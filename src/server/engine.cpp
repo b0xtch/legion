@@ -2,7 +2,10 @@
 #include "Server.h"
 #include <nlohmann/json.hpp>
 
+Engine::Engine() {
 
-int main(int argc, char const *argv[]){
+}
+
+Engine::~Engine() {
 
 }
