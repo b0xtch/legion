@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "game.h"
-#include "players.h"
+#include "player.h"
 
 using namespace std;
 
@@ -30,7 +30,7 @@ Game::~Game(){
   std::cout<<"Deleted vector allPlayers, size of vector = "<<allPlayers.size()<<endl;
 }
 
-void Game::addPlayer(Players p){
+void Game::addPlayer(Player p){
 	if(numPlayers != numPlayersMax){
 		allPlayers.push_back(p);
 		numPlayers++;
