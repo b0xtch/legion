@@ -19,7 +19,7 @@ public:
     void stop(Game g&);
 
 private:
-    std::vector<Game> games;
+    Game game;
     nlohmann::json config;
 
     nlohmann::json getConfig(Game g&) const;

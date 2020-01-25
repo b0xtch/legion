@@ -8,13 +8,14 @@ public:
 
     void start();
     void shutdown();
-    
+
     void onConnect();
     void onDisconnect();
     void receiveMessage();
     void sendMessage();
 
 private:
+    std::vector<Engine> games;
 };
 
 #endif
