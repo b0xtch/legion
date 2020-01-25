@@ -13,10 +13,17 @@ public:
     Engine();
     ~Engine();
 
-    void start();
+    void newGame(nlohmann::json& config, std::string mode);
+
+    void start(Game g&);
+    void stop(Game g&);
+
 private:
-    Game game;
+    std::vector<Game> games;
     nlohmann::json config;
+
+    nlohmann::json getConfig(Game g&) const;
+    void setConfig(nlohmann::json& config) const;
 };
 
 #endif
