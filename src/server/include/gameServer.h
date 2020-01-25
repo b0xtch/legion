@@ -1,10 +1,17 @@
-#ifndef SERVER_H
-#define SERVER_H
+#ifndef GAME_SERVER_H
+#define GAME_SERVER_H
 
-class Server {
+#include "Server.h"
+#include "engine.h"
+
+#include <iostream>
+#include <string>
+#include <vector>
+
+class gameServer {
 public:
-    Server();
-    ~Server();
+    gameServer();
+    ~gameServer();
 
     void start();
     void shutdown();
@@ -15,7 +22,7 @@ public:
     void sendMessage();
 
 private:
-    std::vector<Engine> games;
+    Engine engn;
 };
 
 #endif
