@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 
+#include "Client.h"
 #include "Util.h"
 #include "players.h"
 #include "server.h"
@@ -16,8 +17,7 @@ std::string getHtmlForNewContents();
 class GameClient {
 private:
   Players player;
-  std::string clientAddress;
-  
+  networking::Client client;
 public:
   GameClient(std::string_view address, std::string_view port);
   ~GameClient();
@@ -25,7 +25,7 @@ public:
   void joinSession(std::string sessionId);
   void createSession();
   void sendData(Data& data); // Will create a custom data structure that holds data 
-  void receiveData();
+  Data receiveData(std::string content); // This is registered as a callback function to be called when data is received
 };
 
 #endif
