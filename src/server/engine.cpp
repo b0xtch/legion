@@ -1,6 +1,7 @@
 #include <iostream>
-#include "Server.h"
 #include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 Engine::Engine() {
 
