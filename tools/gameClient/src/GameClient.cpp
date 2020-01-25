@@ -18,6 +18,10 @@ void GameClient::sendData(Data& data) {
   
 }
 
+Players GameClient::getPlayers() const {
+  return player;
+}
+
 Data GameClient::receiveData(std::string content) {
   return {content} // Parses the content received in the message into Data
 }
