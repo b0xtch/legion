@@ -19,7 +19,7 @@ private:
   std::string clientAddress;
   
 public:
-  GameClient();
+  GameClient(std::string_view address, std::string_view port);
   ~GameClient();
 
   void joinSession(std::string sessionId);
