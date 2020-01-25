@@ -9,15 +9,13 @@
  */
 
 class Engine {
-private:
-    Game game;
-
 public:
     Engine();
     ~Engine();
 
     void start();
-
+private:
+    Game game;
 };
 
 #endif
