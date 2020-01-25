@@ -1,0 +1,36 @@
+Date : 2020-01-24 17:08:34
+Directory : d:\Google Drive\School\SFU\Y5S3\CMPT373\social-gaming\src
+Total : 8 files,  106 codes, 6 comments, 36 blanks, all 148 lines
+
+Languages
++----------+------------+------------+------------+------------+------------+
+| language | files      | code       | comment    | blank      | total      |
++----------+------------+------------+------------+------------+------------+
+| C++      |          8 |        106 |          6 |         36 |        148 |
++----------+------------+------------+------------+------------+------------+
+
+Directories
++------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                               | files      | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                  |          8 |        106 |          6 |         36 |        148 |
+| client                                                                             |          1 |          3 |          0 |          2 |          5 |
+| server                                                                             |          7 |        103 |          6 |         34 |        143 |
+| server\include                                                                     |          5 |         84 |          6 |         19 |        109 |
+| server\src                                                                         |          2 |         19 |          0 |         15 |         34 |
++------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| filename                                                                           | language | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| d:\Google Drive\School\SFU\Y5S3\CMPT373\social-gaming\src\client\main.cpp          | C++      |          3 |          0 |          2 |          5 |
+| d:\Google Drive\School\SFU\Y5S3\CMPT373\social-gaming\src\server\include\engine.h  | C++      |         14 |          4 |          4 |         22 |
+| d:\Google Drive\School\SFU\Y5S3\CMPT373\social-gaming\src\server\include\game.cpp  | C++      |          7 |          0 |          3 |         10 |
+| d:\Google Drive\School\SFU\Y5S3\CMPT373\social-gaming\src\server\include\game.h    | C++      |         29 |          2 |          5 |         36 |
+| d:\Google Drive\School\SFU\Y5S3\CMPT373\social-gaming\src\server\include\players.h | C++      |         20 |          0 |          2 |         22 |
+| d:\Google Drive\School\SFU\Y5S3\CMPT373\social-gaming\src\server\include\server.h  | C++      |         14 |          0 |          5 |         19 |
+| d:\Google Drive\School\SFU\Y5S3\CMPT373\social-gaming\src\server\src\engine.cpp    | C++      |          7 |          0 |          5 |         12 |
+| d:\Google Drive\School\SFU\Y5S3\CMPT373\social-gaming\src\server\src\server.cpp    | C++      |         12 |          0 |         10 |         22 |
+| Total                                                                              |          |        106 |          6 |         36 |        148 |
++------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+

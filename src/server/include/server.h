@@ -7,7 +7,8 @@ public:
     ~Server();
 
     void start();
-
+    void shutdown();
+    
     void onConnect();
     void onDisconnect();
     void receiveMessage();
