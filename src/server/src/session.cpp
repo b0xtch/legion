@@ -1,3 +1,5 @@
+#include "session.h"
+
 session(int ID, Game& game, Player& sessionCreator) {
     sessionID = ID;
     sessionGame = game;

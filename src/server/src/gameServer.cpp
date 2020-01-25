@@ -1,3 +1,9 @@
+#include "gameServer.h"
+
+using networking::Server;
+using networking::Connection;
+using networking::Message;
+
 void Server::sendMessage() {}
 
 void Server::receiveMessage() {}

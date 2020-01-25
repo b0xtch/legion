@@ -1,21 +1,21 @@
 #ifndef PLAYERS_H_
 #define PLAYERS_H_
 
+#include <string>
+
 class Players{
 public:
-  Players();
+  Players(); //default
+  Players(int pid, std::string name);
   ~Players();
-  void incrementPoints();
-  void decrementPoints();
+  void incrementPoints(int x);
+  void decrementPoints(int x);
+  int getPlayerID();
+  int getPlayerPoints();
 private:
   int playerID;
   int playersPoints;
+  std::string playerName;
 };
-Players(){
-}
-~Players(){
-}
-void incrementPoints(){
-  playersPoints += 1000;
-}
+
 #endif
