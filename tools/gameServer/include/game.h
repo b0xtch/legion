@@ -1,35 +1,34 @@
 #ifndef GAME_H_
 #define GAME_H_
 #include <string>
+#include <vector>
+#include "players.h"
+
 class Game{
 public:
-  Game();
+  Game(); //defauult for Jackbox no TV
+  Game(std::string name, int maxPlayers, std::string rules); // general constructor to support additional games, will add more parameters
   ~Game();
-  string rightAnswerForQuestion(const std::vector<string*>& questions);
+  void addPlayer(Players p);
+  void removePlayer(int pid); //remove using playerID
+  std::string rightAnswerForQuestion(const std::vector<std::string*>& questions);
+  void addQuestions(std::string question, std::string answer);
+
+  int getNumPlayers();
+  int getNumPlayersMax();
+
 private:
   int numPlayers;
   int numPlayersMax;
   int numQuestions;
   //int playerPoints;
-  string gameName;
-  string rightAnswer;
-  string rulesOfTheGame;
-  //string* listOfAnswers;
-  std::vector<string*> questions;
+  std::string gameName;
+  // std::string rightAnswer; //is this still needed?
+  std::string rulesOfTheGame;
+  //std::string* listOfAnswers;
+  std::vector<std::string*> questions;
+  std::vector<Players> allPlayers;
 };
-
-Game(){
-  gameName = "Jackbox no TV";
-  numPlayersMax = 8;
-  numPlayers = 0; //setting to 0 so that the client server connection can determine number of players connecting
-  rulesOfTheGame = "Welcome to Jackbox no TV, the rules of the game are ...";
-}
-
-~Game(){
-  for(string* question: questions){ delete[] question; }
-  questions.clear();
-  std::cout<<"Deleted vector questions, size of vector = "<<questions.size()<<endl;
-}
 
 
 #endif
