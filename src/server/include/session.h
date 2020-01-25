@@ -5,11 +5,11 @@
 #include <vector>
 #include <chrono>
 #include "game.h"
-#include "players.h"
+#include "player.h"
 
 class Session {
 public:
-    Session();
+    Session(int ID, Game& game, Player& sessionCreator);
     ~Session();
 
     void updateTime();
@@ -20,9 +20,12 @@ public:
     void advanceGameTurn();
     void declareWinner();
 
+    void addPlayer(Player& newPlayer);
+    void removePlayer(int removePlayerID);
+
 private:
     Game sessionGame;
-    std::vector<Players> sessionPlayers;
+    std::vector<Player> sessionPlayers;
 
     int sessionID;
     double maxIdleTime = 30;
