@@ -16,6 +16,7 @@ public:
     void start();
 private:
     Game game;
+    nlohmann::json config;
 };
 
 #endif
