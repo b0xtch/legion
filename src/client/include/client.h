@@ -4,7 +4,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
-#include "lib/networking/include/Server.h"
+#include "Server.h"
 
 std::string getHtmlForNewContents();
 
