@@ -10,7 +10,7 @@
 
 class Engine {
 public:
-    Engine();
+    Engine(/*add some params here on initalization*/);
     ~Engine();
 
     void newGame(nlohmann::json& config, std::string mode);
