@@ -9,6 +9,7 @@
 #include "Util.h"
 #include "players.h"
 #include "server.h"
+#include "Data.h"
 
 // This should be passed as into the "httpMessage" parameter of Nick's server class.
 std::string getHtmlForNewContents();
@@ -26,6 +27,8 @@ public:
   void createSession();
   void sendData(Data& data); // Will create a custom data structure that holds data 
   Data receiveData(std::string content); // This is registered as a callback function to be called when data is received
+  
+  Players getPlayer() const;
 };
 
 #endif
