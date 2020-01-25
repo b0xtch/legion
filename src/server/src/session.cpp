@@ -1,3 +1,5 @@
+#include "session.h"
+
 void updateTime() {
     lastUpdateTime = system_clock()::now();
 }
