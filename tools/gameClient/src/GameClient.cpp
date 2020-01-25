@@ -2,23 +2,24 @@
 
 const size_t SESSION_ID_LENGTH = 8;
 
-void GameClient::Client(std::string_view address, std::string_view port){
-  networking::Client(address, port);
-};
+void GameClient::Client(std::string_view address, std::string_view port)
+  : client{address, port}
+{
+}
 
 void GameClient::createSession(){
   string sessionId = Utils::generateSessionId(SESSION_ID_LENGTH);
-};
+}
 
 void GameClient::joinSession(std::string sessionId){
-};
+}
 
 void GameClient::sendData(Data& data) {
   
 }
 
-void GameClient::receiveData() {
-  
+Data GameClient::receiveData(std::string content) {
+  return {content} // Parses the content received in the message into Data
 }
 
 const std::string WEBPAGE_LOCATION = "./webpage.html";
@@ -32,8 +33,8 @@ std::string getHtmlForNewConnections() {
   }
   else {
     std::string htmlFileContents = std::string{
-      std::istreambuf_iterator<char>(htmlFileStream), 
-        std::istreambuf_iterator<char>()};
+      std::istreambuf_iterator<char>(htmlFileStream),
+      std::istreambuf_iterator<char>()};
     htmlFileStream.close();
     return htmlFileContents;
   }
