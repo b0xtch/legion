@@ -7,10 +7,6 @@ GameServer::GameServer(int port) :
     
 }
 
-GameServer::~GameServer() {
-    
-}
-
 void GameServer::send(const std::deque<networking::Message>& messages) {
     server.send(messages);
 }
