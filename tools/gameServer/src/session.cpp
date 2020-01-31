@@ -1,61 +1,37 @@
 #include "session.h"
+#include <algorithms>
+#include <stdexcept>
 
-session(int ID, Game& game, Player& sessionCreator) {
-    sessionID = ID;
-    sessionGame = game;
-    sessionPlayers.push_back(sessionCreator);
-}
-
-void updateTime() {
-    lastUpdateTime = system_clock()::now();
-}
-
-void checkTimeOut() {
-    auto currentTime = system_clock()::now();
-    std::chrono::duration<double> elapsedTime = currentTime - lastUpdateTime;
-
-    if ( (elapsedTime.count()/60) > maxIdleTime ) endGame();
-}
-
-void startGame() {
-    //Unfinished
-}
-
-void endGame() {
-    //Unfinished
-    declareWinner();
-}
-
-void advanceGameTurn() {
-    //Unfinished
-    updateTime();
-}
-
-void declareWinner() {
-    int winnerID;
-    int maxPoints;
-
-    for (auto Aplayer : sessionPlayers) {
-        if (Aplayer.getPoints() > maxPoints) {
-            maxPoints = Aplayer.getPoints();
-            winnerID = Aplayer.getID();
-        }
-    }
+namespace Session{
     
-    std::cout << "Player " << winnerID << " is the winner!";
+    std::vector<Clients> getAllClients(){
+        return clients;
+    };
+
+    Client getClient(clientId){
+        auto it = find_if(
+            clients.begin(), clients.end(), [=](Client client){
+                return client.getId() == clientId;
+            }
+        );
+
+        if (it == clients.end()){
+            throw std::invalid_argument("No client exists for this id");
+        };
+
+        return *it;
+    };
+    
+    void addClient(Client client){
+         if(clients.size() >= sessionClientLimit){
+            throw std::invalid_argument("Session Limit Exceeded");
+         };
+         
+         clients.push_back(client);
+    };
+    
+    std::string getSessionId(){
+        return sessionId;
+    };
 }
 
-void addPlayer(Player& newPlayer) {
-    sessionPlayers.push_back(newPlayer);
-}
-
-void removePlayer(int removePlayerID) {
-    for (int i = 0; i < sessionPlayers.size(); i++) {
-        if ( sessionPlayers.at(i).getID() == removePlayerID ) {
-            sessionPlayers.erase( sessionPlayers.begin()+i );
-            break;
-        }
-    }
-
-    if ( sessionPlayers.size() == 0 ) endGame();
-}
