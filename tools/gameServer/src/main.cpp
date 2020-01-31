@@ -4,6 +4,8 @@
 
 #include "GameServer.h"
 
+// This is the file that the server admin must run to start the server.
+
 int main(int argc, char** argv) {
     if (argc < 2) {
         std::cerr << "Usage: " << argv[0] << " <port>";
