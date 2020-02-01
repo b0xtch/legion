@@ -21,7 +21,20 @@ void GameServer::receive() {
     
     // Check for messages about creating or joining a room.
     for (auto& message : incomingMessages) {
+        auto& c = message.connection;
         
+        // HEAVY WIP TODO
+        auto& jsonText = message.text;
+        auto typeKey = jsonText.getKey(MessageKey.Type)
+        if (typeKey == MessageType.CreateSession) {
+            
+        }
+        else if (typeKey == MessageType.JoinSession) {
+            
+        }
+        else {
+            
+        }
     }
     
     // Pass these messages to SessionManager for distribution and handling?
