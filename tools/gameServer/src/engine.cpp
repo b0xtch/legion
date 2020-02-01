@@ -45,8 +45,8 @@ template <typename T>
 void Engine<T>::initalizeEngine() { 
     std::cout << "Engine Initalizing!" << endl;
 
-    for (auto& [key, val] : this->json.items()){
-        this->mapKeyToFunction(getCamelCase(key), value); 
+    for (auto& [k, v] : this->json.items()){
+        this->mapKeyToFunction(getCamelCase(k), v); 
     }
 }
   
