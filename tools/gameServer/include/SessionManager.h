@@ -1,15 +1,18 @@
-#ifndef SESSION_H
-#define SESSION_H
+#ifndef SESSION_MANAGER_H
+#define SESSION_MANAGER_H
 
-using networking::Server
-using networking::Connection
+#include <vector>
 
 class SessionManager {
 public:
   SessionManager();
-  Session createNewSession();
+  void createNewSession();
+  void addConnection(networking::Connection connection);
+  void sendMessage(networking::Connection connection);
+  Session getSessionForConnection(networking::Connection connection);
 private:
   std::vector<Session> sessions;
+  std::vector<networking::Connection> unassignedConnections;
 };
 
 

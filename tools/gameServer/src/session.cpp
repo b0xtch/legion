@@ -4,14 +4,14 @@
 
 namespace Session{
     
-    std::vector<Clients> getAllClients(){
+    std::vector<networking::Connection> getAllClients(){
         return clients;
     };
 
-    Client getClient(clientId){
+    networking::Connection getClient(uintptr_t id){
         auto it = find_if(
-            clients.begin(), clients.end(), [=](Client client){
-                return client.getId() == clientId;
+            clients.begin(), clients.end(), [=](const networking::Connection &connection){
+                return connection.id == id;
             }
         );
 
@@ -22,7 +22,7 @@ namespace Session{
         return *it;
     };
     
-    void addClient(Client client){
+    void addClient(networking::Connection connection){
          if(clients.size() >= sessionClientLimit){
             throw std::invalid_argument("Session Limit Exceeded");
          };
@@ -33,5 +33,10 @@ namespace Session{
     std::string getSessionId(){
         return sessionId;
     };
+
+    bool isClient(networking::Connection connection){
+        return clients.find(connection) != connection.end();
+      );
+    }
 }
 
