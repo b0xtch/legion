@@ -74,26 +74,26 @@ JsonDSL::JsonDSL(){
 
 }
 
-bool JsonDSL::isValidSpecificationField(std::string strSpecificationFIeld){
+bool JsonDSL::isValidSpecificationField(const std::string& strSpecificationFIeld){
     return mapStringToSpecification.count(strSpecificationFIeld) == 1;
 }
 
-bool JsonDSL::isValidConfigField(std::string strConfigField){
+bool JsonDSL::isValidConfigField(const std::string& strConfigField){
     return mapStringToConfigFields.count(strConfigField) == 1;
 }
 
-bool JsonDSL::isValidRule(std::string strRule){
+bool JsonDSL::isValidRule(const std::string& strRule){
     return mapStringToRule.count(strRule) == 1;
 }
 
-bool JsonDSL::isValidRuleParameter(std::string strRuleParameter){
+bool JsonDSL::isValidRuleParameter(const std::string& strRuleParameter){
     return mapStringToRuleParameters.count(strRuleParameter) == 1;
 }
 
-bool JsonDSL::isValidTimerMode(std::string strTimerMode){
+bool JsonDSL::isValidTimerMode(const std::string& strTimerMode){
     return mapStringToTimerModes.count(strTimerMode) == 1;
 }
 
-bool JsonDSL::isValidSetupKind(std::string strSetupKind){
+bool JsonDSL::isValidSetupKind(const std::string& strSetupKind){
     return mapStringToSetup.count(strSetupKind) == 1;
 }
