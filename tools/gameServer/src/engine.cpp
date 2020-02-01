@@ -25,9 +25,11 @@ Engine<T>::Engine (T json) {
         {"rules", {}}
     };
 
-    if(this->validGameConfig(json)) this->initalizeEngine(); 
-
-    std::cout << "Engine could not read game specification" << endl;
+    if(this->validGameConfig(json)){
+        this->initalizeEngine();   
+    } else{
+        std::cout << "Engine could not read game specification" << endl;  
+    }
 }
 
 template <typename T> 
@@ -46,7 +48,6 @@ void Engine<T>::initalizeEngine() {
     for (auto& [key, val] : this->json.items()){
         this->mapKeyToFunction(getCamelCase(key), value); 
     }
-
 }
   
 template <typename T> 
