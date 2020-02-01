@@ -1,61 +1,42 @@
 #include "session.h"
+#include <algorithms>
+#include <stdexcept>
 
-session(int ID, Game& game, Player& sessionCreator) {
-    sessionID = ID;
-    sessionGame = game;
-    sessionPlayers.push_back(sessionCreator);
-}
-
-void updateTime() {
-    lastUpdateTime = system_clock()::now();
-}
-
-void checkTimeOut() {
-    auto currentTime = system_clock()::now();
-    std::chrono::duration<double> elapsedTime = currentTime - lastUpdateTime;
-
-    if ( (elapsedTime.count()/60) > maxIdleTime ) endGame();
-}
-
-void startGame() {
-    //Unfinished
-}
-
-void endGame() {
-    //Unfinished
-    declareWinner();
-}
-
-void advanceGameTurn() {
-    //Unfinished
-    updateTime();
-}
-
-void declareWinner() {
-    int winnerID;
-    int maxPoints;
-
-    for (auto Aplayer : sessionPlayers) {
-        if (Aplayer.getPoints() > maxPoints) {
-            maxPoints = Aplayer.getPoints();
-            winnerID = Aplayer.getID();
-        }
-    }
+namespace Session{
     
-    std::cout << "Player " << winnerID << " is the winner!";
-}
+    std::vector<networking::Connection> getAllClients(){
+        return clients;
+    };
 
-void addPlayer(Player& newPlayer) {
-    sessionPlayers.push_back(newPlayer);
-}
+    networking::Connection getClient(uintptr_t id){
+        auto it = find_if(
+            clients.begin(), clients.end(), [=](const networking::Connection &connection){
+                return connection.id == id;
+            }
+        );
 
-void removePlayer(int removePlayerID) {
-    for (int i = 0; i < sessionPlayers.size(); i++) {
-        if ( sessionPlayers.at(i).getID() == removePlayerID ) {
-            sessionPlayers.erase( sessionPlayers.begin()+i );
-            break;
-        }
+        if (it == clients.end()){
+            throw std::invalid_argument("No client exists for this id");
+        };
+
+        return *it;
+    };
+    
+    void addClient(networking::Connection connection){
+         if(clients.size() >= sessionClientLimit){
+            throw std::invalid_argument("Session Limit Exceeded");
+         };
+         
+         clients.push_back(client);
+    };
+    
+    std::string getSessionId(){
+        return sessionId;
+    };
+
+    bool isClient(networking::Connection connection){
+        return clients.find(connection) != connection.end();
+      );
     }
-
-    if ( sessionPlayers.size() == 0 ) endGame();
 }
+
