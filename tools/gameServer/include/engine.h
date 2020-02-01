@@ -3,7 +3,12 @@
 #include <string>
 #include <json.hpp>
 #include <iostream>  
-using namespace std;
+using namespace std;  
+
+// Create Engine as namespace to support non member functions
+// namespace Engine {
+
+// };
 
 template <typename T> 
 class Engine { 
@@ -24,7 +29,7 @@ class Engine {
 
         void initalizeEngine();
         void buildGame();
-        void mapKeyToValue();
+        std::string getCamelCase(std::string &key);
 
         // only set methods, the build game method has access to private variables
         void setConfiguration(nlohmann::json configuration);
@@ -33,6 +38,9 @@ class Engine {
         void setPerPlayer(nlohmann::json perPlayer);
         void setPerAudience(nlohmann::json perAudience);
         void setRules(nlohmann::json rules);
+
+        void mapKeyToFunction(std::string key, nlohmann::json value);
+        void mapKeyToValue();
 
         // Control Structure Methods
         void findAndExecute(/* find a specific function and execute dynamically*/);
