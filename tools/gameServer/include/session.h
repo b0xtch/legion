@@ -7,7 +7,9 @@
 #include "game.h"
 #include "player.h"
 
+// class Game;
 class Session {
+  // friend class Game;
 public:
     Session(int ID, Game& game, Player& sessionCreator);
     ~Session();
@@ -17,20 +19,20 @@ public:
 
     void startGame();
     void endGame();
-    void advanceGameTurn();
+    void advanceGameTurn(); //state machine???
     void declareWinner();
 
     void addPlayer(Player& newPlayer);
     void removePlayer(int removePlayerID);
 
 private:
-    Game sessionGame;
+    Game sessionGame; //each session should only handle 1 Game at a time for now
     std::vector<Player> sessionPlayers;
 
     int sessionID;
     double maxIdleTime = 30;
     std::chrono::system_clock::time_point lastUpdateTime;
-    
+
 };
 
 #endif

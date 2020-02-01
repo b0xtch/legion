@@ -7,20 +7,11 @@
 
 using namespace std;
 
-Game::Game(){
-  gameName = "Jackbox no TV";
-  numPlayersMax = 8;
-  numPlayers = 0; //setting to 0 so that the client server connection can determine number of players connecting
-  rulesOfTheGame = "Welcome to Jackbox no TV, the rules of the game are ...";
-}
+
+Game::Game(): gameName("Jackbox no TV"), numPlayersMax(8), numPlayers(0), rulesOfTheGame("Welcome to Jackbox no TV, the rules of the game are ..."){}
 
 //general constructor -- WIP
-Game::Game(std::string name, int maxPlayers, std::string rules){
-  gameName = name;
-  numPlayersMax = maxPlayers;
-  numPlayers = 0;
-  rulesOfTheGame = rules;
-}
+Game::Game(std::string name, int maxPlayers, std::string rules): gameName(name), numPlayersMax(maxPlayers), numPlayers(0), rulesOfTheGame(rules){}
 
 Game::~Game(){
   for(std::string* question: questions){ delete[] question; }
@@ -36,7 +27,7 @@ void Game::addPlayer(Player p){
 		numPlayers++;
 	} else {
 		std::cout << "Game currently at maximum capacity. Player (" << p.getPlayerID() << ") unable to join. \n";
-	}	
+	}
 }
 
 void Game::removePlayer(int pid){
@@ -56,6 +47,15 @@ int Game::getNumPlayersMax(){
 	return numPlayersMax;
 }
 
+std::vector<Player> Game::getAllPlayers(){
+  return allPlayers;
+}
+
+void Game::displayInfo(){
+  for_each(allPlayers.begin(), allPlayers.end(), [](Player player){
+    std::cout << player.getPlayerID() << ": " << player.getPlayerPoints() << endl;
+  });
+}
 
 
 /*

@@ -31,3 +31,7 @@ int Player::getPlayerID(){
 int Player::getPlayerPoints(){
 	return playerPoints;
 }
+
+std::unique_ptr Player::getPlayerTurn(){
+	return playerTurn;
+}
