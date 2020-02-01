@@ -1,12 +1,14 @@
 #ifndef GAME_SERVER_H
 #define GAME_SERVER_H
 
-#include "Server.h"
-#include "SessionManager.h"
-
 #include <iostream>
 #include <string>
 #include <vector>
+
+#include <nlohmann/json.hpp>
+#include "Server.h"
+#include "SessionManager.h"
+
 
 class GameServer {
 public:

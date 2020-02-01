@@ -1,5 +1,7 @@
 #include "GameServer.h"
 
+using json = nlohmann::json;
+
 void onConnect(networking::Connection c);
 void onDisconnect(networking::Connection c);
 
@@ -16,12 +18,17 @@ void GameServer::send(const std::deque<networking::Message>& messages) {
 
 void GameServer::receive() {
     auto incomingMessages = server.receive();
+    
+    // Check for messages about creating or joining a room.
+    for (auto& message : incomingMessages) {
+        
+    }
+    
     // Pass these messages to SessionManager for distribution and handling?
 }
 
 void GameServer::update() {
     server.update();
-    
 }
 
 /** Called when an initial connection is made to the server. */
