@@ -13,7 +13,7 @@ int main(int argc, char** argv) {
     }
     
     unsigned short port = std::stoi(argv[1]);
-    GameServer gameServer{port};
+    GameServer gameServer{port, ""};
     
     bool keepRunning = true;
     while (keepRunning) {
@@ -26,6 +26,7 @@ int main(int argc, char** argv) {
         }
         
         gameServer.receive();
+        keepRunning = gameServer.getKeepRunning();
     }
     
     return 0;

@@ -2,12 +2,18 @@
 
 using json = nlohmann::json;
 
-void onConnect(networking::Connection c);
-void onDisconnect(networking::Connection c);
-
-GameServer::GameServer(int port) :
+GameServer::GameServer(int port, std::string htmlFile) :
+    keepRunning{true},
     port{port},
-    server{port, "", onConnect, onDisconnect}
+    htmlFile{htmlFile},
+    server{port, htmlFile,
+        [this] (networking::Connection c) {
+            this->sessionManager.addConnection(c);
+        },
+        [this] (networking::Connection c) {
+            this->sessionManager.removeConnection(c);
+        }},
+    sessionManager{}
 {
     
 }
@@ -16,6 +22,7 @@ void GameServer::send(const std::deque<networking::Message>& messages) {
     server.send(messages);
 }
 
+// HEAVY WIP TODO
 void GameServer::receive() {
     auto incomingMessages = server.receive();
     
@@ -23,34 +30,43 @@ void GameServer::receive() {
     for (auto& message : incomingMessages) {
         auto& c = message.connection;
         
-        // HEAVY WIP TODO
-        auto& jsonText = message.text;
-        auto typeKey = jsonText.getKey(MessageKey.Type)
-        if (typeKey == MessageType.CreateSession) {
-            
+        auto& jsonText = json::convertToJson(message.text);
+        auto typeVal = jsonText.get(MessageKey.Type);
+        
+        if (typeVal == MessageType.ServerStop) {
+            keepRunning = false;
         }
-        else if (typeKey == MessageType.JoinSession) {
-            
+        else if (typeVal == MessageType.CreateSession) {
+            sessionManager.createNewSession();
         }
-        else {
-            
+        else if (typeVal == MessageType.JoinSession) {
+            sessionManager.joinToSession();
         }
     }
     
+    auto it = std::remove_if(incomingMessages.front(), incomingMessages.back(), 
+        [] (networking::Message msg) { 
+            auto typeVal = json::convertToJson(msg.text).get(MessageKey.Type);
+            return typeVal == MessageType.CreateSession || typeVal == MessageType.JoinSession;
+        }
+    );
+    
     // Pass these messages to SessionManager for distribution and handling?
+    sessionManager.process(incomingMessages);
 }
 
 void GameServer::update() {
     server.update();
 }
 
-/** Called when an initial connection is made to the server. */
-void onConnect(networking::Connection c) {
-    // Initial connection. Need to hold onto this connection so we can deal with incoming create game/join game requests.
-    sessionManager.addNewConnection(c);
+int GameServer::getPort() const {
+    return port;
 }
 
-/** Called when an existing connection disconnects from the server. */
-void onDisconnect(networking::Connection c) {
-    // 
+bool GameServer::getKeepRunning() const {
+    return keepRunning;
+}
+
+std::string_view GameServer::getHtmlFile() const {
+    return htmlFile;
 }
