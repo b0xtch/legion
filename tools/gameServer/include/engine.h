@@ -1,35 +1,42 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 #include <string>
-#include "game.h"
-#include <nlohmann/json.hpp>
+#include <json.hpp>
+#include <iostream>  
+using namespace std;
 
-/**
- * Parses the json files that will be used to create
- * games dynamically
- */
+template <typename T> 
+class Engine { 
+    public:
+        Engine (T json);
 
-struct Mode {
-    // something else that would allow the strcut more abstraction
-    std::string gameMode;
-};
+        bool validGameConfig(T json);
 
-class Engine {
-public:
-    Engine(/*add some params here on initalization*/);
-    ~Engine();
+    private:
+        nlohmann::json json;
+        nlohmann::json configuration;
+        nlohmann::json constants;
+        nlohmann::json variables;
+        nlohmann::json perPlayer;
+        nlohmann::json perAudience;
+        nlohmann::json rules;
+        std::unordered_map<std::string, void(*)()> gameConfig;
 
-    void newGame(nlohmann::json& config, Mode mode);
+        void initalizeEngine();
+        void buildGame();
+        void mapKeyToValue();
 
-    void start(Game g&);
-    void stop(Game g&);
+        // only set methods, the build game method has access to private variables
+        void setConfiguration(nlohmann::json configuration);
+        void setConstants(nlohmann::json constants);
+        void setVariables(nlohmann::json variables);
+        void setPerPlayer(nlohmann::json perPlayer);
+        void setPerAudience(nlohmann::json perAudience);
+        void setRules(nlohmann::json rules);
 
-private:
-    Game game;
-    nlohmann::json config;
+        // Control Structure Methods
+        void findAndExecute(/* find a specific function and execute dynamically*/);
 
-    nlohmann::json getConfig(Game g&) const;
-    void setConfig(nlohmann::json& config) const;
 };
 
 #endif
