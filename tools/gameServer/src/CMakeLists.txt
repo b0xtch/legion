@@ -1,4 +1,9 @@
-add_executable(server server.cpp)
+add_executable(server main.cpp)
+
+add_library(GameServer GameServer.cpp ../include/GameServer.h)
+target_include_directories(GameServer
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PUBLIC $<INSTALL_INTERFACE:include>)
 
 find_package(nlohmann_json 3.2.0 REQUIRED)
 
