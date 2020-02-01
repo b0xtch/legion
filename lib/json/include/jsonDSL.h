@@ -1,5 +1,6 @@
 #include <string>
 #include <map>
+#include <utility>
 
 class JsonDSL{
 public:
@@ -46,12 +47,23 @@ public:
     bool isValidTimerMode(const std::string&);
     bool isValidSetupKind(const std::string&);
 
-    std::map<std::string, SpecificationFields>::iterator getSpecificationIterator();
-    std::map<std::string, ConfigFields>::iterator getConfigIterator();
-    std::map<std::string, RuleType>::iterator getRuleIterator();
-    std::map<std::string, RuleParameters>::iterator getRuleParameterIterator();
-    std::map<std::string, TimerModes>::iterator getTimerModeIterator();
-    std::map<std::string, SetupFields>::iterator getSetupIterator();
+    std::pair<std::map<std::string, SpecificationFields>::iterator, 
+                std::map<std::string, SpecificationFields>::iterator> getSpecificationIterator();
+                
+    std::pair<std::map<std::string, ConfigFields>::iterator, 
+                std::map<std::string, ConfigFields>::iterator>getConfigIterator();
+
+    std::pair<std::map<std::string, RuleType>::iterator, 
+                std::map<std::string, RuleType>::iterator> getRuleIterator();
+
+    std::pair<std::map<std::string, RuleParameters>::iterator, 
+                std::map<std::string, RuleParameters>::iterator>getRuleParameterIterator();
+
+    std::pair<std::map<std::string, TimerModes>::iterator, 
+                std::map<std::string, TimerModes>::iterator>getTimerModeIterator();
+
+    std::pair<std::map<std::string, SetupFields>::iterator, 
+                std::map<std::string, SetupFields>::iterator>getSetupIterator();
 
 private:
     std::map<std::string, SpecificationFields> mapStringToSpecification;

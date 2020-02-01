@@ -1,5 +1,5 @@
-#include<map>
-#include<string>
+#include <map>
+#include <string>
 #include "jsonDSL.h"
 
 JsonDSL::JsonDSL(){
@@ -98,26 +98,32 @@ bool JsonDSL::isValidSetupKind(const std::string& strSetupKind){
     return mapStringToSetup.count(strSetupKind) == 1;
 }
 
-std::map<std::string, JsonDSL::SpecificationFields>::iterator JsonDSL::getSpecificationIterator(){
-    return mapStringToSpecification.begin();
+std::pair<std::map<std::string, JsonDSL::SpecificationFields>::iterator, 
+            std::map<std::string, JsonDSL::SpecificationFields>::iterator> JsonDSL::getSpecificationIterator(){
+    return std::make_pair(mapStringToSpecification.begin(), mapStringToSpecification.end());
 }
 
-std::map<std::string, JsonDSL::ConfigFields>::iterator JsonDSL::getConfigIterator(){
-    return mapStringToConfigFields.begin();
+std::pair<std::map<std::string, JsonDSL::ConfigFields>::iterator, 
+            std::map<std::string, JsonDSL::ConfigFields>::iterator> JsonDSL::getConfigIterator(){
+    return std::make_pair(mapStringToConfigFields.begin(), mapStringToConfigFields.end());
 }
 
-std::map<std::string, JsonDSL::RuleType>::iterator JsonDSL::getRuleIterator(){
-    return mapStringToRule.begin();
+std::pair<std::map<std::string, JsonDSL::RuleType>::iterator, 
+            std::map<std::string, JsonDSL::RuleType>::iterator> JsonDSL::getRuleIterator(){
+    return std::make_pair(mapStringToRule.begin(), mapStringToRule.end());
 }
 
-std::map<std::string, JsonDSL::RuleParameters>::iterator JsonDSL::getRuleParameterIterator(){
-    return mapStringToRuleParameters.begin();
+std::pair<std::map<std::string, JsonDSL::RuleParameters>::iterator, 
+            std::map<std::string, JsonDSL::RuleParameters>::iterator> JsonDSL::getRuleParameterIterator(){
+    return std::make_pair(mapStringToRuleParameters.begin(), mapStringToRuleParameters.end());
 }
 
-std::map<std::string, JsonDSL::TimerModes>::iterator JsonDSL::getTimerModeIterator(){
-    return mapStringToTimerModes.begin();
+std::pair<std::map<std::string, JsonDSL::TimerModes>::iterator, 
+            std::map<std::string, JsonDSL::TimerModes>::iterator> JsonDSL::getTimerModeIterator(){
+    return std::make_pair(mapStringToTimerModes.begin(), mapStringToTimerModes.end());
 }
 
-std::map<std::string, JsonDSL::SetupFields>::iterator JsonDSL::getSetupIterator(){
-    return mapStringToSetup.begin();
+std::pair<std::map<std::string, JsonDSL::SetupFields>::iterator, 
+            std::map<std::string, JsonDSL::SetupFields>::iterator> JsonDSL::getSetupIterator(){
+    return std::make_pair(mapStringToSetup.begin(), mapStringToSetup.end());
 }
