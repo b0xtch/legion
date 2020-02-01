@@ -1,16 +1,10 @@
 #include "jsonvalidator.h"
 #include <nlohmann/json.hpp>
+#include <map>
 #include "jsonDSL.h"
 
 using json = nlohmann::json;
 
-bool JsonValidator::isJsonValid(json& j_object) {
-    for (auto& x : json::iterator_wrapper(j_object))
-    {
-        if(!isKeyValuePairValid(x.key(), x.value())){
-            return false;
-        }
-    }
-}
+SpecificationValidator::validateSpecification(const nlohmann::json& j_object){
 
-bool JsonValidator::isKeyValuePairValid(JsonDSL::LanguageCommands, auto value){}
+}
