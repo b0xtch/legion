@@ -46,6 +46,13 @@ public:
     bool isValidTimerMode(const std::string&);
     bool isValidSetupKind(const std::string&);
 
+    std::map<std::string, SpecificationFields>::iterator getSpecificationIterator();
+    std::map<std::string, ConfigFields>::iterator getConfigIterator();
+    std::map<std::string, RuleType>::iterator getRuleIterator();
+    std::map<std::string, RuleParameters>::iterator getRuleParameterIterator();
+    std::map<std::string, TimerModes>::iterator getTimerModeIterator();
+    std::map<std::string, SetupFields>::iterator getSetupIterator();
+
 private:
     std::map<std::string, SpecificationFields> mapStringToSpecification;
     std::map<std::string, ConfigFields> mapStringToConfigFields;

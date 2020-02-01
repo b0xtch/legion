@@ -97,3 +97,27 @@ bool JsonDSL::isValidTimerMode(const std::string& strTimerMode){
 bool JsonDSL::isValidSetupKind(const std::string& strSetupKind){
     return mapStringToSetup.count(strSetupKind) == 1;
 }
+
+std::map<std::string, JsonDSL::SpecificationFields>::iterator JsonDSL::getSpecificationIterator(){
+    return mapStringToSpecification.begin();
+}
+
+std::map<std::string, JsonDSL::ConfigFields>::iterator JsonDSL::getConfigIterator(){
+    return mapStringToConfigFields.begin();
+}
+
+std::map<std::string, JsonDSL::RuleType>::iterator JsonDSL::getRuleIterator(){
+    return mapStringToRule.begin();
+}
+
+std::map<std::string, JsonDSL::RuleParameters>::iterator JsonDSL::getRuleParameterIterator(){
+    return mapStringToRuleParameters.begin();
+}
+
+std::map<std::string, JsonDSL::TimerModes>::iterator JsonDSL::getTimerModeIterator(){
+    return mapStringToTimerModes.begin();
+}
+
+std::map<std::string, JsonDSL::SetupFields>::iterator JsonDSL::getSetupIterator(){
+    return mapStringToSetup.begin();
+}
