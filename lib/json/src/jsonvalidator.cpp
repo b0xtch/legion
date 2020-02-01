@@ -4,7 +4,7 @@
 
 using json = nlohmann::json;
 
-bool isJsonValid(json& j_object) {
+bool JsonValidator::isJsonValid(json& j_object) {
     for (auto& x : json::iterator_wrapper(j_object))
     {
         if(!isKeyValuePairValid(x.key(), x.value())){
@@ -13,4 +13,4 @@ bool isJsonValid(json& j_object) {
     }
 }
 
-bool isKeyValuePairValid(JsonDSL::LanguageCommands, auto value){}
+bool JsonValidator::isKeyValuePairValid(JsonDSL::LanguageCommands, auto value){}
