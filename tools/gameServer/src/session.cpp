@@ -50,12 +50,9 @@ void addPlayer(Player& newPlayer) {
 }
 
 void removePlayer(int removePlayerID) {
-    for (int i = 0; i < sessionPlayers.size(); i++) {
-        if ( sessionPlayers.at(i).getID() == removePlayerID ) {
-            sessionPlayers.erase( sessionPlayers.begin()+i );
-            break;
-        }
-    }
+    auto found = std::find_if(sessionPlayers.begin(), sessionPlayers.end(), [removePlayerID] (auto& player) { return player.getID() == removePlayerID; });
 
-    if ( sessionPlayers.size() == 0 ) endGame();
+    if (found != sessionPlayers.end()) {
+        sessionPlayers.erase(found);
+    }
 }
