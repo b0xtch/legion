@@ -10,6 +10,23 @@ using namespace std;
 
 // };
 
+// Public pair strcut to support properties like Setup from configuration
+// This i think will support all types of mappings int -> string, class -> string
+// setup property has to be a map of this type
+/**
+{
+"kind": <<data kind>>,
+"prompt": <<Description of what data the owner should provide>>
+}
+* 
+*/
+template <typename k, typename P>
+struct Pair<K, P>{
+    K first;
+    P second;
+};
+
+
 template <typename T> 
 class Engine { 
     public:

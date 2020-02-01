@@ -99,6 +99,8 @@ void Engine<T>::mapKeyToFunction(std::string key, nlohmann::json value){
    //https://stackoverflow.com/questions/11284059/call-method-inside-lambda-expression
    //trying to implement something like link above
 
+   this->setConfiguration(value); // will change once i figure out the code above
+
 
 }
 
@@ -110,6 +112,10 @@ template <typename T>
 void Engine<T>::setConfiguration(nlohmann::json configuration){
     cout << "I am in: " << configuration << endl;
     this->configuration = configuration;
+    // ill only be testing one json property this one for now as the plan is to 
+    // make all the below as a generic type where we can merge these together
+
+   std::map<Engine::Pair> setup;
 }
 
 template <typename T> 
