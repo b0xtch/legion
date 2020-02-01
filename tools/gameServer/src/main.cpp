@@ -24,6 +24,8 @@ int main(int argc, char** argv) {
             std::cerr << "An error occurred updating the server: " << e.what() << "\nTerminating" << std::endl;
             keepRunning = false;
         }
+        
+        gameServer.receive();
     }
     
     return 0;
