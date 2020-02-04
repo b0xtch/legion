@@ -1,6 +1,8 @@
 #include <string>
 #include <map>
 #include <utility>
+#ifndef JSON_DSL_H
+#define JSON_DSL_H
 
 class JsonDSL{
 public:
@@ -73,3 +75,4 @@ private:
     std::map<std::string, TimerModes> mapStringToTimerModes;
     std::map<std::string, SetupFields> mapStringToSetup;
 };
+#endif
