@@ -34,6 +34,11 @@ private:
     std::string_view htmlFile;
     networking::Server server;
     SessionManager sessionManager;
+    
+    enum MessageType {
+        Other, ServerStop, CreateSession, JoinSession
+    };
+    static MessageType parseMessageType(std::string text);
 };
 
 #endif
