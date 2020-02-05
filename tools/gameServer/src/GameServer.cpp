@@ -1,5 +1,9 @@
 #include "GameServer.h"
 
+#include <algorithm>
+
+#include "json.hpp"
+
 using json = nlohmann::json;
 
 GameServer::GameServer(int port, std::string htmlFile) :
