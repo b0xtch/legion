@@ -3,65 +3,67 @@
 #include <string>
 #include <json.hpp>
 #include <iostream>  
-using namespace std;  
+#include <any>
 
-// Create Engine as namespace to support non member functions
-// namespace Engine {
+using namespace std; 
 
-// };
+template <typename G> 
+struct GenType {
+    GenType() : genMap() {};
+    GenType(std::map<G, std::any> &param) : genMap(param) {};
+    GenType(const G &param) : genValue(param) {};
+    
+    // go out of scope when not used
+    std::map<G, std::any> genMap;
+    G genValue;
 
-// Public pair strcut to support properties like Setup from configuration
-// This i think will support all types of mappings int -> string, class -> string
-// setup property has to be a map of this type
-/**
-{
-"kind": <<data kind>>,
-"prompt": <<Description of what data the owner should provide>>
-}
-* 
-*/
-template <typename k, typename P>
-struct Pair<K, P>{
-    K first;
-    P second;
+    // auto get(std::ostream& o) override{
+    //     o << genValue; 
+    // }
 };
 
+// move to DSL
+typedef enum {
+    integer,
+    string,
+    boolean,
+    question_answer,
+    multiple_choice
+} SetupType;
+
+// "kind": <<data kind>>,
+// "prompt": ""
+struct Setup: GenType<std::any> {
+    public:
+        Setup () {};
+        Setup(const int &number) : GenType(number) {}
+        Setup(const std::string &str) : GenType(str) {}
+        Setup(const bool &boo) : GenType(boo) {}
+        Setup(const std::map<SetupType, std::any> &param) : GenType(param) {}
+
+    private:
+        std::string prompt;
+};
 
 template <typename T> 
-class Engine { 
+class Engine{ 
     public:
         Engine (T json);
 
         bool validGameConfig(T json);
+        GenType<T> getGameConfig();
 
     private:
-        nlohmann::json json;
-        nlohmann::json configuration;
-        nlohmann::json constants;
-        nlohmann::json variables;
-        nlohmann::json perPlayer;
-        nlohmann::json perAudience;
-        nlohmann::json rules;
-        std::unordered_map<std::string, void(*)()> gameConfig;
+        T json;
+        GenType<T> gameConfig;
 
         void initalizeEngine();
         void buildGame();
-        std::string getCamelCase(std::string &key);
-
-        // only set methods, the build game method has access to private variables
-        void setConfiguration(nlohmann::json configuration);
-        void setConstants(nlohmann::json constants);
-        void setVariables(nlohmann::json variables);
-        void setPerPlayer(nlohmann::json perPlayer);
-        void setPerAudience(nlohmann::json perAudience);
-        void setRules(nlohmann::json rules);
-
-        void mapKeyToFunction(std::string key, nlohmann::json value);
-        void mapKeyToValue();
+        void mapKeyToValue(T key, T value);
+        T mapValueToFuntion(T value);
 
         // Control Structure Methods
         void findAndExecute(/* find a specific function and execute dynamically*/);
-
 };
 
 #endif
