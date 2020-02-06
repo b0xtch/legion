@@ -1,5 +1,5 @@
-#ifndef NETWORKING_SERVERW_H
-#define NETWORKING_SERVERW_H
+#ifndef NETWORKING_SIMPLESERVER_H
+#define NETWORKING_SIMPLESERVER_H
 
 #include <deque>
 #include <functional>
@@ -12,10 +12,10 @@
 A wrapper class for Server, with functions intended to help with communicating with several clients in different session.
 **/
 
-Class ServerW : public Server {
+Class SimpleServer : public Server {
 
 public:
-    ServerW (Server* server) : parentServer(server) { }
+    SimpleServer (Server* server) : parentServer(server) { }
 
     void update();
     void send(const std::deque<Message>& messages);
@@ -26,7 +26,7 @@ public:
 
 private:
     Server parentServer;
-    std::deque<Message> messageQueue;
+    std::deque<Message> outgoingMessages;
 
 };
 
