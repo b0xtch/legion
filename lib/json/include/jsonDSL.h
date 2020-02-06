@@ -75,6 +75,14 @@ public:
     std::pair<setupMap::left_const_iterator, 
                 setupMap::left_const_iterator>getSetupIterator();
 
+
+    std::string getStringOfSpecificationCommand(SpecificationFields specification);
+    std::string getStringOfConfigCommand(ConfigFields config);
+    std::string getStringOfRuleCommand(RuleType rule);
+    std::string getStringOfRuleParameterCommand(RuleParameters paramter);
+    std::string getStringOfTimerModesCommand(TimerModes timerMode);
+    std::string getStringOfSetupCommand(SetupFields setup);
+
 private:
     specificationMap mapStringToSpecification;
     configMap mapStringToConfigFields;

@@ -127,3 +127,27 @@ std::pair<JsonDSL::setupMap::left_const_iterator,
             JsonDSL::setupMap::left_const_iterator> JsonDSL::getSetupIterator(){
     return std::make_pair(mapStringToSetup.left.begin(), mapStringToSetup.left.end());
 }
+
+std::string JsonDSL::getStringOfSpecificationCommand(JsonDSL::SpecificationFields specification){
+    return mapStringToSpecification.right.find(specification)->second;
+}
+
+std::string JsonDSL::getStringOfConfigCommand(JsonDSL::ConfigFields config){
+    return mapStringToConfigFields.right.find(config)->second;
+}
+
+std::string JsonDSL::getStringOfRuleCommand(JsonDSL::RuleType rule){
+    return mapStringToRule.right.find(rule)->second;
+}
+
+std::string JsonDSL::getStringOfRuleParameterCommand(JsonDSL::RuleParameters ruleParameter){
+    return mapStringToRuleParameters.right.find(ruleParameter)->second;
+}
+
+std::string JsonDSL::getStringOfTimerModesCommand(JsonDSL::TimerModes timerMode){
+    return mapStringToTimerModes.right.find(timerMode)->second;
+}
+
+std::string JsonDSL::getStringOfSetupCommand(JsonDSL::SetupFields setup){
+    return mapStringToSetup.right.find(setup)->second;
+}
