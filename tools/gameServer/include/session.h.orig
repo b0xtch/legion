@@ -15,8 +15,8 @@ public:
     void updateTime();
     void checkTimeOut();
 
-    void startGame();	
-	void endGame();
+    void startGame();
+    void endGame();
     void advanceGameTurn(); //state machine???
     void declareWinner();
 
