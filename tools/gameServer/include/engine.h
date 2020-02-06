@@ -10,12 +10,16 @@ using namespace std;
 template <typename G> 
 struct GenType {
     GenType() : genMap() {};
-    GenType(std::map<G, std::any> &param) : genMap(param) {};
-    GenType(const G &param) : genValue(param) {};
+    GenType(std::map<G, std::any> &param) : valueMap(param) {
+        return genMap;
+    };
+    GenType(const G &param) : value(param) {
+        return value;
+    };
     
     // go out of scope when not used
-    std::map<G, std::any> genMap;
-    G genValue;
+    std::map<G, std::any> map;
+    G value;
 
     // auto get(std::ostream& o) override{
     //     o << genValue; 
@@ -48,13 +52,13 @@ struct Setup: GenType<std::any> {
 template <typename T> 
 class Engine{ 
     public:
-        Engine (T json);
+        Engine (T input);
 
-        bool validGameConfig(T json);
+        bool validGameConfig(T input);
         GenType<T> getGameConfig();
 
     private:
-        T json;
+        T input;
         GenType<T> gameConfig;
 
         void initalizeEngine();

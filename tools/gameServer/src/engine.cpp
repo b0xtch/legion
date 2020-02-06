@@ -8,25 +8,30 @@
 #include <json.hpp>
 #include <any>
 // #include "jsonvalidator.h"
+- course grain subsytems
+- boundries and constraints
+
+four major comp:
+
 
 // for convenience
 using json = nlohmann::json;
 
 template <typename T>
-Engine<T>::Engine (T json) {
-    if(this->validGameConfig(json)) this->initalizeEngine(); 
+Engine<T>::Engine (T input) {
+    if(this->validGameConfig(input)) this->initalizeEngine(); 
 
     std::cout << "Engine could not read game specification" << endl;
 }
 
 template <typename T> 
-bool Engine<T>::validGameConfig(T json) { 
-    // if(JsonValidator.validJson(json)) {
-    //     this->json = json; 
+bool Engine<T>::validGameConfig(T input) { 
+    // if(JsonValidator.validJson(input)) {
+    //     this->input = input; 
     //     return true;
     // }
 
-    this->json = json; 
+    this->input = input; 
     return true;
 } 
 
@@ -34,7 +39,7 @@ template <typename T>
 void Engine<T>::initalizeEngine() { 
     std::cout << "Engine Initalizing!" << endl;
 
-    for (auto& [key, value] : this->json.items()){
+    for (auto& [key, value] : this->input.items()){
         this->mapKeyToValue(key, value); 
     }
 }
@@ -42,7 +47,7 @@ void Engine<T>::initalizeEngine() {
 template <typename T> 
 void Engine<T>::buildGame() { 
     std::cout << "Building new game from the following configs..." << endl;
-    std::cout << this->json << endl;
+    std::cout << this->input << endl;
 
     // merge all the config variables together
     // This one of the last methods that will be called to construct
@@ -52,7 +57,7 @@ void Engine<T>::buildGame() {
 
 template <typename T> 
 void Engine<T>::mapKeyToValue(T key, T value){
-    this->gameConfig.genMap[key] = this->mapValueToFuntion(value);
+    this->gameConfig.map[key] = this->mapValueToFuntion(value);
 }
 
 template <typename T> 
@@ -62,7 +67,7 @@ T Engine<T>::mapValueToFuntion(T value){
 
 template <typename T> 
 GenType<T> Engine<T>::getGameConfig(){
-    for (const auto&[key, value] : this->gameConfig.genMap) {
+    for (const auto&[key, value] : this->gameConfig.map) {
         cout << key << " " << std::any_cast<T>(value) << endl;
     }
 
