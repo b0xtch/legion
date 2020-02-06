@@ -19,12 +19,14 @@ public:
 
     void update();
     void send(const std::deque<Message>& messages);
-    void sendTo(std::vector<Connection> connections, std::string text); // Send the same message to a list of clients
+    void queueMessage(std::vector<Connection> connections, std::string text); // Construct messages to clients and add them to the server queue
+    void sendQueuedMessages();
     [[nodiscard]] std::deque<Message> receive();
     void disconnect(Connection connection);
 
 private:
     Server parentServer;
+    std::deque<Message> messageQueue;
 
 };
 
