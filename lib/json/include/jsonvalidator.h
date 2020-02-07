@@ -2,24 +2,11 @@
 #include "jsonDSL.h"
 #include <string>
 
+#ifndef JSON_VALIDATOR_H
+#define JSON_VALIDATOR_H
+
 class JsonValidator{
 public:
-    bool validJson(nlohmann::json& j_object);
+    bool validJson(const nlohmann::json& j_object);
 };
-
-class RuleValidator{
-public:
-    nlohmann::json retrieveRule(nlohmann::json j_object);
-    void validateRule(const nlohmann::json& j_object, JsonDSL::RuleType rule);
-};
-
-class ConfigValidator{
-public:
-    nlohmann::json retrieveConfig(nlohmann::json j_object);
-    RuleValidator validateConfig(const nlohmann::json& j_object);
-};
-
-class SpecificationValidator{
-public:
-    ConfigValidator validateSpecification(const nlohmann::json& j_object);
-};
+#endif
