@@ -7,46 +7,59 @@
 
 using namespace std; 
 
-template <typename G> 
-struct GenType {
-    GenType() : genMap() {};
-    GenType(std::map<G, std::any> &param) : valueMap(param) {
-        return genMap;
-    };
-    GenType(const G &param) : value(param) {
-        return value;
-    };
-    
-    // go out of scope when not used
-    std::map<G, std::any> map;
-    G value;
+// The main work is to split the string into the three components 
+// "player", ".", and "count" and turn these into instructions: "player" => look up 
+// "player" key; "." => expect it to be an inner map/object; "count" => look up 
+// "count" key in inner map/object
 
-    // auto get(std::ostream& o) override{
-    //     o << genValue; 
-    // }
+// these enums are here for testing ill move them out once I am done
+enum SetupTypes{
+    Kind, SetupPrompt,
+    KindInteger, KindString, KindBoolean,
+    KindQuestionAnswer, KindMultipleChoice  
 };
 
-// move to DSL
-typedef enum {
-    integer,
-    string,
-    boolean,
-    question_answer,
-    multiple_choice
-} SetupType;
+enum RuleTypes{
+    Foreach, Loop, InParallel, Parallelfor,
+    Switch, When, Extend, Reverse, Shuffle, 
+    Sort, Deal, Discard, Add, Timer, 
+    InputChoice, InputText, InputVote, 
+    Message, GlobalMessage, Scores
+};
 
-// "kind": <<data kind>>,
-// "prompt": ""
-struct Setup: GenType<std::any> {
-    public:
-        Setup () {};
-        Setup(const int &number) : GenType(number) {}
-        Setup(const std::string &str) : GenType(str) {}
-        Setup(const bool &boo) : GenType(boo) {}
-        Setup(const std::map<SetupType, std::any> &param) : GenType(param) {}
+template <typename G> 
+struct GenType {
+    GenType() : map() {};
+    GenType(std::map<G, std::any> &param) : map(param) {};
+    GenType(const G &param) : value(param) {};
 
-    private:
-        std::string prompt;
+    std::map<G, std::any> map;
+    G value;
+};
+
+// {
+//   "kind": <<data kind>>,
+//   "prompt": <<Description of what data the owner should provide>>
+// }
+struct Setup: GenType<std::pair<std::string, std::any>> {
+    Setup(const std::pair<std::string, std::any> &param) // change the any to json
+        : GenType(param) {}; 
+
+    // overload the cout to be able to cout a custom thing like the prompt for example
+};
+
+struct Interpreter {
+    auto operator()(int& _in){_in += _in;}
+    auto operator()(double& _in){_in += _in;}
+    auto operator()(std::string& _in){_in += _in;}
+    auto operator()(bool& ){std::cout << "bool item" << std::endl;}
+    auto operator()(RuleTypes value){std::cout << "rules item" << " " << RuleTypes(value) << std::endl;}
+    auto operator()(SetupTypes value){
+        std::cout << "setup item:" << " " << SetupTypes(value) << std::endl;
+        std::cout << "Upload your json!" << std::endl;
+
+        //Setup( /* map[ make_pair("kind", json ] = “the prompt”; */ );
+    }
 };
 
 template <typename T> 
