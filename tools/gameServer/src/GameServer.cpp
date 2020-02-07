@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include "json.hpp"
+#include "MessageType.h"
 
 // PUBLIC
 
@@ -34,28 +34,28 @@ void GameServer::receive() {
     for (auto& message : incomingMessages) {
         auto& c = message.connection;
         
-        auto msgType = parseMessageType(message.text);
+        auto msgType = MessageType::interpretType(message.text);
         
-        if (msgType == GameServer::MessageType::ServerStop) {
+        if (msgType == MessageType::Type::ServerStop) {
             keepRunning = false;
         }
-        else if (msgType == GameServer::MessageType::CreateSession) {
+        else if (msgType == MessageType::Type::CreateSession) {
             sessionManager.createNewSession();
         }
-        else if (msgType == GameServer::MessageType::JoinSession) {
-            sessionManager.joinToSession();
+        else if (msgType == MessageType::Type::JoinSession) {
+            //sessionManager.joinToSession(); Currently no implementation
         }
     }
     
     auto it = std::remove_if(incomingMessages.front(), incomingMessages.back(), 
         [] (networking::Message msg) {
-            auto msgType = parseMessageType(msg.text);
-            return msgType != GameServer::MessageType::Other;
+            auto msgType = MessageType::interpretType(msg.text);
+            return msgType != MessageType::Type::Other;
         }
     );
     
     // Pass these messages to SessionManager for distribution and handling?
-    sessionManager.process(incomingMessages);
+    //sessionManager.process(incomingMessages); Currently no implementation
 }
 
 void GameServer::update() {
@@ -72,33 +72,4 @@ bool GameServer::getKeepRunning() const {
 
 std::string_view GameServer::getHtmlFile() const {
     return htmlFile;
-}
-
-// ==================================================
-
-// PRIVATE
-
-GameServer::MessageType GameServer::parseMessageType(std::string text) {
-    using json = nlohmann::json;
-    
-    json jsonObj = json::parse(text);
-    
-    // Message format is currently unknown so some placeholder strings are in place.
-    std::string msgType = jsonObj["type"];
-    
-    GameServer::MessageType ret;
-    if (msgType.compare("serverStop")) {
-        ret = GameServer::MessageType::ServerStop
-    }
-    else if (msgType.compare("create")) {
-        ret = GameServer::MessageType::CreateSession;
-    }
-    else if (msgType.compare("join")) {
-        ret = GameServer::MessageType::JoinSession;
-    }
-    else {
-        ret = GameServer::MessageType::Other;
-    }
-    
-    return ret;
 }
