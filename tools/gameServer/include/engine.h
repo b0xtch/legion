@@ -48,28 +48,17 @@ struct Setup: GenType<std::pair<std::string, std::any>> {
     // overload the cout to be able to cout a custom thing like the prompt for example
 };
 
-
-struct Interpreter {
-    auto operator()(int& _in){_in += _in;}
-    auto operator()(double& _in){_in += _in;}
-    auto operator()(std::string& _in){_in += _in;}
-    auto operator()(bool& ){std::cout << "bool item" << std::endl;}
-    auto operator()(RuleTypes value){std::cout << "rules item" << " " << RuleTypes(value) << std::endl;}
-    auto operator()(SetupTypes value){
-        std::cout << "Upload your json!" << std::endl;
-
-        //Setup( /* map[ make_pair("kind", json ] = "the prompt"; */ );
-    }
-};
-
 /**
  * Convert my interpreter into self executing lambda functions
  * from this cool article on dev
  * still grasping how to use variants for each component of our game
  * 
- * THIS DOESNT NOT WORK YET, STILL MISSING PICES FROM THR ARTICLE
  * https://dev.to/tmr232/that-overloaded-trick-overloading-lambdas-in-c17
 */
+
+template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>; 
+
 template<typename... T>
 struct Components{
     using component = std::variant<T...>;
