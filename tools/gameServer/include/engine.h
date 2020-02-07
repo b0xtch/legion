@@ -48,6 +48,7 @@ struct Setup: GenType<std::pair<std::string, std::any>> {
     // overload the cout to be able to cout a custom thing like the prompt for example
 };
 
+
 struct Interpreter {
     auto operator()(int& _in){_in += _in;}
     auto operator()(double& _in){_in += _in;}
@@ -55,12 +56,27 @@ struct Interpreter {
     auto operator()(bool& ){std::cout << "bool item" << std::endl;}
     auto operator()(RuleTypes value){std::cout << "rules item" << " " << RuleTypes(value) << std::endl;}
     auto operator()(SetupTypes value){
-        std::cout << "setup item:" << " " << SetupTypes(value) << std::endl;
         std::cout << "Upload your json!" << std::endl;
 
-        //Setup( /* map[ make_pair("kind", json ] = “the prompt”; */ );
+        //Setup( /* map[ make_pair("kind", json ] = "the prompt"; */ );
     }
 };
+
+template<typename... T>
+struct Components{
+    using component = std::variant<T...>;
+
+    template<typename V>
+    void visit(V&& visitor){
+        for (auto& entity : entities){
+            std::visit(visitor, entity);
+        }
+    }
+
+    // Create a vector of variants
+    std::vector<component> entities;
+};
+
 
 template <typename T> 
 class Engine{ 
