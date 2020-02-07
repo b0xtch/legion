@@ -4,6 +4,7 @@
 #include <json.hpp>
 #include <iostream>  
 #include <any>
+#include "jsonDSL.h"
 
 using namespace std; 
 
@@ -63,20 +64,30 @@ template<typename... T>
 struct Components{
     using component = std::variant<T...>;
 
+    // These are the main types that we are going to 
+    // have and translate to from type T
+    // JsonDSL::SpecificationFields;
+    // JsonDSL::ConfigFields;
+    // JsonDSL::RuleType;
+    // JsonDSL::RuleParameters;
+    // JsonDSL::TimerModes;
+    // JsonDSL::SetupFields;
+
     template<typename V>
     void visit(V&& visitor){
         for (auto& entity : entities){
-            std::visit( {
+            std::visit(overloaded {
                 [](int& _in){_in += _in;},
                 [](double& _in){_in += _in;},
                 [](std::string& _in){_in += _in;},
                 [](bool& ){std::cout << "bool item" << std::endl;},
-                [](RuleTypes value){std::cout << "rules item" << " " << RuleTypes(value) << std::endl;},
-                [](SetupTypes value){
+                [](JsonDSL::RuleType value){std::cout << "rules item" << " " << RuleTypes(value) << std::endl;},
+                [](JsonDSL::SetupFields value){
                     std::cout << "Upload your json!" << std::endl;
 
                     //Setup( /* map[ make_pair("kind", json ] = "the prompt"; */ );
                 }
+                // .. add th rest once I have clear understanding of whats happening
             }, entity);
         }
     }
