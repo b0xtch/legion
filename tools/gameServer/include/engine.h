@@ -8,12 +8,18 @@
 
 using namespace std; 
 
-namespace Engine {
+// The main work is to split the string into the three components 
+// "player", ".", and "count" and turn these into instructions: "player" => look up 
+// "player" key; "." => expect it to be an inner map/object; "count" => look up 
+// "count" key in inner map/object
+/**
+ * 
+ * Create a way to output from each struct type
+ * Implement the rest of the JsonDsl types just put them into lambda functions with (ENUM& )
+ * 
+*/
 
-    // The main work is to split the string into the three components 
-    // "player", ".", and "count" and turn these into instructions: "player" => look up 
-    // "player" key; "." => expect it to be an inner map/object; "count" => look up 
-    // "count" key in inner map/object
+namespace Engine {
 
     // these enums are here for testing ill move them out once I am done
     enum SetupTypes{
@@ -75,8 +81,7 @@ namespace Engine {
         // JsonDSL::TimerModes;
         // JsonDSL::SetupFields;
 
-        template<typename V>
-        void visit(V&& visitor){
+        void visit(){
             for (auto& entity : entities){
                 std::visit(overloaded {
                     [](int& _in){_in += _in;},
