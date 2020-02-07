@@ -83,7 +83,9 @@ namespace Engine {
                     [](double& _in){_in += _in;},
                     [](std::string& _in){_in += _in;},
                     [](bool& ){std::cout << "bool item" << std::endl;},
-                    [](JsonDSL::RuleType value){std::cout << "rules item" << " " << RuleTypes(value) << std::endl;},
+                    [](JsonDSL::RuleType value){
+                        std::cout << "rules item" << " " << RuleTypes(value) << std::endl;
+                    },
                     [](JsonDSL::SetupFields value){
                         std::cout << "Upload your json!" << std::endl;
 
@@ -102,7 +104,7 @@ namespace Engine {
     template <typename T> 
     class EngineImpl{ 
         public:
-            Engine (T input);
+            EngineImpl (T input);
 
             bool validGameConfig(T input);
             GenType<T> getGameConfig();
