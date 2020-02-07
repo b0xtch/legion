@@ -57,6 +57,12 @@ namespace Engine {
         // overload the cout to be able to cout a custom thing like the prompt for example
     };
 
+    // mostly for arithmetic operations
+    struct Interpreter {
+        auto operator()(int& _in){_in += _in;}
+        auto operator()(double& _in){_in += _in;}
+    };
+
     /**
      * Convert my interpreter into self executing lambda functions
      * from this cool article on dev
@@ -98,6 +104,14 @@ namespace Engine {
                     }
                     // .. add th rest once I have clear understanding of whats happening
                 }, entity);
+            }
+        }
+
+        // overlaoded function to take a cutom visitor i.e struct interpreter
+        template <typename V>
+        void visit(V&& visitor){
+            for (auto& entity : entities){
+                std::visit(visitor, entity);
             }
         }
 
