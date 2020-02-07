@@ -59,8 +59,17 @@ namespace Engine {
 
     // mostly for arithmetic operations
     struct Interpreter {
-        auto operator()(int& _in){_in += _in;}
-        auto operator()(double& _in){_in += _in;}
+        auto operator()(int& value){value += value;}
+        auto operator()(double& value){value += value;}
+        auto operator()(std::string& value){value += value;}
+        auto operator()(bool& ){std::cout << "bool item" << std::endl;}
+        auto operator()(RuleTypes value){std::cout << "rules item" << " " << RuleTypes(value) << std::endl;}
+        auto operator()(SetupTypes value){
+            std::cout << "setup item:" << " " << SetupTypes(value) << std::endl;
+            std::cout << "Upload your json!" << std::endl;
+
+            //Setup( /* map[ make_pair("kind", json ] = “the prompt”; */ );
+        }
     };
 
     /**
@@ -90,9 +99,9 @@ namespace Engine {
         void visit(){
             for (auto& entity : entities){
                 std::visit(overloaded {
-                    [](int& _in){_in += _in;},
-                    [](double& _in){_in += _in;},
-                    [](std::string& _in){_in += _in;},
+                    [](int& value){value += value;},
+                    [](double& value){value += value;},
+                    [](std::string& value){std::cout << "bool item" << std::endl;},
                     [](bool& ){std::cout << "bool item" << std::endl;},
                     [](JsonDSL::RuleType value){
                         std::cout << "rules item" << " " << RuleTypes(value) << std::endl;
