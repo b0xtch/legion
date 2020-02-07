@@ -62,6 +62,14 @@ struct Interpreter {
     }
 };
 
+/**
+ * Convert my interpreter into self executing lambda functions
+ * from this cool article on dev
+ * still grasping how to use variants for each component of our game
+ * 
+ * THIS DOESNT NOT WORK YET, STILL MISSING PICES FROM THR ARTICLE
+ * https://dev.to/tmr232/that-overloaded-trick-overloading-lambdas-in-c17
+*/
 template<typename... T>
 struct Components{
     using component = std::variant<T...>;
@@ -69,7 +77,18 @@ struct Components{
     template<typename V>
     void visit(V&& visitor){
         for (auto& entity : entities){
-            std::visit(visitor, entity);
+            std::visit( {
+                [](int& _in){_in += _in;},
+                [](double& _in){_in += _in;},
+                [](std::string& _in){_in += _in;},
+                [](bool& ){std::cout << "bool item" << std::endl;},
+                [](RuleTypes value){std::cout << "rules item" << " " << RuleTypes(value) << std::endl;},
+                [](SetupTypes value){
+                    std::cout << "Upload your json!" << std::endl;
+
+                    //Setup( /* map[ make_pair("kind", json ] = "the prompt"; */ );
+                }
+            }, entity);
         }
     }
 
