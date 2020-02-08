@@ -9,13 +9,13 @@
 /** Handles the loading and parsing of the server configuation file only. */
 class GameServerConfig {
 public:
+    GameServerConfig();
     GameServerConfig(const std::string& configLocation);
     
     std::string_view getGameConfigDir() const;
     
 private:
     std::string_view configLocation;
-    
     std::string_view gameConfigDir;
 }
 
@@ -52,6 +52,8 @@ private:
     std::string_view htmlFile;
     SimpleServer server;
     SessionManager sessionManager;
+    GameServerConfig gameServerConfig;
+    
     std::vector<Connection> clients;
     
 };
