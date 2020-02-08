@@ -9,14 +9,14 @@ typedef std::string stringVar;
 class Player{
 public:
   Player(const variable&, const stringVar&);
-  void incrementPoints(const variable&);
-  void decrementPoints(const variable&);
+  // void incrementPoints(const variable&);
+  // void decrementPoints(const variable&);
   variable getPlayerID();
-  variable getPlayerPoints();
+  // variable getPlayerPoints();
   friend bool operator== (const Player&, const Player&);
 private:
   variable playerID;
-  variable playersPoints;
+  // variable playersPoints;
   stringVar playerName;
   networking::Connection connection; //Connections from PA, PB, PC to Game class for instantitations
 };
