@@ -6,6 +6,24 @@
 
 #include <ctime>
 
+GameServerConfig::GameServerConfig() :
+    this{"./games/"}
+{
+    
+}
+
+GameServerConfig::GameServerConfig(const std::string& configLocation) :
+    configLocation{configLocation}
+{
+    // TODO, load the file, parse it, and save it into some class variables
+    // TODO, add error handling to this part
+}
+
+std::string_view GameServerConfig::getGameConfigDir() const {
+    return gameConfigDir;
+}
+
+
 // PUBLIC
 
 GameServer::GameServer(int port, const std::string& htmlFile) :
