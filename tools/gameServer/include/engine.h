@@ -57,6 +57,7 @@ namespace Engine {
         // overload the cout to be able to cout a custom thing like the prompt for example
     };
 
+
     // mostly for arithmetic operations
     struct Interpreter {
         auto operator()(int& _in){_in += _in;}
