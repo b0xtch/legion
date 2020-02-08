@@ -37,7 +37,10 @@ void Session::addClient(const networking::Connection& connection){
         if(clients.size() >= MAX_SESSION_SIZE){
         throw SessSessionLimitExceeded();
         };
-        
+
+        clients.add(client);
+};
+
         clients.add(client);
 };
 
@@ -56,5 +59,3 @@ std::string Session::getSessionId(){
 bool Session::isClient(const networking::Connection& connection){
     return clients.find(connection) != clients.end();
 }
-
-

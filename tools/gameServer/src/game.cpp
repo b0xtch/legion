@@ -7,46 +7,24 @@
 
 using namespace std;
 
-Game::Game(){
-  gameName = "Jackbox no TV";
-  numPlayersMax = 8;
-  numPlayers = 0; //setting to 0 so that the client server connection can determine number of players connecting
-  rulesOfTheGame = "Welcome to Jackbox no TV, the rules of the game are ...";
-}
-
 //general constructor -- WIP
-Game::Game(std::string name, int maxPlayers, std::string rules){
-  gameName = name;
-  numPlayersMax = maxPlayers;
-  numPlayers = 0;
-  rulesOfTheGame = rules;
-}
+Game::Game(const stringVar& name, const int& maxPlayers, const stringVar& rules): gameName(name), numPlayersMax(maxPlayers), numPlayers(0), rulesOfTheGame(rules){}
 
-Game::~Game(){
-  for(std::string* question: questions){ delete[] question; }
-  questions.clear();
-  std::cout<<"Deleted vector questions, size of vector = "<<questions.size()<<endl;
-  allPlayers.clear();
-  std::cout<<"Deleted vector allPlayers, size of vector = "<<allPlayers.size()<<endl;
-}
+Game::Game(const stringVar& name): gameName(name){}
 
-void Game::addPlayer(Player p){
+void Game::addPlayer(const Player& p){
 	if(numPlayers != numPlayersMax){
 		allPlayers.push_back(p);
 		numPlayers++;
 	} else {
 		std::cout << "Game currently at maximum capacity. Player (" << p.getPlayerID() << ") unable to join. \n";
-	}	
+	}
 }
 
-void Game::removePlayer(int pid){
+void Game::removePlayer(const variable& pid){
 	//placeholder - looking for alternative solutions for organizing vector of players
-	for(int i = 0; i<numPlayers; i++){
-		if(allPlayers[i].getPlayerID() == pid){
-			allPlayers.erase(allPlayers.begin() + i);
-			numPlayers--;
-		}
-	}
+  allPlayers.erase(std::find_if(allPlayers.begin(), allPlayers.end(), Player(pid, "name")));
+  numPlayers--;
 }
 
 int Game::getNumPlayers(){
@@ -56,8 +34,19 @@ int Game::getNumPlayersMax(){
 	return numPlayersMax;
 }
 
+std::vector<Player> Game::getAllPlayers(){
+  return allPlayers;
+}
 
+std::vector<stringVar> getAllPlayersInputs(){ return allPlayersInputs; }
 
+//setAllPlayersInputs function will act as an alternative to game turns
+//since some games won't require turns, like rock, paper, scissors
+void Game::setAllPlayersInputs(){
+  //Unfinished
+}
+
+bool operator==(const Game& game1, const Game& game2){ return game1->gameName == game2->gameName; }
 /*
 *  WIP
 */
