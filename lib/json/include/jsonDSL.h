@@ -1,6 +1,10 @@
 #include <string>
 #include <map>
 #include <utility>
+#include "boost/bimap.hpp"
+
+#ifndef JSON_DSL_H
+#define JSON_DSL_H
 
 class JsonDSL{
 public:
@@ -39,6 +43,12 @@ public:
         KindQuestionAnswer, KindMultipleChoice  
     };
 
+    typedef boost::bimap<std::string, SpecificationFields> specificationMap;
+    typedef boost::bimap<std::string, ConfigFields> configMap;
+    typedef boost::bimap<std::string, RuleType> ruleMap;
+    typedef boost::bimap<std::string, RuleParameters> ruleParameterMap;
+    typedef boost::bimap<std::string, TimerModes> timerModeMap;
+    typedef boost::bimap<std::string, SetupFields> setupMap;
 
     bool isValidSpecificationField(const std::string&);
     bool isValidConfigField(const std::string&);
@@ -47,29 +57,38 @@ public:
     bool isValidTimerMode(const std::string&);
     bool isValidSetupKind(const std::string&);
 
-    std::pair<std::map<std::string, SpecificationFields>::iterator, 
-                std::map<std::string, SpecificationFields>::iterator> getSpecificationIterator();
+    std::pair<specificationMap::left_const_iterator, 
+                specificationMap::left_const_iterator> getSpecificationIterator();
                 
-    std::pair<std::map<std::string, ConfigFields>::iterator, 
-                std::map<std::string, ConfigFields>::iterator>getConfigIterator();
+    std::pair<configMap::left_const_iterator, 
+                configMap::left_const_iterator>getConfigIterator();
 
-    std::pair<std::map<std::string, RuleType>::iterator, 
-                std::map<std::string, RuleType>::iterator> getRuleIterator();
+    std::pair<ruleMap::left_const_iterator, 
+                ruleMap::left_const_iterator> getRuleIterator();
 
-    std::pair<std::map<std::string, RuleParameters>::iterator, 
-                std::map<std::string, RuleParameters>::iterator>getRuleParameterIterator();
+    std::pair<ruleParameterMap::left_const_iterator, 
+                ruleParameterMap::left_const_iterator>getRuleParameterIterator();
 
-    std::pair<std::map<std::string, TimerModes>::iterator, 
-                std::map<std::string, TimerModes>::iterator>getTimerModeIterator();
+    std::pair<timerModeMap::left_const_iterator, 
+                timerModeMap::left_const_iterator>getTimerModeIterator();
 
-    std::pair<std::map<std::string, SetupFields>::iterator, 
-                std::map<std::string, SetupFields>::iterator>getSetupIterator();
+    std::pair<setupMap::left_const_iterator, 
+                setupMap::left_const_iterator>getSetupIterator();
+
+
+    std::string getStringOfSpecificationCommand(SpecificationFields specification);
+    std::string getStringOfConfigCommand(ConfigFields config);
+    std::string getStringOfRuleCommand(RuleType rule);
+    std::string getStringOfRuleParameterCommand(RuleParameters paramter);
+    std::string getStringOfTimerModesCommand(TimerModes timerMode);
+    std::string getStringOfSetupCommand(SetupFields setup);
 
 private:
-    std::map<std::string, SpecificationFields> mapStringToSpecification;
-    std::map<std::string, ConfigFields> mapStringToConfigFields;
-    std::map<std::string, RuleType> mapStringToRule;
-    std::map<std::string, RuleParameters> mapStringToRuleParameters;
-    std::map<std::string, TimerModes> mapStringToTimerModes;
-    std::map<std::string, SetupFields> mapStringToSetup;
+    specificationMap mapStringToSpecification;
+    configMap mapStringToConfigFields;
+    ruleMap mapStringToRule;
+    ruleParameterMap mapStringToRuleParameters;
+    timerModeMap mapStringToTimerModes;
+    setupMap mapStringToSetup;
 };
+#endif
