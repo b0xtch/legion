@@ -1,3 +1,8 @@
+#include<iostream>
+#include <vector>
+#include "GameManager.h"
+
+
 Game GameManager::createNewGame() {
     if (Games.size() < maxGames) {
         Game newgame();
@@ -5,13 +10,13 @@ Game GameManager::createNewGame() {
     }
 }
 
-void GameManager::startGame(std::string name) {
-}
+void GameManager::startGame(const stringVar& name) {
+  Games.emplace_back(std::make_unique<Game>("name", 8, "rules"));
+  //specific Game entity will exist inside gameProcess only and destroyed when out of bounds of function
 
-void GameManager::endGame(std::string name) {
 }
-
-void GameManager::advanceGame(std::string name) {
-    auto selectedGame = std::find_if(Games.begin(), Games.end(), [name] (auto& game) { return game.getName() == name; });
-    selectedGame.advanceTurn();
+//endGame will kill the mentioned session
+void GameManager::endGame(const stringVar& name)  {
+  //Unfinished
+  Games.erase(std::find_if(Games.begin(), Games.end(), Game(name)));
 }

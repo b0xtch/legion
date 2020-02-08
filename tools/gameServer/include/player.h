@@ -3,23 +3,21 @@
 
 #include <string>
 #include <utility>
-using std::unique_ptr
-
+// using std::unique_ptr
+typedef int variable;
+typedef std::string stringVar;
 class Player{
 public:
-  Player(); //default
-  Player(int pid, std::string name);
-  ~Player();
-  void incrementPoints(int x);
-  void decrementPoints(int x);
-  int getPlayerID();
-  int getPlayerPoints();
-  std::unique_ptr getPlayerTurn();
+  Player(const variable&, const stringVar&);
+  void incrementPoints(const variable&);
+  void decrementPoints(const variable&);
+  variable getPlayerID();
+  variable getPlayerPoints();
+  friend bool operator== (const Player&, const Player&);
 private:
-  int playerID;
-  int playersPoints;
-  std::string playerName;
-  std::unique_ptr playerTurn;
+  variable playerID;
+  variable playersPoints;
+  stringVar playerName;
   networking::Connection connection; //Connections from PA, PB, PC to Game class for instantitations
 };
 

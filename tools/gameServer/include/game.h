@@ -3,38 +3,27 @@
 #include <string>
 #include <vector>
 // #include "session.h"
-#include "players.h"
+#include "player.h"
 
-// class Session;
 class Game{
-  // friend class Session;
 public:
-  Game(); //defauult for Jackbox no TV
-  Game(std::string name, int maxPlayers, std::string rules); // general constructor to support additional games, will add more parameters
-  ~Game();
-  void addPlayer(Players p);
-  void removePlayer(int pid); //remove using playerID
-  // std::string rightAnswerForQuestion(const std::vector<std::string*>& questions);
-  void addQuestions(std::string question, std::string answer);
-  //rightAnswerForQuestion and addQuestions will be moved to a separate child class inherited from Game class
-
+  Game(const stringVar&, const int& , const stringVar&); // general constructor to support additional games, will add more parameterss
+  Game(const stringVar&);
+  void addPlayer(const Player&);
+  void removePlayer(const variable&);
   int getNumPlayers(); //interpreted from json config
   int getNumPlayersMax(); //interpreted from json config
-
+  void playersInputs(); //playersInputs is the alternative to advanceGame since allPlayers inputs can be obtained all in one phase of the game
+  std::vector<stringVar> getAllPlayersInputs();
   std::vector<Player> getAllPlayers();
-  virtual void displayInfo(Game& displayGame);
-
+  friend bool operator== (const Game&, const Game&);
 private:
   int numPlayers; //interpreted from json config
   int numPlayersMax; //interpreted from json config
-  int numQuestions;
-  //int playerPoints;
-  std::string gameName; //interpreted from json config
-  // std::string rightAnswer; //is this still needed?
-  std::string rulesOfTheGame; //interpreted from json config, might be made into an object???
-  std::string* listOfAnswers;
-  std::vector<std::string*> questions;
   std::vector<Player> allPlayers;
+  std::vector<stringVar> allPlayersInputs; //store all the answer inputs from allPlayers
+  stringVar gameName; //interpreted from json config
+  stringVar rulesOfTheGame; //interpreted from json config, might be made into an object???
   boolean audience; //interpreted from json config
 };
 
