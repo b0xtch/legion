@@ -1,18 +1,17 @@
 #ifndef GAME_SERVER_H
 #define GAME_SERVER_H
 
-#include <iostream>
 #include <string>
-#include <vector>
-#include <algorithm>
 
-#include <nlohmann/json.hpp>
 #include "Server.h"
 #include "SessionManager.h"
 
 class GameServer {
 public:
-    GameServer(int port, std::string htmlFile);
+    GameServer(int port, const std::string& htmlFile);
+    
+    /** Useful for testing the GameServer. Perfroms an std::move on the server. */
+    GameServer(networking::Server& server, SessionManager& sessionManager);
     
     /** Sends out all the messages passed to the intended clients. */
     void send(const std::deque<networking::Message>& messages);

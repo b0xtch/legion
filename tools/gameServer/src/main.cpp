@@ -12,7 +12,25 @@ int main(int argc, char** argv) {
         return 1;
     }
     
-    unsigned short port = std::stoi(argv[1]);
+    unsigned short port;
+    // Error handling for the port.
+    try {
+        int rangeCheck = std::stoi(argv[1]);
+        if (rangeCheck < 1 || rangeCheck > 65535) {
+            std::cerr << "Error: The port is out of range." << std::endl;
+            return 1;
+        }
+        port = rangeCheck;
+    }
+    catch (std::invalid_argument& e) {
+        std::cerr << "Error: The port is invalid." << std::endl;
+        return 1;
+    }
+    catch (std::out_of_range& e) {
+        std::cerr << "Error: The port is out of range." << std::endl;
+        return 1;
+    }
+    
     GameServer gameServer{port, ""};
     
     bool keepRunning = true;
