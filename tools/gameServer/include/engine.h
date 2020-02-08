@@ -18,6 +18,7 @@ using namespace std;
  * Implement the rest of the JsonDsl types just put them into lambda functions with (ENUM& )
  * change any type in setup and GenType struct
  * define a desgin of hiercarhy
+ * Map of string to structs => <"configuratin" -> configuration (type struct)>
 */
 
 namespace Engine {
@@ -47,19 +48,55 @@ namespace Engine {
         G value;
     };
 
-    struct configuration {
-        std::string name;
-        setup setup;
-    }
+    struct Configuration {
+        GenType<std::string> name {"config"};
+        struct PlayerCount: GenType<int> {
+            GenType min;
+            GenType max;
+        };
+        GenType<bool> audience;
 
-    // {
-    //   "kind": <<data kind>>,
-    //   "prompt": <<Description of what data the owner should provide>>
-    // }
-    using KindPair = std::pair<std::string, json>;
-    struct setup: GenType<KindPair> {
-        setup(const KindPair &param)
-            : GenType(param) {}; 
+        // {
+        //   "kind": <<data kind>>,
+        //   "prompt": <<Description of what data the owner should provide>>
+        // }
+        using KindPair = std::pair<std::string, std::string>;
+        struct setup: GenType<KindPair> {
+            setup(const KindPair &param)
+                : GenType(param) {}; 
+        };
+    } configuration;
+
+    template<typename T>
+    struct cvpa: GenType<std::string, T> {
+
+        struct Constants {
+            GenType map;
+        } constants;
+
+        struct Variables {
+            GenType map;
+        } variables;
+        
+        template<typename PP>
+        struct PerPlayer>: GenType<std::string, PP>{
+            GenType map;
+        } per_player;
+
+        template<typename PA>
+        struct PerAudience: GenType<std::string, PA> {
+            GenType map;
+        } per_audience;
+    };
+    
+    /**
+     * Each individual rule is a map of attributes describing the rule. 
+     * Lists of rules define a sequence of operations in which each rule 
+     * must be performed in sequential order.
+    */
+    template<typename T, typename... Args>
+    struct Rules: GenType<T, Args> {
+        std::string add {"rules"};
     };
 
     // mostly for arithmetic operations
@@ -87,8 +124,6 @@ namespace Engine {
                     break;
             }
         }
-
-        
 
         E type;
     };

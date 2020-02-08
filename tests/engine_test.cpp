@@ -69,35 +69,35 @@ struct Components{
 };
 
 
-    template<typename E, typename A>
-    struct arithm {
-        arithm(const E& type): type(type) {} // change this to accept a pair for addition
-        
-        template<typename T>
-        auto& operator()(const T& value){
-            switch (type)
-            {
-                case upFrom:
-                    value++;
-                    break;
-                case downFrom:
-                    value--;
-                    break;
-            }
+template<typename E, typename A>
+struct arithm {
+    arithm(const E& type): type(type) {} // change this to accept a pair for addition
+    
+    template<typename T>
+    auto& operator()(const T& value){
+        switch (type)
+        {
+            case upFrom:
+                value++;
+                break;
+            case downFrom:
+                value--;
+                break;
         }
+    }
 
-        auto& operator()(const A& value){
-            switch (type)
-            {
-                case add:
-                    std::cout << value.first + value.second << std::endl;
-                    return value;
-                    break;
-            }
+    auto& operator()(const A& value){
+        switch (type)
+        {
+            case add:
+                std::cout << value.first + value.second << std::endl;
+                return value;
+                break;
         }
+    }
 
-        E type;
-    };
+    E type;
+};
 
 template<typename E, typename A> // switch this to accept an varidic args
 struct Interpreter
