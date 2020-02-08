@@ -6,7 +6,7 @@
 
 // PUBLIC
 
-GameServer::GameServer(int port, std::string htmlFile) :
+GameServer::GameServer(int port, const std::string& htmlFile) :
     keepRunning{true},
     port{port},
     htmlFile{htmlFile},
@@ -22,7 +22,7 @@ GameServer::GameServer(int port, std::string htmlFile) :
     
 }
 
-GameServer::GameServer(networking::Server server, SessionManager sessionManager) :
+GameServer::GameServer(networking::Server& server, SessionManager& sessionManager) :
     server{std::move(server)},
     sessionManager{sessionManager},
     keepRunning{true}, port{-1}, htmlFile{""}
@@ -37,7 +37,7 @@ void GameServer::send(const std::deque<networking::Message>& messages) {
 void GameServer::receive() {
     auto incomingMessages = server.receive();
     
-    // Check for messages about creating or joining a room.
+    // Check and deal with messages about creating/joining rooms or server shutdowns.
     std::vector<networking::Message> unhandledMessages;
     std::for_each(incomingMessages.front(), incomingMessages.back(),
         [this, &unhandledMessages] (networking::Message msg) {
@@ -59,7 +59,7 @@ void GameServer::receive() {
         }
     );
     
-    // Pass these messages to SessionManager for distribution and handling?
+    // Pass the remaining messages to SessionManager for distribution and handling
     //sessionManager.process(unhandledMessages); Currently no implementation
 }
 
