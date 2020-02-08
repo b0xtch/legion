@@ -16,7 +16,8 @@ using namespace std;
  * 
  * Create a way to output from each struct type
  * Implement the rest of the JsonDsl types just put them into lambda functions with (ENUM& )
- * 
+ * change any type in setup and GenType struct
+ * define a desgin of hiercarhy
 */
 
 namespace Engine {
@@ -56,13 +57,12 @@ namespace Engine {
         Setup(const KindPair &param) // change the any to json
             : GenType(param) {}; 
 
-        // overload the cout to be able to cout a custom thing like the prompt for example
+        // overload the cout to be able to cout a custom thing like the KindPair for example
     };
 
     // mostly for arithmetic operations
     template<typename E>
-    struct arithmetic
-    {
+    struct arithmetic {
         arithmetic(const E& value): value(value) {}
         auto operator()(Arithmetic& type){
             switch (type){
@@ -74,7 +74,6 @@ namespace Engine {
                     std::cout << "minus one" << std::endl;
                     value -= 1;
                     break;
-                    
                 default:
                     break;
             }
@@ -84,8 +83,7 @@ namespace Engine {
     };
 
     template<typename E>
-    struct Interpreter
-    {
+    struct Interpreter {
         Interpreter(const E& value){
             component.entities.emplace_back(value);
         }
@@ -110,7 +108,7 @@ namespace Engine {
     template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>; 
 
     template<typename... T>
-    struct Components{
+    struct Components {
         using component = std::variant<T...>;
 
         // These are the main types that we are going to 
@@ -156,7 +154,7 @@ namespace Engine {
 
 
     template <typename T> 
-    class EngineImpl{ 
+    class EngineImpl { 
         public:
             EngineImpl (T& input);
 
