@@ -10,6 +10,9 @@ class GameServer {
 public:
     GameServer(int port, std::string htmlFile);
     
+    /** Useful for testing the GameServer. */
+    GameServer(networking::Server server, SessionManager sessionManager);
+    
     /** Sends out all the messages passed to the intended clients. */
     void send(const std::deque<networking::Message>& messages);
     
