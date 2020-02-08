@@ -1,6 +1,10 @@
 #include "GameServer.h"
 
-using json = nlohmann::json;
+#include <algorithm>
+
+#include "json.hpp"
+
+// PUBLIC
 
 GameServer::GameServer(int port, std::string htmlFile) :
     keepRunning{true},
@@ -11,7 +15,7 @@ GameServer::GameServer(int port, std::string htmlFile) :
             this->sessionManager.addConnection(c);
         },
         [this] (networking::Connection c) {
-            this->sessionManager.removeConnection(c);
+            //this->sessionManager.removeConnection(c); Currently no implementation
         }},
     sessionManager{}
 {
@@ -30,24 +34,23 @@ void GameServer::receive() {
     for (auto& message : incomingMessages) {
         auto& c = message.connection;
         
-        auto& jsonText = json::convertToJson(message.text);
-        auto typeVal = jsonText.get(MessageKey.Type);
+        auto msgType = parseMessageType(message.text);
         
-        if (typeVal == MessageType.ServerStop) {
+        if (msgType == GameServer::MessageType::ServerStop) {
             keepRunning = false;
         }
-        else if (typeVal == MessageType.CreateSession) {
+        else if (msgType == GameServer::MessageType::CreateSession) {
             sessionManager.createNewSession();
         }
-        else if (typeVal == MessageType.JoinSession) {
+        else if (msgType == GameServer::MessageType::JoinSession) {
             sessionManager.joinToSession();
         }
     }
     
     auto it = std::remove_if(incomingMessages.front(), incomingMessages.back(), 
-        [] (networking::Message msg) { 
-            auto typeVal = json::convertToJson(msg.text).get(MessageKey.Type);
-            return typeVal == MessageType.CreateSession || typeVal == MessageType.JoinSession;
+        [] (networking::Message msg) {
+            auto msgType = parseMessageType(msg.text);
+            return msgType != GameServer::MessageType::Other;
         }
     );
     
@@ -69,4 +72,33 @@ bool GameServer::getKeepRunning() const {
 
 std::string_view GameServer::getHtmlFile() const {
     return htmlFile;
+}
+
+// ==================================================
+
+// PRIVATE
+
+GameServer::MessageType GameServer::parseMessageType(std::string text) {
+    using json = nlohmann::json;
+    
+    json jsonObj = json::parse(text);
+    
+    // Message format is currently unknown so some placeholder strings are in place.
+    std::string msgType = jsonObj["type"];
+    
+    GameServer::MessageType ret;
+    if (msgType.compare("serverStop")) {
+        ret = GameServer::MessageType::ServerStop
+    }
+    else if (msgType.compare("create")) {
+        ret = GameServer::MessageType::CreateSession;
+    }
+    else if (msgType.compare("join")) {
+        ret = GameServer::MessageType::JoinSession;
+    }
+    else {
+        ret = GameServer::MessageType::Other;
+    }
+    
+    return ret;
 }
