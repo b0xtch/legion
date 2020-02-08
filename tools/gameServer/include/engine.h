@@ -47,67 +47,64 @@ namespace Engine {
         G value;
     };
 
+    struct configuration {
+        std::string name;
+        setup setup;
+    }
+
     // {
     //   "kind": <<data kind>>,
     //   "prompt": <<Description of what data the owner should provide>>
     // }
-    struct Setup: GenType<std::pair<std::string, std::any>> {
-        using KindPair = std::pair<std::string, std::any>;
-
-        Setup(const KindPair &param) // change the any to json
+    using KindPair = std::pair<std::string, json>;
+    struct setup: GenType<KindPair> {
+        setup(const KindPair &param)
             : GenType(param) {}; 
-        
-        // Example of how to add two numbers
-        using KindPair = std::pair<int, int>;
-        Components<KindPair> comp2;
-        KindPair b {1, 1};
-        comp2.entities.emplace_back(b);
-        comp2.visit(Interpreter<Arithmetic> {add});
-
-        std::cout << std::endl;
-
-        // overload the cout to be able to cout a custom thing like the KindPair for example
     };
 
     // mostly for arithmetic operations
-    template<typename E>
+    template<typename E, typename A>
     struct arithmetic {
-        arithmetic(const E& value): value(value) {} // change this to accept a pair for addition
-        auto operator()(Arithmetic& type){
-            switch (type){
-                // switch different arithmetic rules
+        arithmetic(const E& type): type(type) {} // change this to accept a pair for addition
+        
+        template<typename T>
+        auto& operator()(const T& value) {
+            switch (type) {
                 case upFrom:
-                    std::cout << "adding one" << std::endl;
-                    value += 1;
+                    value++;
                     break;
                 case downFrom:
-                    std::cout << "minus one" << std::endl;
-                    value -= 1;
-                    break;
-                case add:
-                    std::cout << "adding" << std::endl;
-                    value.first + value.second;
-                    break;
-                default:
+                    value--;
                     break;
             }
         }
 
-        E value;
+        auto& operator()(const A& value){
+            switch (type) {
+                case add:
+                    std::cout << value.first + value.second << std::endl;
+                    return value;
+                    break;
+            }
+        }
+
+        
+
+        E type;
     };
 
-    template<typename E>
+    template<typename E, typename A> // switch this to accept an varidic args
     struct Interpreter {
-        Interpreter(const E& value){
-            component.entities.emplace_back(value);
-        }
+        Interpreter(const E& type): type(type) {}
 
-        template <class T>
+        template <typename T>
         auto operator()(T&& value){
-            component.visit(arithmetic<T>{value});
+            component.entities.emplace_back(value);
+            component.visit(arithm<E, T>{type});
         }
 
-        Components<E> component;
+        Components<A> component;
+        E type;
     };
 
     /**
