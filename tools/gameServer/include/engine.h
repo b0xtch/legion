@@ -194,9 +194,9 @@ namespace Engine {
     template <typename T> 
     class EngineImpl{ 
         public:
-            EngineImpl (T input);
+            EngineImpl (T& input);
 
-            bool validGameConfig(T input);
+            bool validGameConfig(T& input);
             GenType<T> getGameConfig();
 
         private:
@@ -205,8 +205,8 @@ namespace Engine {
 
             void initalizeEngine();
             void buildGame();
-            void mapKeyToValue(T key, T value);
-            T mapValueToFuntion(T value);
+            void mapKeyToValue(T& key, T& value);
+            T mapValueToFuntion(T& value);
 
             // Control Structure Methods
             void findAndExecute(/* find a specific function and execute dynamically*/);
