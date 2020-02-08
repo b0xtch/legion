@@ -36,7 +36,7 @@ struct CouldNotSendMessage : public std::exception
     }
 };
 
-struct SERVERLIMITREACHED : public std::exception
+struct ServerLimitReached : public std::exception
 {
 	const char * what () const throw ()
     {

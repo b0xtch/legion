@@ -14,6 +14,8 @@ public:
 
   void createNewSession();
   
+  void addToSession(const networking::Connection& connectionToAdd, std::string sessionId);
+
   vector<networking::Message> update(const networking::Message& message);
   
   vector<networking::Message> constructMessage(const std::string& message, std::vector<networking::Connection>& connections);
