@@ -43,6 +43,13 @@ public:
         KindQuestionAnswer, KindMultipleChoice  
     };
 
+    // TODO:: get it to kevs standard
+    enum Arithmetic {
+        upFrom,
+        downFrom,
+        add
+    };
+
     typedef boost::bimap<std::string, SpecificationFields> specificationMap;
     typedef boost::bimap<std::string, ConfigFields> configMap;
     typedef boost::bimap<std::string, RuleType> ruleMap;
