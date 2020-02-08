@@ -2,13 +2,13 @@
 
 #include <algorithm>
 
-#include "json.hpp"
+#include "MessageType.h"
 
 #include <ctime>
 
 // PUBLIC
 
-GameServer::GameServer(int port, std::string htmlFile) :
+GameServer::GameServer(int port, const std::string& htmlFile) :
     keepRunning{true},
     port{port},
     htmlFile{htmlFile},
@@ -20,6 +20,14 @@ GameServer::GameServer(int port, std::string htmlFile) :
             //this->sessionManager.removeConnection(c); Currently no implementation
         }},
     sessionManager{}
+{
+    
+}
+
+GameServer::GameServer(networking::Server& server, SessionManager& sessionManager) :
+    server{std::move(server)},
+    sessionManager{sessionManager},
+    keepRunning{true}, port{-1}, htmlFile{""}
 {
     
 }
@@ -45,40 +53,34 @@ std::string GameServer::receive() {
     // for prepending each message with the time it was received
     time_t currentTime = time(0);
     tm *formatTime = localtime(&currentTime);
-    
-    // Check for messages about creating or joining a room.
-    for (auto& message : incomingMessages) {
-        auto& c = message.connection;
-        
-        auto msgType = parseMessageType(message.text);
-        
-        if (msgType == GameServer::MessageType::ServerStop) {
-            keepRunning = false;
-        }
-        else if (msgType == GameServer::MessageType::CreateSession) {
-            sessionManager.createNewSession();
-        }
-        else if (msgType == GameServer::MessageType::JoinSession) {
-            sessionManager.joinToSession();
-        }
-        else if (msgType == GameServer::MessageType::LeaveServer) {
-            server.disconnect(c);
-        }
-        else { // If message is not a command it is sent to other clients
-            outgoingText << "[" << formatTime->tm_hour << "] " << c.id << ": " << message.text << "\n";
-        }
-    }
-    
-    auto it = std::remove_if(incomingMessages.front(), incomingMessages.back(), 
-        [] (networking::Message msg) {
-            auto msgType = parseMessageType(msg.text);
-            return msgType != GameServer::MessageType::Other;
+
+    // Check and deal with messages about creating/joining rooms or server shutdowns.
+    std::vector<networking::Message> unhandledMessages;
+    std::for_each(incomingMessages.front(), incomingMessages.back(),
+        [this, &unhandledMessages] (networking::Message msg) {
+            auto msgType = MessageType::interpretType(msg.text);
+            switch (msgType) {
+                case MessageType::Type::ServerStop:
+                    this->keepRunning = false;
+                    break;
+                case MessageType::Type::CreateSession:
+                    this->sessionManager.createNewSession();
+                    break;
+                case MessageType::Type::JoinSession:
+                    //this->sessionManager.joinToSession(); Currently no implementation
+                    break;
+                case MessageType::Type::LeaveServer:
+                    server.disconnect(c);
+                default:
+                    unhandledMessages.push_back(msg);
+                    //outgoingText << "[" << formatTime->tm_hour << "] " << c.id << ": " << message.text << "\n";
+                    break;
+            }
         }
     );
     
-    // Pass these messages to SessionManager for distribution and handling?
-    sessionManager.process(incomingMessages);
-    
+    // Pass the remaining messages to SessionManager for distribution and handling
+    //sessionManager.process(unhandledMessages); Currently no implementation
     return outgoingText.str();
 
 }
@@ -97,38 +99,6 @@ bool GameServer::getKeepRunning() const {
 
 std::string_view GameServer::getHtmlFile() const {
     return htmlFile;
-}
-
-// ==================================================
-
-// PRIVATE
-
-GameServer::MessageType GameServer::parseMessageType(std::string text) {
-    using json = nlohmann::json;
-    
-    json jsonObj = json::parse(text);
-    
-    // Message format is currently unknown so some placeholder strings are in place.
-    std::string msgType = jsonObj["type"];
-    
-    GameServer::MessageType ret;
-    if (msgType.compare("serverStop")) {
-        ret = GameServer::MessageType::ServerStop
-    }
-    else if (msgType.compare("create")) {
-        ret = GameServer::MessageType::CreateSession;
-    }
-    else if (msgType.compare("join")) {
-        ret = GameServer::MessageType::JoinSession;
-    }
-    else if (msgType.compare("quit")) {
-        ret = GameServer::MessageType::LeaveServer;
-    }
-    else {
-        ret = GameServer::MessageType::Other;
-    }
-    
-    return ret;
 }
 
 int main(int argc, char* argv[]) {
