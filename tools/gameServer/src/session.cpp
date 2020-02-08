@@ -1,42 +1,62 @@
 #include "session.h"
-#include <algorithms>
+#include <algorithm>
 #include <stdexcept>
+#include "networking.h"
 
-namespace Session{
+namespace Session {
+
+    /**
+     * Construct with session id
+     * **/
+    Session(): generateSessionId{5}{}
     
+
+    /**
+     * This function returns all available connections
+     * **/
     std::vector<networking::Connection> getAllClients(){
         return clients;
     };
 
-    networking::Connection getClient(uintptr_t id){
-        auto it = find_if(
-            clients.begin(), clients.end(), [=](const networking::Connection &connection){
-                return connection.id == id;
-            }
-        );
 
-        if (it == clients.end()){
-            throw std::invalid_argument("No client exists for this id");
+    /**
+     * This function returns particular connection if exists
+     * **/
+    networking::Connection getClient(const Connection& connection){
+        auto found = clients.find(connection) != clients.end());
+        if (found == clients.end()){
+            throw ConnectionNotFound();
         };
 
-        return *it;
+        return *found;
     };
+
     
-    void addClient(networking::Connection connection){
-         if(clients.size() >= sessionClientLimit){
-            throw std::invalid_argument("Session Limit Exceeded");
+    /**
+     * This function adds new connection to session given session limit has'nt reached yet
+     * **/
+    void addClient(const networking::Connection& connection){
+         if(clients.size() >= MAX_SESSION_SIZE){
+            throw SessSessionLimitExceeded();
          };
          
-         clients.push_back(client);
+         clients.add(client);
     };
     
+
+    /**
+     * Simple getter for getting sesion id
+     * **/
     std::string getSessionId(){
         return sessionId;
     };
 
-    bool isClient(networking::Connection connection){
-        return clients.find(connection) != connection.end();
-      );
+    
+    /**
+     * Check if connection is part of this session
+     * **/
+    bool isClient(const networking::Connection& connection){
+        return clients.find(connection) != clients.end();
     }
 }
 

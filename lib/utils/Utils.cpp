@@ -1,6 +1,7 @@
 #include "Utils.h"
 
-Utils::generateSessionId(std:size_t length){
+
+std::string generateSessionId(std::size_t length){
   // Random string generator of size length
   // https://inversepalindrome.com/blog/how-to-create-a-random-string-in-cpp
   const std::string CHARACTERS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
