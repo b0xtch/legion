@@ -2,11 +2,11 @@
 
 #include <algorithm>
 
-#include "json.hpp"
+#include "MessageType.h"
 
 // PUBLIC
 
-GameServer::GameServer(int port, std::string htmlFile) :
+GameServer::GameServer(int port, const std::string& htmlFile) :
     keepRunning{true},
     port{port},
     htmlFile{htmlFile},
@@ -22,40 +22,45 @@ GameServer::GameServer(int port, std::string htmlFile) :
     
 }
 
+GameServer::GameServer(networking::Server& server, SessionManager& sessionManager) :
+    server{std::move(server)},
+    sessionManager{sessionManager},
+    keepRunning{true}, port{-1}, htmlFile{""}
+{
+    
+}
+
 void GameServer::send(const std::deque<networking::Message>& messages) {
     server.send(messages);
 }
 
-// HEAVY WIP TODO
 void GameServer::receive() {
     auto incomingMessages = server.receive();
     
-    // Check for messages about creating or joining a room.
-    for (auto& message : incomingMessages) {
-        auto& c = message.connection;
-        
-        auto msgType = parseMessageType(message.text);
-        
-        if (msgType == GameServer::MessageType::ServerStop) {
-            keepRunning = false;
-        }
-        else if (msgType == GameServer::MessageType::CreateSession) {
-            sessionManager.createNewSession();
-        }
-        else if (msgType == GameServer::MessageType::JoinSession) {
-            sessionManager.joinToSession();
-        }
-    }
-    
-    auto it = std::remove_if(incomingMessages.front(), incomingMessages.back(), 
-        [] (networking::Message msg) {
-            auto msgType = parseMessageType(msg.text);
-            return msgType != GameServer::MessageType::Other;
+    // Check and deal with messages about creating/joining rooms or server shutdowns.
+    std::vector<networking::Message> unhandledMessages;
+    std::for_each(incomingMessages.front(), incomingMessages.back(),
+        [this, &unhandledMessages] (networking::Message msg) {
+            auto msgType = MessageType::interpretType(msg.text);
+            switch (msgType) {
+                case MessageType::Type::ServerStop:
+                    this->keepRunning = false;
+                    break;
+                case MessageType::Type::CreateSession:
+                    this->sessionManager.createNewSession();
+                    break;
+                case MessageType::Type::JoinSession:
+                    //this->sessionManager.joinToSession(); Currently no implementation
+                    break;
+                default:
+                    unhandledMessages.push_back(msg);
+                    break;
+            }
         }
     );
     
-    // Pass these messages to SessionManager for distribution and handling?
-    sessionManager.process(incomingMessages);
+    // Pass the remaining messages to SessionManager for distribution and handling
+    //sessionManager.process(unhandledMessages); Currently no implementation
 }
 
 void GameServer::update() {
@@ -72,33 +77,4 @@ bool GameServer::getKeepRunning() const {
 
 std::string_view GameServer::getHtmlFile() const {
     return htmlFile;
-}
-
-// ==================================================
-
-// PRIVATE
-
-GameServer::MessageType GameServer::parseMessageType(std::string text) {
-    using json = nlohmann::json;
-    
-    json jsonObj = json::parse(text);
-    
-    // Message format is currently unknown so some placeholder strings are in place.
-    std::string msgType = jsonObj["type"];
-    
-    GameServer::MessageType ret;
-    if (msgType.compare("serverStop")) {
-        ret = GameServer::MessageType::ServerStop
-    }
-    else if (msgType.compare("create")) {
-        ret = GameServer::MessageType::CreateSession;
-    }
-    else if (msgType.compare("join")) {
-        ret = GameServer::MessageType::JoinSession;
-    }
-    else {
-        ret = GameServer::MessageType::Other;
-    }
-    
-    return ret;
 }

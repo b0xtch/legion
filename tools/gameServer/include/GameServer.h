@@ -8,7 +8,10 @@
 
 class GameServer {
 public:
-    GameServer(int port, std::string htmlFile);
+    GameServer(int port, const std::string& htmlFile);
+    
+    /** Useful for testing the GameServer. Perfroms an std::move on the server. */
+    GameServer(networking::Server& server, SessionManager& sessionManager);
     
     /** Sends out all the messages passed to the intended clients. */
     void send(const std::deque<networking::Message>& messages);
@@ -34,11 +37,6 @@ private:
     std::string_view htmlFile;
     networking::Server server;
     SessionManager sessionManager;
-    
-    enum MessageType {
-        Other, ServerStop, CreateSession, JoinSession
-    };
-    static MessageType parseMessageType(std::string text);
 };
 
 #endif
