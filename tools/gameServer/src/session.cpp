@@ -21,7 +21,7 @@ std::vector<networking::Connection> Session::getAllClients(){
  * This function returns particular connection if exists
  * **/
 networking::Connection Session::getClient(const Connection& connection){
-    auto found = clients.find(connection) != clients.end());
+    auto found = clients.find(connection) != clients.end();
     if (found == clients.end()){
         throw ConnectionNotFound();
     };
