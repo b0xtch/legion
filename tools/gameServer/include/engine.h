@@ -59,42 +59,6 @@ namespace Engine {
         // overload the cout to be able to cout a custom thing like the prompt for example
     };
 
-    /* Example for using the interpreter for arithmetic operations
-        Components<int> comp2;
-        comp2.entities.emplace_back(1);
-
-        comp2.visit(printer);
-        std::cout << std::endl;
-
-        comp2.visit(Interpreter<Arithmetic> {upFrom});
-
-        comp2.visit(printer);
-        std::cout << std::endl;
-
-        std::cout << std::endl;
-
-        Components<int> comp3;
-        comp3.entities.emplace_back(2);
-
-        comp3.visit(printer);
-        std::cout << std::endl;
-
-        comp3.visit(Interpreter<Arithmetic> {downFrom});
-
-        comp3.visit(printer);
-        std::cout << std::endl;
-
-        output: 
-        1 
-        adding one
-        2 
-
-        2 
-        minus one
-        1 
-
-    */
-
     // mostly for arithmetic operations
     template<typename E>
     struct arithmetic
