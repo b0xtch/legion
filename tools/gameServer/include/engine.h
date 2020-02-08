@@ -59,6 +59,24 @@ namespace Engine {
         // overload the cout to be able to cout a custom thing like the prompt for example
     };
 
+    // When i figure out how to switch on type, nested variant type maybe
+    template<typename T, typename V>
+    const V& addition(const T& type , const V& value){
+        switch (type){
+        case upFrom:
+            std::cout << "adding one" << std::endl;
+            return value += 1;
+            break;
+        case downFrom:
+            std::cout << "minus one" << std::endl;
+            return value -= 1;
+            break;
+            
+        default:
+            break;
+        }
+    };
+
     /* Example for using the interpreter for arithmetic operations
         Components<int> comp2;
         comp2.entities.emplace_back(1);
@@ -97,30 +115,43 @@ namespace Engine {
 
     // mostly for arithmetic operations
     template<typename E>
-    struct Interpreter
+    struct arithmetic
     {
-        Interpreter(const E& value)
-            : type(value) {}
-
-        template <class T>
-        auto operator()(T&& value){
-
+        arithmetic(const E& value): value(value) {}
+        auto operator()(Arithmetic& type){
             switch (type){
-            case 0:
-                std::cout << "adding one" << std::endl;
-                value += 1;
-                break;
-            case 1:
-                std::cout << "minus one" << std::endl;
-                value -= 1;
-                break;
-            
-            default:
-                break;
+                case upFrom:
+                    std::cout << "adding one" << std::endl;
+                    value += 1;
+                    break;
+                case downFrom:
+                    std::cout << "minus one" << std::endl;
+                    value -= 1;
+                    break;
+                    
+                default:
+                    break;
             }
         }
 
-        E type;
+        E value;
+    };
+
+    template<typename E>
+    struct Interpreter
+    {
+        Interpreter(const E& value){
+            component.entities.emplace_back(value);
+            std::cout << value << std::endl;
+        }
+
+        template <class T>
+        auto operator()(T&& value){
+            std::cout << typeid(value).name() << std::endl;
+            component.visit(arithmetic<T>{value});
+        }
+
+        Components<E> component;
     };
 
     /**
