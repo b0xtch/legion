@@ -59,24 +59,6 @@ namespace Engine {
         // overload the cout to be able to cout a custom thing like the prompt for example
     };
 
-    // When i figure out how to switch on type, nested variant type maybe
-    template<typename T, typename V>
-    const V& addition(const T& type , const V& value){
-        switch (type){
-        case upFrom:
-            std::cout << "adding one" << std::endl;
-            return value += 1;
-            break;
-        case downFrom:
-            std::cout << "minus one" << std::endl;
-            return value -= 1;
-            break;
-            
-        default:
-            break;
-        }
-    };
-
     /* Example for using the interpreter for arithmetic operations
         Components<int> comp2;
         comp2.entities.emplace_back(1);
