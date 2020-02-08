@@ -56,6 +56,15 @@ namespace Engine {
 
         Setup(const KindPair &param) // change the any to json
             : GenType(param) {}; 
+        
+        // Example of how to add two numbers
+        using KindPair = std::pair<int, int>;
+        Components<KindPair> comp2;
+        KindPair b {1, 1};
+        comp2.entities.emplace_back(b);
+        comp2.visit(Interpreter<Arithmetic> {add});
+
+        std::cout << std::endl;
 
         // overload the cout to be able to cout a custom thing like the KindPair for example
     };
@@ -63,9 +72,10 @@ namespace Engine {
     // mostly for arithmetic operations
     template<typename E>
     struct arithmetic {
-        arithmetic(const E& value): value(value) {}
+        arithmetic(const E& value): value(value) {} // change this to accept a pair for addition
         auto operator()(Arithmetic& type){
             switch (type){
+                // switch different arithmetic rules
                 case upFrom:
                     std::cout << "adding one" << std::endl;
                     value += 1;
@@ -73,6 +83,10 @@ namespace Engine {
                 case downFrom:
                     std::cout << "minus one" << std::endl;
                     value -= 1;
+                    break;
+                case add:
+                    std::cout << "adding" << std::endl;
+                    value.first + value.second;
                     break;
                 default:
                     break;
