@@ -142,12 +142,10 @@ namespace Engine {
     {
         Interpreter(const E& value){
             component.entities.emplace_back(value);
-            std::cout << value << std::endl;
         }
 
         template <class T>
         auto operator()(T&& value){
-            std::cout << typeid(value).name() << std::endl;
             component.visit(arithmetic<T>{value});
         }
 
