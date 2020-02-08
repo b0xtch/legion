@@ -24,7 +24,7 @@ private:
   std::vector<stringVar> allPlayersInputs; //store all the answer inputs from allPlayers
   stringVar gameName; //interpreted from json config
   stringVar rulesOfTheGame; //interpreted from json config, might be made into an object???
-  boolean audience; //interpreted from json config
+  bool audience; //interpreted from json config
 };
 
 

@@ -4,19 +4,33 @@
 #include <vector>
 #include <unordered_set>
 
+
+/**
+ * This class is responsible for handle communication between single game/session
+ **/
 class Session {
+
 public:
+    
     Session();
+    
     std::vector<networking::Connection> getAllClients();
-    networking::Connection getClient(uintptr_t id);
-    void addClient(networking::Connection connection);
-    bool isClient(networking::Connection connection);
-    void broadCastMessage(std::string message);
+    
+    networking::Connection getClient(const networking::Connection &connection);
+    
+    void addClient(const networking::Connection &connection);
+    
+    bool isClient(const networking::Connection &connection);
+    
     std::string getSessionId();
+
 private:
+    
     std::unordered_set<networking::Connection> clients;
+    
     std::string sessionId;
-    int sessionClientLimit;
+    
+    int MAX_SESSION_SIZE;
 }
 
 #endif

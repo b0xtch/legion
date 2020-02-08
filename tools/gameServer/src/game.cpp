@@ -43,9 +43,7 @@ std::vector<stringVar> getAllPlayersInputs(){ return allPlayersInputs; }
 //setAllPlayersInputs function will act as an alternative to game turns
 //since some games won't require turns, like rock, paper, scissors
 void Game::setAllPlayersInputs(){
-  stringVar input;
-  std::cin>>input;
-  allPlayersInputs.push_back(input);
+  //Unfinished
 }
 
 bool operator==(const Game& game1, const Game& game2){ return game1->gameName == game2->gameName; }

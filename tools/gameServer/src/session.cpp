@@ -41,6 +41,9 @@ void Session::addClient(const networking::Connection& connection){
         clients.add(client);
 };
 
+        clients.add(client);
+};
+
 
 /**
  * Simple getter for getting sesion id
