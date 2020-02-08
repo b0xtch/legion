@@ -51,25 +51,76 @@ namespace Engine {
     //   "prompt": <<Description of what data the owner should provide>>
     // }
     struct Setup: GenType<std::pair<std::string, std::any>> {
-        Setup(const std::pair<std::string, std::any> &param) // change the any to json
+        using KindPair = std::pair<std::string, std::any>;
+
+        Setup(const KindPair &param) // change the any to json
             : GenType(param) {}; 
 
         // overload the cout to be able to cout a custom thing like the prompt for example
     };
 
-    // mostly for arithmetic operations
-    struct Interpreter {
-        auto operator()(int& value){value += value;}
-        auto operator()(double& value){value += value;}
-        auto operator()(std::string& value){value += value;}
-        auto operator()(bool& ){std::cout << "bool item" << std::endl;}
-        auto operator()(RuleTypes value){std::cout << "rules item" << " " << RuleTypes(value) << std::endl;}
-        auto operator()(SetupTypes value){
-            std::cout << "setup item:" << " " << SetupTypes(value) << std::endl;
-            std::cout << "Upload your json!" << std::endl;
+    /* Example for using the interpreter for arithmetic operations
+        Components<int> comp2;
+        comp2.entities.emplace_back(1);
 
-            //Setup( /* map[ make_pair("kind", json ] = “the prompt”; */ );
+        comp2.visit(printer);
+        std::cout << std::endl;
+
+        comp2.visit(Interpreter<Arithmetic> {upFrom});
+
+        comp2.visit(printer);
+        std::cout << std::endl;
+
+        std::cout << std::endl;
+
+        Components<int> comp3;
+        comp3.entities.emplace_back(2);
+
+        comp3.visit(printer);
+        std::cout << std::endl;
+
+        comp3.visit(Interpreter<Arithmetic> {downFrom});
+
+        comp3.visit(printer);
+        std::cout << std::endl;
+
+        output: 
+        1 
+        adding one
+        2 
+
+        2 
+        minus one
+        1 
+
+    */
+
+    // mostly for arithmetic operations
+    template<typename E>
+    struct Interpreter
+    {
+        Interpreter(const E& value)
+            : type(value) {}
+
+        template <class T>
+        auto operator()(T&& value){
+
+            switch (type){
+            case 0:
+                std::cout << "adding one" << std::endl;
+                value += 1;
+                break;
+            case 1:
+                std::cout << "minus one" << std::endl;
+                value -= 1;
+                break;
+            
+            default:
+                break;
+            }
         }
+
+        E type;
     };
 
     /**
