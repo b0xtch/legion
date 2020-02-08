@@ -4,7 +4,11 @@
 
 #include "MessageType.h"
 
-// PUBLIC
+GameServerConfig::GameServerConfig(const std::string& configLocation) :
+    configLocation{configLocation}
+{
+    
+}
 
 GameServer::GameServer(int port, const std::string& htmlFile) :
     keepRunning{true},

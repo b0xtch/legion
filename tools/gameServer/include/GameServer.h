@@ -6,6 +6,19 @@
 #include "Server.h"
 #include "SessionManager.h"
 
+/** Handles the loading and parsing of the server configuation file only. */
+class GameServerConfig {
+public:
+    GameServerConfig(const std::string& configLocation);
+    
+    std::string_view getGameConfigDir() const;
+    
+private:
+    std::string_view configLocation;
+    
+    std::string_view gameConfigDir;
+}
+
 class GameServer {
 public:
     GameServer(int port, const std::string& htmlFile);
