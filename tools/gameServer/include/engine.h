@@ -119,23 +119,28 @@ namespace Engine {
         // JsonDSL::RuleParameters;
         // JsonDSL::TimerModes;
         // JsonDSL::SetupFields;
-
         void visit(){
             for (auto& entity : entities){
                 std::visit(overloaded {
-                    [](int& value){value += value;},
-                    [](double& value){value += value;},
-                    [](std::string& value){std::cout << "bool item" << std::endl;},
-                    [](bool& ){std::cout << "bool item" << std::endl;},
+                    [](JsonDSL::SpecificationFields value){
+                        std::cout << "SpecificationFields" << std::endl;
+                    },
+                    [](JsonDSL::ConfigFields value){
+                        std::cout << "ConfigFields" << std::endl;
+                    },
                     [](JsonDSL::RuleType value){
-                        std::cout << "rules item" << " " << RuleTypes(value) << std::endl;
+                        std::cout << "RuleType" << std::endl;
+                    },
+                    [](JsonDSL::RuleParameters value){
+                        std::cout << "RuleParameters" << std::endl;
+                    },
+                    [](JsonDSL::TimerModes value){
+                        std::cout << "TimerModes" << std::endl;
                     },
                     [](JsonDSL::SetupFields value){
                         std::cout << "Upload your json!" << std::endl;
-
                         //Setup( /* map[ make_pair("kind", json ] = "the prompt"; */ );
                     }
-                    // .. add th rest once I have clear understanding of whats happening
                 }, entity);
             }
         }
