@@ -23,21 +23,6 @@ using namespace std;
 
 namespace Engine {
 
-    // these enums are here for testing ill move them out once I am done
-    enum SetupTypes{
-        Kind, SetupPrompt,
-        KindInteger, KindString, KindBoolean,
-        KindQuestionAnswer, KindMultipleChoice  
-    };
-
-    enum RuleTypes{
-        Foreach, Loop, InParallel, Parallelfor,
-        Switch, When, Extend, Reverse, Shuffle, 
-        Sort, Deal, Discard, Add, Timer, 
-        InputChoice, InputText, InputVote, 
-        Message, GlobalMessage, Scores
-    };
-
     template <typename G> 
     struct GenType {
         GenType() : map() {};
@@ -63,7 +48,7 @@ namespace Engine {
         using KindPair = std::pair<std::string, std::string>;
         struct setup: GenType<KindPair> {
             setup(const KindPair &param)
-                : GenType(param) {}; 
+                : GenType(param) {}; p
         };
     } configuration;
 
@@ -88,7 +73,7 @@ namespace Engine {
             GenType map;
         } per_audience;
     };
-    
+
     /**
      * Each individual rule is a map of attributes describing the rule. 
      * Lists of rules define a sequence of operations in which each rule 
@@ -102,7 +87,7 @@ namespace Engine {
     // mostly for arithmetic operations
     template<typename E, typename A>
     struct arithmetic {
-        arithmetic(const E& type): type(type) {} // change this to accept a pair for addition
+        arithmetic(const E& type): type(type) {}
         
         template<typename T>
         auto& operator()(const T& value) {
@@ -135,7 +120,7 @@ namespace Engine {
         template <typename T>
         auto operator()(T&& value){
             component.entities.emplace_back(value);
-            component.visit(arithm<E, T>{type});
+            component.visit(arithmetic<E, T>{type});
         }
 
         Components<A> component;
