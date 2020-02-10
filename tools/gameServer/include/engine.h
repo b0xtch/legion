@@ -16,7 +16,8 @@ using namespace std;
  * 
  * Create a way to output from each struct type
  * Implement the rest of the JsonDsl types just put them into lambda functions with (ENUM& )
- * 
+ * change any type in setup and GenType struct
+ * define a desgin of hiercarhy
 */
 
 namespace Engine {
@@ -51,17 +52,63 @@ namespace Engine {
     //   "prompt": <<Description of what data the owner should provide>>
     // }
     struct Setup: GenType<std::pair<std::string, std::any>> {
-        Setup(const std::pair<std::string, std::any> &param) // change the any to json
-            : GenType(param) {}; 
+        using KindPair = std::pair<std::string, std::any>;
 
-        // overload the cout to be able to cout a custom thing like the prompt for example
+        Setup(const KindPair &param) // change the any to json
+            : GenType(param) {}; 
+        
+        // Example of how to add two numbers
+        using KindPair = std::pair<int, int>;
+        Components<KindPair> comp2;
+        KindPair b {1, 1};
+        comp2.entities.emplace_back(b);
+        comp2.visit(Interpreter<Arithmetic> {add});
+
+        std::cout << std::endl;
+
+        // overload the cout to be able to cout a custom thing like the KindPair for example
     };
 
 
     // mostly for arithmetic operations
+    template<typename E>
+    struct arithmetic {
+        arithmetic(const E& value): value(value) {} // change this to accept a pair for addition
+        auto operator()(Arithmetic& type){
+            switch (type){
+                // switch different arithmetic rules
+                case upFrom:
+                    std::cout << "adding one" << std::endl;
+                    value += 1;
+                    break;
+                case downFrom:
+                    std::cout << "minus one" << std::endl;
+                    value -= 1;
+                    break;
+                case add:
+                    std::cout << "adding" << std::endl;
+                    value.first + value.second;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        E value;
+    };
+
+    template<typename E>
     struct Interpreter {
-        auto operator()(int& _in){_in += _in;}
-        auto operator()(double& _in){_in += _in;}
+        Interpreter(const E& value){
+            component.entities.emplace_back(value);
+        }
+
+        template <class T>
+        auto operator()(T&& value){
+            component.visit(arithmetic<T>{value});
+        }
+
+        Components<E> component;
     };
 
     /**
@@ -76,7 +123,7 @@ namespace Engine {
     template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>; 
 
     template<typename... T>
-    struct Components{
+    struct Components {
         using component = std::variant<T...>;
 
         // These are the main types that we are going to 
@@ -87,23 +134,28 @@ namespace Engine {
         // JsonDSL::RuleParameters;
         // JsonDSL::TimerModes;
         // JsonDSL::SetupFields;
-
         void visit(){
             for (auto& entity : entities){
                 std::visit(overloaded {
-                    [](int& _in){_in += _in;},
-                    [](double& _in){_in += _in;},
-                    [](std::string& _in){_in += _in;},
-                    [](bool& ){std::cout << "bool item" << std::endl;},
+                    [](JsonDSL::SpecificationFields value){
+                        std::cout << "SpecificationFields" << std::endl;
+                    },
+                    [](JsonDSL::ConfigFields value){
+                        std::cout << "ConfigFields" << std::endl;
+                    },
                     [](JsonDSL::RuleType value){
-                        std::cout << "rules item" << " " << RuleTypes(value) << std::endl;
+                        std::cout << "RuleType" << std::endl;
+                    },
+                    [](JsonDSL::RuleParameters value){
+                        std::cout << "RuleParameters" << std::endl;
+                    },
+                    [](JsonDSL::TimerModes value){
+                        std::cout << "TimerModes" << std::endl;
                     },
                     [](JsonDSL::SetupFields value){
                         std::cout << "Upload your json!" << std::endl;
-
                         //Setup( /* map[ make_pair("kind", json ] = "the prompt"; */ );
                     }
-                    // .. add th rest once I have clear understanding of whats happening
                 }, entity);
             }
         }
@@ -122,11 +174,11 @@ namespace Engine {
 
 
     template <typename T> 
-    class EngineImpl{ 
+    class EngineImpl { 
         public:
-            EngineImpl (T input);
+            EngineImpl (T& input);
 
-            bool validGameConfig(T input);
+            bool validGameConfig(T& input);
             GenType<T> getGameConfig();
 
         private:
@@ -135,8 +187,8 @@ namespace Engine {
 
             void initalizeEngine();
             void buildGame();
-            void mapKeyToValue(T key, T value);
-            T mapValueToFuntion(T value);
+            void mapKeyToValue(T& key, T& value);
+            T mapValueToFuntion(T& value);
 
             // Control Structure Methods
             void findAndExecute(/* find a specific function and execute dynamically*/);

@@ -4,7 +4,7 @@
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
-#include "Engine.h"
+#include "engine.h"
 #include <json.hpp>
 #include <any>
 #include "jsonvalidator.h"
@@ -16,14 +16,14 @@ using Engine::GenType;
 namespace Engine {
     
     template <typename T>
-    EngineImpl<T>::EngineImpl (T input) {
+    EngineImpl<T>::EngineImpl (T& input) {
         if(this->validGameConfig(input)) this->initalizeEngineImpl(); 
 
         std::cout << "EngineImpl could not read game specification" << endl;
     }
 
     template <typename T> 
-    bool EngineImpl<T>::validGameConfig(T input) { 
+    bool EngineImpl<T>::validGameConfig(T& input) { 
         // if(JsonValidator.validJson(input)) {
         //     this->input = input; 
         //     return true;
@@ -54,12 +54,12 @@ namespace Engine {
     }
 
     template <typename T> 
-    void EngineImpl<T>::mapKeyToValue(T key, T value){
+    void EngineImpl<T>::mapKeyToValue(T& key, T& value){
         this->gameConfig.map[key] = this->mapValueToFuntion(value);
     }
 
     template <typename T> 
-    T EngineImpl<T>::mapValueToFuntion(T value){
+    T EngineImpl<T>::mapValueToFuntion(T& value){
         return value.flatten();
     }
 
