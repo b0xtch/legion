@@ -73,6 +73,51 @@ namespace Engine {
     }
 
     /////////////////////////////////////////////////////////////////////////////
+    // Main Parser from Type T to DSL
+    /////////////////////////////////////////////////////////////////////////////
+    Configuration& EngineImpl<T>::setConfiguration(const nlohmann::json& configuration) {
+        Configuration configuration = Configuration();
+
+        this->gameConfig["configuration"] = configuration;
+        return configuration;
+    }
+
+    cvpa& EngineImpl<T>::setConstants(const nlohmann::json& constants){
+        cvpa constants;
+
+        this->gameConfig["constants"] = constants;
+        return constants;
+    }
+
+    CVPA& EngineImpl<T>::setVariables(const nlohmann::json& variables){
+        CVPA variables;
+
+        this->gameConfig["variables"] = variables;
+        return variables;
+    }
+
+    CVPA& EngineImpl<T>::setPerPlayer(const nlohmann::json& perPlayer){
+        CVPA perPlayer;
+
+        this->gameConfig["perPlayer"] = perPlayer;
+        return perPlayer;
+    }
+
+    CVPA& EngineImpl<T>::setPerAudience(const nlohmann::json& perAudience){
+        CVPA perAudience;
+
+        this->gameConfig["perAudience"] = perAudience;
+        return perAudience;
+    }
+
+    Rules& EngineImpl<T>::setRules(const nlohmann::json& rules){
+        Rules rules;
+
+        this->gameConfig["rules"] = rules;
+        return rules;
+    }
+
+    /////////////////////////////////////////////////////////////////////////////
     // Control Structures
     /////////////////////////////////////////////////////////////////////////////
 

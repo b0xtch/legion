@@ -23,6 +23,10 @@ using namespace std;
 
 namespace Engine {
 
+
+    // logic
+    // ===============================================================
+
     template <typename G> 
     struct GenType {
         GenType() : map() {};
@@ -48,12 +52,12 @@ namespace Engine {
         using KindPair = std::pair<std::string, std::string>;
         struct setup: GenType<KindPair> {
             setup(const KindPair &param)
-                : GenType(param) {}; p
+                : GenType(param) {};
         };
     } configuration;
 
     template<typename T>
-    struct cvpa: GenType<std::string, T> {
+    struct CVPA: GenType<std::string, T> {
 
         struct Constants {
             GenType map;
@@ -82,6 +86,25 @@ namespace Engine {
     template<typename T, typename... Args>
     struct Rules: GenType<T, Args> {
         std::string add {"rules"};
+
+        // List of all the rules under Rules struct\
+        // Control Structures
+        struct ControlStructures {}
+
+        // List Operations
+        struct ListOperations {}
+
+        // Arithmetic Operations -> example provided using the arithmetic struct provided above
+        struct Arithmetic {} // basically the one below this main struct
+
+        // Timing
+        struct Timing {} 
+
+        // Human Input
+        struct HumanInput {} 
+
+        // Output
+        struct Output {} 
     };
 
     // mostly for arithmetic operations
@@ -188,7 +211,6 @@ namespace Engine {
         std::vector<component> entities;
     };
 
-
     template <typename T> 
     class EngineImpl { 
         public:
@@ -201,10 +223,21 @@ namespace Engine {
             T input;
             GenType<T> gameConfig;
 
+            // 
             void initalizeEngine();
             void buildGame();
             void mapKeyToValue(T& key, T& value);
             T mapValueToFuntion(T& value);
+
+            // prase methods
+            // only set methods, the build game method has access to private variables
+            Configuration setConfiguration(const nlohmann::json& configuration);
+            CVPA setConstants(const nlohmann::json& constants);
+            CVPA setVariables(const nlohmann::json& variables);
+            CVPA setPerPlayer(const nlohmann::json& perPlayer);
+            CVPA setPerAudience(const nlohmann::json& perAudience);
+            Rules setRules(const nlohmann::json& rules);
+
 
             // Control Structure Methods
             void findAndExecute(/* find a specific function and execute dynamically*/);
