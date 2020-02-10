@@ -2,32 +2,29 @@
 #define GAME_H_
 #include <string>
 #include <vector>
-#include "players.h"
+// #include "session.h"
+#include "player.h"
 
 class Game{
 public:
-  Game(); //defauult for Jackbox no TV
-  Game(std::string name, int maxPlayers, std::string rules); // general constructor to support additional games, will add more parameters
-  ~Game();
-  void addPlayer(Players p);
-  void removePlayer(int pid); //remove using playerID
-  std::string rightAnswerForQuestion(const std::vector<std::string*>& questions);
-  void addQuestions(std::string question, std::string answer);
-
-  int getNumPlayers();
-  int getNumPlayersMax();
-
+  Game(const stringVar&, const int& , const stringVar&); // general constructor to support additional games, will add more parameterss
+  Game(const stringVar&);
+  void addPlayer(const Player&);
+  void removePlayer(const variable&);
+  int getNumPlayers(); //interpreted from json config
+  int getNumPlayersMax(); //interpreted from json config
+  void playersInputs(); //playersInputs is the alternative to advanceGame since allPlayers inputs can be obtained all in one phase of the game
+  std::vector<stringVar> getAllPlayersInputs();
+  std::vector<Player> getAllPlayers();
+  friend bool operator== (const Game&, const Game&);
 private:
-  int numPlayers;
-  int numPlayersMax;
-  int numQuestions;
-  //int playerPoints;
-  std::string gameName;
-  // std::string rightAnswer; //is this still needed?
-  std::string rulesOfTheGame;
-  //std::string* listOfAnswers;
-  std::vector<std::string*> questions;
-  std::vector<Players> allPlayers;
+  int numPlayers; //interpreted from json config
+  int numPlayersMax; //interpreted from json config
+  std::vector<Player> allPlayers;
+  std::vector<stringVar> allPlayersInputs; //store all the answer inputs from allPlayers
+  stringVar gameName; //interpreted from json config
+  stringVar rulesOfTheGame; //interpreted from json config, might be made into an object???
+  bool audience; //interpreted from json config
 };
 
 
