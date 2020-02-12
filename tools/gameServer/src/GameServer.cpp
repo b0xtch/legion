@@ -4,10 +4,8 @@
 
 #include "MessageType.h"
 
-#include <ctime>
-
 GameServerConfig::GameServerConfig() :
-    this{"./games/"}
+    GameServerConfig{"./configuration.txt"}
 {
     
 }
@@ -22,7 +20,6 @@ GameServerConfig::GameServerConfig(const std::string& configLocation) :
 std::string_view GameServerConfig::getGameConfigDir() const {
     return gameConfigDir;
 }
-
 
 // PUBLIC
 
@@ -54,53 +51,41 @@ void GameServer::send(const std::deque<networking::Message>& messages) {
     server.send(messages);
 }
 
-void GameServer::sendTextTo(const std::vector<Connection>& connections, std::string text) {
-    server.queueMessage(connections, text);
-    server.sendQueuedMessages();
-}
-
 void GameServer::update() {
     server.update();
 }
 
-// HEAVY WIP TODO
-std::string GameServer::receive() {
+void GameServer::receive() {
     auto incomingMessages = server.receive();
-    std::ostringstream outgoingText;
-
-    // for prepending each message with the time it was received
-    time_t currentTime = time(0);
-    tm *formatTime = localtime(&currentTime);
-
+    
     // Check and deal with messages about creating/joining rooms or server shutdowns.
     std::vector<networking::Message> unhandledMessages;
-    std::for_each(incomingMessages.front(), incomingMessages.back(),
-        [this, &unhandledMessages] (networking::Message msg) {
-            auto msgType = MessageType::interpretType(msg.text);
-            switch (msgType) {
-                case MessageType::Type::ServerStop:
-                    this->keepRunning = false;
-                    break;
-                case MessageType::Type::CreateSession:
-                    this->sessionManager.createNewSession();
-                    break;
-                case MessageType::Type::JoinSession:
-                    //this->sessionManager.joinToSession(); Currently no implementation
-                    break;
-                case MessageType::Type::LeaveServer:
-                    server.disconnect(c);
-                default:
-                    unhandledMessages.push_back(msg);
-                    //outgoingText << "[" << formatTime->tm_hour << "] " << c.id << ": " << message.text << "\n";
-                    break;
-            }
+    for (auto& msg : incomingMessages) {
+        auto& conn = msg.connection;
+        auto msgType = MessageType::interpretType(msg.text);
+        switch (msgType) {
+            case MessageType::Type::ServerStop:
+                this->keepRunning = false;
+                break;
+            case MessageType::Type::CreateSession:
+                this->sessionManager.createNewSession();
+                break;
+            case MessageType::Type::JoinSession:
+                this->sessionManager.addToSession(conn, ""); Currently no implementation
+                break;
+            case MessageType::Type::LeaveServer:
+                server.disconnect(c);
+                break;
+            default:
+                unhandledMessages.push_back(msg);
+                break;
         }
-    );
+    }
     
     // Pass the remaining messages to SessionManager for distribution and handling
-    //sessionManager.process(unhandledMessages); Currently no implementation
-    return outgoingText.str();
-
+    //auto toSendOut = sessionManager.process(unhandledMessages); Currently no implementation
+    
+    //send(toSendOut);
 }
 
 void GameServer::update() {
@@ -117,22 +102,4 @@ bool GameServer::getKeepRunning() const {
 
 std::string_view GameServer::getHtmlFile() const {
     return htmlFile;
-}
-
-int main(int argc, char* argv[]) {
-
-    while (keepRunning) {
-        try {
-            server.update();
-        } catch (std::exception& e) {
-            keepRunning = false;
-        }
-
-        auto outgoing = receive();
-        sendTextTo(clients, outgoing);
-        sleep(1);
-    }
-
-    return 0;
-
 }
