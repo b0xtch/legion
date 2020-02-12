@@ -91,7 +91,19 @@ struct Parallelfor : GenRule{
 	vector<GenRule> rules_to_run;
 };
 
-// TO DO: add rest of rules
+template <typename T> 
+struct Switch : GenRule {
+	Switch() {};
+	Switch(T &value, const vector<T> v, RulesList &cases) :
+		GenRule{"Switch"},
+		value{value},
+		list{v},
+		cases{cases}
+		{};
 
+	T value;
+	vector<T> list;
+	vector<GenRule> cases;
+};
 
 #endif
