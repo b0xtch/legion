@@ -27,19 +27,23 @@ namespace Engine {
     // logic
     // ===============================================================
 
-    template <typename G> 
+    template <typename G, typename V> 
     struct GenType {
         GenType() : map() {};
-        GenType(std::map<G, std::any> &param) : map(param) {};
+        GenType(std::unordered_map<G, V> &param) : map(param) {};
         GenType(const G &param) : value(param) {};
 
-        std::map<G, std::any> map;
+        // V get(const G& key) const {
+        //     return;
+        // }
+
+        std::unordered_map<G, V> map;
         G value;
     };
 
     struct Configuration {
         GenType<std::string> name {"config"};
-        struct PlayerCount: GenType<int> {
+        struct PlayerCount: GenType<int> { // move all the nested structs outside
             GenType min;
             GenType max;
         };
