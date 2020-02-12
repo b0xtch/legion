@@ -215,35 +215,38 @@ namespace Engine {
         std::vector<component> entities;
     };
 
+    Struct Game {
+        Components comps;
+    }
+
     template <typename T> 
     class EngineImpl { 
         public:
             EngineImpl (T& input);
 
             bool validGameConfig(T& input);
-            GenType<T> getGameConfig();
+            Game getGameConfig() const;
 
         private:
             T input;
-            GenType<T> gameConfig;
+            Game gameConfig;
 
-            // 
+            // Domain level set functions
+            Configuration setConfiguration(const T& configuration);
+            CVPA setConstants(const T& constants);
+            CVPA setVariables(const T& variables);
+            CVPA setPerPlayer(const T& perPlayer);
+            CVPA setPerAudience(const T& perAudience);
+            Rules setRules(const T& rules);
+
+            // Parser Related methods
             void initalizeEngine();
             void buildGame();
             void mapKeyToValue(T& key, T& value);
             T mapValueToFuntion(T& value);
 
-            // prase methods
-            // only set methods, the build game method has access to private variables
-            Configuration setConfiguration(const nlohmann::json& configuration);
-            CVPA setConstants(const nlohmann::json& constants);
-            CVPA setVariables(const nlohmann::json& variables);
-            CVPA setPerPlayer(const nlohmann::json& perPlayer);
-            CVPA setPerAudience(const nlohmann::json& perAudience);
-            Rules setRules(const nlohmann::json& rules);
 
-
-            // Control Structure Methods
+            // Game related methods
             void findAndExecute(/* find a specific function and execute dynamically*/);
     };
 
