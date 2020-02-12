@@ -28,6 +28,9 @@ void exit_program();
 // Make json message for server
 string makeServerMessage(string input);
 
+// global vars
+bool done;
+
 int main(int argc, char* argv[]) {
 
     MenuManager::initialize_menu_manager();
@@ -123,7 +126,7 @@ int main(int argc, char* argv[]) {
 
     networking::Client client{argv[1], argv[2]};
 
-    bool done = false;
+    done = false;
 
     string userInput;
     // Menu gets user input and sets the above variable
@@ -196,12 +199,17 @@ string makeServerMessage(string input) {
     vector<string> possibleCommands;
     possibleCommands.push_back("!createsession");
     possibleCommands.push_back("!joinsession");
+    possibleCommands.push_back("!leavesession");
+    possibleCommands.push_back("!gameinput");
+    possibleCommands.push_back("!whisper");
 
     string command = "{ \"command\": \"";
     
     size_t endOfCommand = input.find(" ");
     string firstWord = input.substr(0,endOfCommand);
-    if (firstWord == "!example") {
+    if (firstWord == "!quit") {
+        done = true;
+    } else if ( std::find(possibleCommands.begin(), possibleCommands.end(), firstWord) != possibleCommands.end() ) {
         command += firstWord;
     } else {
         command += "!chat";
