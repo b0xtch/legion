@@ -25,6 +25,7 @@ target_include_directories(session
 add_executable(server src/main.cpp)
 target_link_libraries(server GameServer)
 
+# https://stackoverflow.com/a/29871891
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(server Threads::Threads)
