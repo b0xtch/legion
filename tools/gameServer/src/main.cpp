@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
 #include <unistd.h>
+#include <chrono>
+#include <thread>
 
 #include "GameServer.h"
 
@@ -31,7 +33,8 @@ int main(int argc, char** argv) {
         return 1;
     }
     
-    GameServer gameServer{port, ""};
+    GameServerConfig gsConfig{};
+    GameServer gameServer{gsConfig, port, ""};
     
     bool keepRunning = true;
     while (keepRunning) {
@@ -45,6 +48,9 @@ int main(int argc, char** argv) {
         
         gameServer.receive();
         keepRunning = gameServer.getKeepRunning();
+        
+        // https://stackoverflow.com/a/10613664
+        std::this_thread::sleep_for(std::chrono::milliseconds(100))
     }
     
     return 0;

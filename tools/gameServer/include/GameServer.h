@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include "Server.h"
 #include "SessionManager.h"
+#include "Server.h"
 
 /** Handles the loading and parsing of the server configuation file only. */
 class GameServerConfig {
@@ -16,12 +16,14 @@ public:
     
 private:
     std::string_view configLocation;
-    std::string_view gameConfigDir;
+    std::string_view gameDir;
+    
+    const std::string_view CFGKEY_GAME_DIR = "games";
 }
 
 class GameServer {
 public:
-    GameServer(int port, const std::string& htmlFile);
+    GameServer(GameServerConfig gameServerConfig, int port, const std::string& htmlFile);
     
     /** Useful for testing the GameServer. Perfroms an std::move on the server. */
     GameServer(networking::Server& server, SessionManager& sessionManager);

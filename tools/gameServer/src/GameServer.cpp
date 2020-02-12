@@ -2,7 +2,10 @@
 
 #include <algorithm>
 
+#include <iostream>
+
 #include "MessageType.h"
+#include "json.hpp"
 
 GameServerConfig::GameServerConfig() :
     GameServerConfig{"./configuration.txt"}
@@ -13,8 +16,22 @@ GameServerConfig::GameServerConfig() :
 GameServerConfig::GameServerConfig(const std::string& configLocation) :
     configLocation{configLocation}
 {
-    // TODO, load the file, parse it, and save it into some class variables
-    // TODO, add error handling to this part
+    using json = nlohmann::json;
+    
+    json j;
+    try {
+        j = json::parse(Utils::loadFile(configLocation));
+        gameDir{j.get<std::string>(CFGKEY_GAME_DIR)};
+    }
+    catch (const json::parse_error& e) {
+        std::cerr << "There was a problem reading the configuration file." << std::endl;
+    }
+    catch (const json::type_error& e) {
+        std::cerr << "There are missing configurations in the file." << std::endl;
+    }
+    catch (const std::runtime_error& e) {
+        std::cerr << "There was an error opening the configuration file." << std::endl;
+    }
 }
 
 std::string_view GameServerConfig::getGameConfigDir() const {
@@ -23,7 +40,8 @@ std::string_view GameServerConfig::getGameConfigDir() const {
 
 // PUBLIC
 
-GameServer::GameServer(int port, const std::string& htmlFile) :
+GameServer::GameServer(GameServerConfig gameServerConfig, int port, const std::string& htmlFile) :
+    gameServerConfig{gameServerConfig},
     keepRunning{true},
     port{port},
     htmlFile{htmlFile},
