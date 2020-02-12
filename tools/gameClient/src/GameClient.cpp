@@ -2,11 +2,14 @@
 #include <ncurses.h>
 #include <menu.h>
 #include <form.h>
+#include "json.hpp"
 
-#include "../include/MenuPage.h"
-#include "../../../lib/networking/include/Client.h"
+#include "MenuPage.h"
+#include "ChatWindow.h"
+#include "Client.h"
 
 using namespace std;
+using json = nlohmann::json;
 
 // Basic menu structure referenced from: 
 //    http://tldp.org/HOWTO/NCURSES-Programming-HOWTO/menus.html
@@ -18,42 +21,23 @@ using namespace std;
 //    https://alan-mushi.github.io/2015/05/26/simple-ncurses-popup-in-C.html
 
 
-// Menu item results functions
-void connect_to_server();
-void switch_to_main_menu_page();
-void switch_to_join_lobby_page();
-void switch_to_create_lobby_page();
-void exit_program();
-
 // Make json message for server
 string makeServerMessage(string input);
 
-// global vars
-bool done;
-
 int main(int argc, char* argv[]) {
+
+    if (argc < 3) {
+        // Give user message about incorrect arguments
+        return 1;
+    }
+
+    networking::Client client{argv[1], argv[2]};
+
+    bool done = false;
 
     MenuManager::initialize_menu_manager();
 
     // Initialize menu pages
-
-    // Connect menu
-    MenuPage::NameList connect_menu_fields
-        = {"Server IP:", "Server port:"};
-
-    MenuPage::NameList connect_menu_items
-        = {"Connect"};
-
-    const MenuPage::FunctionList connect_menu_item_results
-        = {connect_to_server};
-
-    string connect_menu_name = "Connect menu";
-    MenuPage *connect_menu_page = new MenuPage( connect_menu_name,
-                                               connect_menu_fields,
-                                               connect_menu_items, 
-                                               connect_menu_item_results );
-    MenuManager::add_menu_page( connect_menu_name, connect_menu_page );
-
 
     // Main menu
     MenuPage::NameList main_menu_fields = {};
@@ -61,8 +45,23 @@ int main(int argc, char* argv[]) {
     MenuPage::NameList main_menu_items 
         = {"Join lobby", "Create lobby", "Exit"};
 
+    // Main menu item functions
+    auto moveToJoinLobbyPage = [] () {
+        std::string next_page = "Join lobby";
+        MenuManager::switch_page( next_page );
+    };
+
+    auto moveToCreateLobbyPage = [] () {
+        std::string next_page = "Join lobby";
+        MenuManager::switch_page( next_page );
+    };
+
+    auto exitProgram = [&done] () {
+        done = true;
+    };
+
     const MenuPage::FunctionList main_menu_item_results
-        = {switch_to_join_lobby_page, switch_to_create_lobby_page, exit_program};
+        = {moveToJoinLobbyPage, moveToCreateLobbyPage, exitProgram};
 
     string main_menu_name = "Main menu";
     MenuPage *main_menu_page = new MenuPage( main_menu_name,
@@ -78,9 +77,33 @@ int main(int argc, char* argv[]) {
 
     MenuPage::NameList join_lobby_items
         = {"Join", "Back"};
+        
+    // Join lobby item functions
+    auto joinLobby = [&done, &client] () {
+        std::string commad_type =  "!joinsession ";
+
+        MenuPage *join_page = MenuManager::get_current_page();
+        vector<FIELD *> connect_fields = join_page->get_field_list();
+
+        const int lobby_code_input_index = 1;
+        const char *lobby_code = 
+            field_buffer( connect_fields[lobby_code_input_index], 0 );
+        std::string lobby_code_string(lobby_code);
+
+        std::string command = commad_type + lobby_code_string;
+        std::string serverMessage = makeServerMessage( command );
+        client.send( serverMessage );
+
+        // TODO: move to lobby (chat room?)
+    };
+
+    auto moveBackToMainMenuPage = [] () {
+        std::string next_page = "Main menu";
+        MenuManager::switch_page( next_page );
+    };
 
     const MenuPage::FunctionList join_lobby_item_results
-        = {switch_to_main_menu_page, switch_to_main_menu_page};
+        = {joinLobby, moveBackToMainMenuPage};
 
     string join_lobby_name = "Join lobby";
     MenuPage *join_lobby_page = new MenuPage( join_lobby_name,
@@ -91,14 +114,16 @@ int main(int argc, char* argv[]) {
 
 
     // Create lobby menu
-    MenuPage::NameList create_lobby_fields
-        = {"Lobby code:"};
+    // TODO: Make the menu get the playable games, and then move to the game lobby
+        // with the generated lobby code displayed
+        // (insert game names to start of "create_lobby_items")
+    MenuPage::NameList create_lobby_fields = {};
     MenuPage::NameList create_lobby_items
-        = {"Game 1", "Game 2", "Game 3", "Back"};
+        = {"Back"};
 
     const MenuPage::FunctionList create_lobby_item_results
-        = {switch_to_main_menu_page, switch_to_main_menu_page, 
-           switch_to_main_menu_page, switch_to_main_menu_page
+        = {moveBackToMainMenuPage, moveBackToMainMenuPage, 
+           moveBackToMainMenuPage, moveBackToMainMenuPage
            }; 
 
     string create_lobby_name = "Create lobby";
@@ -108,34 +133,23 @@ int main(int argc, char* argv[]) {
                                                create_lobby_item_results );  
     MenuManager::add_menu_page( create_lobby_name, create_lobby_page ); 
 
-    MenuManager::set_current_page( connect_menu_page );
+    MenuManager::set_current_page( main_menu_page );
 
     // Start menu
 
-    MenuManager::main_loop();
-
-    MenuManager::cleanup();
+    MenuManager::initialize_starting_page();
 
     // ----------------------------------------------------
-    // main loop
+    // Setup menu loop
 
-    if (argc < 3) {
-        // Give user message about incorrect arguments
-        return 1;
-    }
+    while (!done && !client.isDisconnected() &&
+        MenuManager::get_current_page()->change_selected_option_on_input()) {
 
-    networking::Client client{argv[1], argv[2]};
+        MenuManager::main_menu_driver();
 
-    done = false;
-
-    string userInput;
-    // Menu gets user input and sets the above variable
-    client.send( makeServerMessage(userInput) );
-
-    while (!done && !client.isDisconnected()) {
         try {
             client.update();
-        } catch (std:exception& e) {
+        } catch (std::exception& e) {
             // Give user message about exception
             done = true;
         }
@@ -143,45 +157,43 @@ int main(int argc, char* argv[]) {
         auto response = client.receive();
         if (!response.empty()) {
             // Give user response
+
+            // Recieve game list
         }
 
     }
 
-    return 0;
-}
+    // ----------------------------------------------------
+    // Game loop
 
-void connect_to_server() {
-    // TODO: connect to server with given ip and port in fields
-    MenuPage *connect_page = MenuManager::get_current_page();
-    vector<FIELD *> connect_fields = connect_page->get_field_list();
+    auto onTextEntry = [&done, &client] (std::string text) {
+    if ("exit" == text || "quit" == text) {
+        done = true;
+        } else {
+        client.send(text);
+        }
+    };
 
-    const int server_ip_input_index = 1;
-    char *server_ip = field_buffer( connect_fields[server_ip_input_index], 0 );
-    const int server_port_input_index = 3;
-    char *server_port = field_buffer( connect_fields[server_port_input_index], 0 );
+    ChatWindow chatWindow(onTextEntry);
+    while (!done && !client.isDisconnected()) {
 
-    networking::Client client{server_ip, server_port};
-
-    switch_to_main_menu_page();
-}
-
-void switch_to_join_lobby_page() {
-    string next_page_name = "Join lobby";
-    MenuManager::switch_page( next_page_name );
-}
-
-void switch_to_create_lobby_page() {
-    string next_page_name = "Create lobby";
-    MenuManager::switch_page( next_page_name );
-}
-
-void switch_to_main_menu_page() {
-    string next_page_name = "Main menu";
-    MenuManager::switch_page( next_page_name );
-}
-
-void exit_program() {
+        try {
+            client.update();
+        } catch (std::exception& e) {
+            // Give user message about exception
+            done = true;
+        }
     
+        auto response = client.receive();
+        if (!response.empty()) {
+            chatWindow.displayText(response);
+        }
+        chatWindow.update();
+    }
+
+    MenuManager::cleanup();
+
+    return 0;
 }
 
 /** 
@@ -207,9 +219,7 @@ string makeServerMessage(string input) {
     
     size_t endOfCommand = input.find(" ");
     string firstWord = input.substr(0,endOfCommand);
-    if (firstWord == "!quit") {
-        done = true;
-    } else if ( std::find(possibleCommands.begin(), possibleCommands.end(), firstWord) != possibleCommands.end() ) {
+    if ( std::find(possibleCommands.begin(), possibleCommands.end(), firstWord) != possibleCommands.end() ) {
         command += firstWord;
     } else {
         command += "!chat";
@@ -224,4 +234,3 @@ string makeServerMessage(string input) {
     return message.dump();
 
 }
-
