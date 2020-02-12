@@ -23,10 +23,11 @@ private:
 
 class GameServer {
 public:
+
     GameServer(GameServerConfig gameServerConfig, int port, const std::string& htmlFile);
     
     /** Useful for testing the GameServer. Perfroms an std::move on the server. */
-    GameServer(networking::Server& server, SessionManager& sessionManager);
+    GameServer(GameServerConfig gameServerConfig, networking::Server& server, SessionManager& sessionManager);
     
     /** Sends out all the messages passed to the intended clients. */
     void send(const std::deque<networking::Message>& messages);

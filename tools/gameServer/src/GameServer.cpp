@@ -57,7 +57,8 @@ GameServer::GameServer(GameServerConfig gameServerConfig, int port, const std::s
     
 }
 
-GameServer::GameServer(networking::Server& server, SessionManager& sessionManager) :
+GameServer::GameServer(GameServerConfig gameServerConfig, networking::Server& server, SessionManager& sessionManager) :
+    gameServerConfig{gameServerConfig},
     server{std::move(server)},
     sessionManager{sessionManager},
     keepRunning{true}, port{-1}, htmlFile{""}
@@ -77,33 +78,13 @@ void GameServer::receive() {
     auto incomingMessages = server.receive();
     
     // Check and deal with messages about creating/joining rooms or server shutdowns.
-    std::vector<networking::Message> unhandledMessages;
+    std::deque<networking::Message> batchToSend{};
     for (auto& msg : incomingMessages) {
-        auto& conn = msg.connection;
-        auto msgType = MessageType::interpretType(msg.text);
-        switch (msgType) {
-            case MessageType::Type::ServerStop:
-                this->keepRunning = false;
-                break;
-            case MessageType::Type::CreateSession:
-                this->sessionManager.createNewSession();
-                break;
-            case MessageType::Type::JoinSession:
-                this->sessionManager.addToSession(conn, ""); Currently no implementation
-                break;
-            case MessageType::Type::LeaveServer:
-                server.disconnect(c);
-                break;
-            default:
-                unhandledMessages.push_back(msg);
-                break;
-        }
+        std::vector<networking::Message> toSend = sessionManager.processMessage(msg);
+        batchToSend.insert(batchToSend.end(), toSend.begin(), toSend.end());
     }
     
-    // Pass the remaining messages to SessionManager for distribution and handling
-    //auto toSendOut = sessionManager.process(unhandledMessages); Currently no implementation
-    
-    //send(toSendOut);
+    send(batchToSend);
 }
 
 void GameServer::update() {
