@@ -1,3 +1,6 @@
+#ifndef JSON_CONVERT_H
+#define JSON_CONVERT_H
+
 #include "json.hpp"
 #include <string>
 
@@ -8,3 +11,5 @@ namespace jsonConvert {
 	json string_to_json(std::string& str);
 	json input_to_json();
 }
+
+#endif

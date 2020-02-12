@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <random>
+#include <stdexcept>
 
 namespace Utils {
     
@@ -20,9 +21,13 @@ namespace Utils {
         return random_string;
     }
 
-    std::string_view loadFile(const std::string& filename) {
+    std::string loadFile(const std::string& filename) {
         std::ifstream fileStream;
         fileStream.open(filename);
+        
+        if (!fileStream.good()) {
+            throw std::runtime_error("File stream for " + filename + "has encountered an error!");
+        }
     
         std::stringstream contents{};
         contents << fileStream.rdbuf();
