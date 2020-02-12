@@ -21,7 +21,7 @@ namespace Utils {
         return random_string;
     }
 
-    std::string_view loadFile(const std::string& filename) {
+    std::string loadFile(const std::string& filename) {
         std::ifstream fileStream;
         fileStream.open(filename);
         

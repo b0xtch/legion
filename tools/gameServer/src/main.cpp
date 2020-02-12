@@ -9,8 +9,8 @@
 // This is the file that the server admin must run to start the server.
 
 int main(int argc, char** argv) {
-    if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <port>";
+    if (argc < 3) {
+        std::cerr << "Usage: " << argv[0] << " <port> <config-file-path>" << std::endl;
         return 1;
     }
     
@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
         return 1;
     }
     
-    GameServerConfig gsConfig{};
+    GameServerConfig gsConfig{argv[2]};
     GameServer gameServer{gsConfig, port, ""};
     
     bool keepRunning = true;
