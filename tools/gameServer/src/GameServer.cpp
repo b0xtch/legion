@@ -6,6 +6,7 @@
 
 #include "MessageType.h"
 #include "json.hpp"
+#include "Utils.h"
 
 GameServerConfig::GameServerConfig() :
     GameServerConfig{"./configuration.txt"}
@@ -21,7 +22,7 @@ GameServerConfig::GameServerConfig(const std::string& configLocation) :
     json j;
     try {
         j = json::parse(Utils::loadFile(configLocation));
-        gameDir{j.get<std::string>(CFGKEY_GAME_DIR)};
+        gameDir = j[CFGKEY_GAME_DIR];
     }
     catch (const json::parse_error& e) {
         std::cerr << "There was a problem reading the configuration file." << std::endl;
@@ -35,7 +36,7 @@ GameServerConfig::GameServerConfig(const std::string& configLocation) :
 }
 
 std::string_view GameServerConfig::getGameConfigDir() const {
-    return gameConfigDir;
+    return gameDir;
 }
 
 // PUBLIC
@@ -85,10 +86,6 @@ void GameServer::receive() {
     }
     
     send(batchToSend);
-}
-
-void GameServer::update() {
-    server.update();
 }
 
 int GameServer::getPort() const {

@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
         keepRunning = gameServer.getKeepRunning();
         
         // https://stackoverflow.com/a/10613664
-        std::this_thread::sleep_for(std::chrono::milliseconds(100))
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
     
     return 0;

@@ -18,7 +18,7 @@ private:
     std::string_view configLocation;
     std::string_view gameDir;
     
-    const std::string_view CFGKEY_GAME_DIR = "games";
+    const std::string CFGKEY_GAME_DIR = "games";
 }
 
 class GameServer {
