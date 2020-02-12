@@ -69,6 +69,7 @@ namespace Engine {
         // overload the cout to be able to cout a custom thing like the KindPair for example
     };
 
+
     // mostly for arithmetic operations
     template<typename E>
     struct arithmetic {
