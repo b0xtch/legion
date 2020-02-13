@@ -20,6 +20,23 @@ namespace Engine {
     template <typename T> 
     GenType<std::string, Game> EngineImpl<T>::initalizeEngine() { 
         std::cout << "Engine Initalizing!" << endl;
+        const json j1 = {
+            {"configuration", {
+                {"name", "Botch"},
+                {"player count", {{"min", 1}, {"max", 4}}},
+                {"audience", false},
+                {"setup", {{"Rounds", 10}}}
+            }},
+            {"constants", {}},
+            {"variables", {
+            {"winners", {1, 0, 2}}
+            }},
+            {"per-player", {
+            {"wins", 0}
+            }}, 
+            {"per-audience", {}},
+            {"rules", {}}
+        };
 
         if(this->validGameConfig(input)){
             for (auto& [key, value] : this->input.items()){
