@@ -24,6 +24,10 @@ using json = nlohmann::json;
 // Make json message for server
 string makeServerMessage(string input);
 
+// Controls which window is active
+enum menuMode { mainMenu, chatMenu };
+menuMode currentMode;
+
 int main(int argc, char* argv[]) {
 
     if (argc < 3) {
@@ -31,9 +35,9 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    enum menuMode { mainMenu, chatMenu };
-    menuMode currentMode = mainMenu;
     bool done = false;
+    currentMode = mainMenu;
+    networking::Client client{argv[1], argv[2]};
 
     // Start Chat Window
     auto onTextEntry = [&done, &client] (std::string text) {
@@ -44,8 +48,6 @@ int main(int argc, char* argv[]) {
         }
     };
     ChatWindow chatWindow(onTextEntry);
-
-    networking::Client client{argv[1], argv[2]};
 
     MenuManager::initialize_menu_manager();
 
