@@ -5,49 +5,49 @@
 /**
  * Session manager constructor that takes in max number of session allowed
  * **/
-SessionManager::SessionManager(): MAX_SESSIONS_PER_SERVER{maxSessions} {}
+SessionManager::SessionManager(int maxSessions): MAX_SESSIONS_PER_SERVER{maxSessions} {}
 
 /**
  * function for creating a new session
  * **/
 void SessionManager::createNewSession(){
   if(sessions.size() <= MAX_SESSIONS_PER_SERVER){
-    Session::Session session();
+    Session session = Session{};
     sessions.push_back(session);
   };
 
-  throw ServerLimitReached();
+  throw; // ServerLimitReached();
 };
 
 /**
  * Function for adding a new connection which is not part of any session
  * **/
-void SessionManager::addConnection(const networking::Connection& connection){
+void SessionManager::addConnection(const Connection& connection){
   unassignedConnections.push_back(connection);
 };
 
 /**
  * Function for adding connection to existing session
  * **/
-void SessionManager::addToSession(const networking::Connection& connectionToAdd, std::string sessionId){
+void SessionManager::addToSession(const Connection& connectionToAdd, std::string& sessionId){
   auto connectionIter = find_if(
-    unassignedConnections.begin(), unassignedConnections.end(), [&](const networking::Connection &connection){
+    unassignedConnections.begin(), unassignedConnections.end(), [&](const Connection &connection){
       return connection == connectionToAdd;
       }
   );
 
   if (connectionIter == unassignedConnections.end()){
-      throw ConnectionNotFound();
+      throw; // ConnectionNotFound();
   };
 
   auto sessionIter = find_if(
-    sessions.begin(), sessions.end(), [&](const Session &session){
+    sessions.begin(), sessions.end(), [&](Session &session){
       return session.getSessionId() == sessionId;
     }
   );
 
   if (sessionIter == sessions.end()){
-      throw SessionNotFound();
+      throw; // SessionNotFound();
   };
 
   sessionIter->addClient(connectionToAdd);
@@ -57,9 +57,9 @@ void SessionManager::addToSession(const networking::Connection& connectionToAdd,
 /**
  * Find session for particular connection
  * **/  
-Session SessionManager::getSessionForConnection(const networking::Connection& connection){
+Session SessionManager::getSessionForConnection(const Connection& connection){
   auto it = find_if(
-    sessions.begin(), sessions.end(), [&](const Session &session){
+    sessions.begin(), sessions.end(), [&](Session &session){
       return session.isClient(connection);
     }
   );
@@ -74,11 +74,11 @@ Session SessionManager::getSessionForConnection(const networking::Connection& co
 /**
  * This function constructs vector of struct message for all passed connections
  * **/
-networking::Message SessionManager::constructMessage(const std::string& message, std::vector<networking::Connection>& connections){
-  std::vector<networking::Message> messages;
-  for(auto connection: connection){
-    message.push_back(
-      networking::Message{connection, message};
+std::vector<Message> SessionManager::constructMessage(const std::string& message, std::unordered_map<ConnectionId, Connection>& connections){
+  std::vector<Message> messages;
+  for(auto connection: connections){
+    messages.push_back(
+      Message{connection.second, message}
     );
   }
 
@@ -90,9 +90,9 @@ networking::Message SessionManager::constructMessage(const std::string& message,
  * This function recieves messages and returns new vector of
  * Message struct which will be used by server to forward messages 
  * **/
-vector<networking::Message> SessionManager::update(const networking::Message& message){
+std::vector<Message> SessionManager::processMessage(const Message& message){
   Session session = getSessionForConnection(message.connection);
-  return constructMessage(message.message, session.getAllClients());
+  return constructMessage(message.text, session.getAllClients());
 }  
 
 
