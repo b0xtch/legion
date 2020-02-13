@@ -6,7 +6,7 @@
 /**
  * Construct with session id
  * **/
-Session::Session(): sessionId{Utils::generateSessionId(5)}{};
+Session::Session(): sessionId{"ABC"}{};
 
 
 /**

@@ -18,7 +18,7 @@ class SessionManager {
 public:
   SessionManager(int maxSessions);
 
-  void createNewSession();
+  Session createNewSession();
   
   void addToSession(const Connection& connectionToAdd, std::string& sessionId);
 
@@ -28,14 +28,14 @@ public:
   
   void addConnection(const Connection& connection);
 
-  //void removeConnection(const Connection& connection);
+  void removeConnection(const Connection& connection);
   
   void sendMessage(const Connection& connection);
   
   Session getSessionForConnection(const Connection& connection);
 
 private:
-  std::vector<Session> sessions;
+  std::unordered_map<std::string, Session> sessions;
   
   std::vector<Connection> unassignedConnections;
   
