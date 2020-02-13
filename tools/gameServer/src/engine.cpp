@@ -6,7 +6,6 @@
 #include <algorithm>
 #include "engine.h"
 #include <json.hpp>
-#include <any>
 #include "jsonvalidator.h"
 
 using json = nlohmann::json;
