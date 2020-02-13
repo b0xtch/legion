@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
             client.send( makeServerMessage(text) );
         }
     };
-    ChatWindow chatWindow;
+    ChatWindow *chatWindow;
 
     MenuManager::initialize_menu_manager();
 
@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
         = {"Join", "Back"};
         
     // Join lobby item functions
-    auto joinLobby = [&done, &client] () {
+    auto joinLobby = [&done, &client, &chatWindow, &onTextEntry] () {
         std::string commad_type =  "!joinsession ";
 
         MenuPage *join_page = MenuManager::get_current_page();
@@ -173,9 +173,9 @@ int main(int argc, char* argv[]) {
 
             auto response = client.receive();
             if (!response.empty()) {
-                chatWindow.displayText(response);
+                chatWindow->displayText(response);
             }
-            chatWindow.update();
+            chatWindow->update();
 
         } else {
 
@@ -187,6 +187,8 @@ int main(int argc, char* argv[]) {
     }
 
     delete chatWindow;
+
+    MenuManager::cleanup();
 
     return 0;
 }
