@@ -225,7 +225,7 @@ namespace Engine {
     template <typename T> 
     class EngineImpl { 
         public:
-            EngineImpl (T& input);
+            EngineImpl (const T& input);
             GenType<std::string, Game> getGameConfig() const;
 
             GenType<std::string, Game> initalizeEngine();
@@ -243,10 +243,10 @@ namespace Engine {
             // Rules& setRules(const T& rules);
 
             // Parser Related methods
-            bool validGameConfig(T& input);
+            bool validGameConfig(const T& input);
             GenType<std::string, Game> buildGame();
-            void mapKeyToValue(T& key, T& value);
-            T mapValueToFuntion(T& value);
+            void mapKeyToValue(const T& key, const T& value);
+            T mapValueToFuntion(const T& value);
 
 
             // Game related methods

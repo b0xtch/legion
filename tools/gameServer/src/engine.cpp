@@ -14,7 +14,7 @@ using Engine::GenType;
 namespace Engine {
     
     template <typename T>
-    EngineImpl<T>::EngineImpl (T& input): 
+    EngineImpl<T>::EngineImpl (const T& input): 
     input(input) {}
 
     template <typename T> 
@@ -23,21 +23,21 @@ namespace Engine {
 
         if(this->validGameConfig(input)){
             for (auto& [key, value] : this->input.items()){
-                // this->mapKeyToValue(key, value); 
+                this->mapKeyToValue(key, value); 
             }
 
-            return buildGame();
+            // return buildGame();
         }; 
     }
 
     template <typename T> 
-    bool EngineImpl<T>::validGameConfig(T& input) { 
+    bool EngineImpl<T>::validGameConfig(const T& input) { 
         // if(JsonValidator.validJson(input)) {
         //     this->input = input; 
         //     return true;
         // }
 
-        this->input = input; 
+        this->input = std::move(input); 
         return true;
     } 
     
@@ -54,12 +54,12 @@ namespace Engine {
     }
 
     template <typename T> 
-    void EngineImpl<T>::mapKeyToValue(T& key, T& value){
-        this->gameConfig.map[key] = this->mapValueToFuntion(value);
+    void EngineImpl<T>::mapKeyToValue(const T& key, const T& value){
+        std::cout << key << " " << this->mapValueToFuntion(value) << std::endl;
     }
 
     template <typename T> 
-    T EngineImpl<T>::mapValueToFuntion(T& value){
+    T EngineImpl<T>::mapValueToFuntion(const T& value){
         return value.flatten();
     }
 
