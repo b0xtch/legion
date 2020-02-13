@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
             client.send( makeServerMessage(text) );
         }
     };
-    ChatWindow chatWindow(onTextEntry);
+    ChatWindow chatWindow;
 
     MenuManager::initialize_menu_manager();
 
@@ -110,6 +110,7 @@ int main(int argc, char* argv[]) {
 
         currentMode = chatMenu;
         MenuManager::cleanup();
+        chatWindow = new ChatWindow(onTextEntry);
     };
 
     auto moveBackToMainMenuPage = [] () {
@@ -184,6 +185,8 @@ int main(int argc, char* argv[]) {
         }
 
     }
+
+    delete chatWindow;
 
     return 0;
 }
