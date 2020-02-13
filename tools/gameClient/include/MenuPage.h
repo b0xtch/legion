@@ -2,6 +2,7 @@
 #define SETUPMENU_H
 
 #include <vector>
+#include <functional>
 #include <string>
 #include <map>
 #include <menu.h>
@@ -12,12 +13,12 @@ class MenuPage {
 public:
 
     using PageMap = std::map<std::string, MenuPage *>;
-    using FunctionList = std::vector<void (*)()>;
-    using NameList = const std::vector<const char *>;
+    using FunctionList = std::vector<std::function<void()>>;
+    using NameList = std::vector<const char *>;
     
     MenuPage( const std::string &menu_name,
-              NameList &field_names, 
-              NameList &item_names, 
+              const NameList &field_names, 
+              const NameList &item_names, 
               const FunctionList &item_results );
 
     void cleanup();
@@ -63,12 +64,14 @@ public:
 
     static void initialize_menu_manager();
     static void initialize_windows();
+    static void initialize_starting_page();
     static void add_menu_page( std::string &page_name, MenuPage *page );
     static std::map<std::string, MenuPage *> get_menu_pages();
     static void set_current_page( MenuPage *page );
     static MenuPage *get_current_page();
+    static int get_selected_index();
     static void switch_page( std::string &next_page_name );
-    static void main_loop();
+    static void main_menu_driver();
     static void cleanup();
 
 private:
