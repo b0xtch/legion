@@ -14,11 +14,11 @@ public:
 
     using PageMap = std::map<std::string, MenuPage *>;
     using FunctionList = std::vector<std::function<void()>>;
-    using NameList = const std::vector<const char *>;
+    using NameList = std::vector<const char *>;
     
     MenuPage( const std::string &menu_name,
-              NameList &field_names, 
-              NameList &item_names, 
+              const NameList &field_names, 
+              const NameList &item_names, 
               const FunctionList &item_results );
 
     void cleanup();
@@ -69,6 +69,7 @@ public:
     static std::map<std::string, MenuPage *> get_menu_pages();
     static void set_current_page( MenuPage *page );
     static MenuPage *get_current_page();
+    static int get_selected_index();
     static void switch_page( std::string &next_page_name );
     static void main_menu_driver();
     static void cleanup();

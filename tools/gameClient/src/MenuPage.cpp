@@ -6,8 +6,8 @@ WINDOW * MenuPage::form_window = nullptr;
 WINDOW * MenuPage::menu_window = nullptr;
 
 MenuPage::MenuPage( const std::string &menu_name,
-                    MenuPage::NameList &field_names,
-                    MenuPage::NameList &item_names,
+                    const MenuPage::NameList &field_names,
+                    const MenuPage::NameList &item_names,
                     const MenuPage::FunctionList &item_results )
     : menu_name( menu_name ), 
       field_names( field_names ), 
@@ -190,6 +190,10 @@ void MenuManager::set_current_page( MenuPage *page ) {
 
 MenuPage *MenuManager::get_current_page() {
     return current_page;
+}
+
+int MenuManager::get_selected_index() {
+    return selected_index;
 }
 
 void MenuManager::switch_page( std::string &next_page_name ) {

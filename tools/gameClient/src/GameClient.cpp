@@ -54,9 +54,9 @@ int main(int argc, char* argv[]) {
     // Initialize menu pages
 
     // Main menu
-    MenuPage::NameList main_menu_fields = {};
+    const MenuPage::NameList main_menu_fields = {};
 
-    MenuPage::NameList main_menu_items 
+    const MenuPage::NameList main_menu_items 
         = {"Join lobby", "Create lobby", "Exit"};
 
     // Main menu item functions
@@ -65,17 +65,79 @@ int main(int argc, char* argv[]) {
         MenuManager::switch_page( next_page );
     };
 
-    auto moveToCreateLobbyPage = [] () {
-        std::string next_page = "Join lobby";
-        MenuManager::switch_page( next_page );
-    };
-
     auto exitProgram = [&done] () {
         done = true;
     };
 
-    const MenuPage::FunctionList main_menu_item_results
-        = {moveToJoinLobbyPage, moveToCreateLobbyPage, exitProgram};
+    auto moveBackToMainMenuPage = [] () {
+        std::string next_page = "Main menu";
+        MenuManager::switch_page( next_page );
+    };
+
+
+    MenuPage::FunctionList main_menu_item_results
+        = {exitProgram};
+
+    auto moveToCreateLobbyPage = [&client, &moveBackToMainMenuPage] () {
+
+        // Get the list of games
+
+        std::string commad_type =  "!requestGames ";
+        std::string serverMessage = makeServerMessage( commad_type );
+        client.send( serverMessage );
+
+        auto response = client.receive();
+        while ( response.empty() ) {
+            response = client.receive();
+        }
+
+        MenuPage::NameList games_list = {"Game 1", "Game 2"};
+            /* TEMP create list from response */
+
+        // Define the function that is called when a game is chosen
+
+        auto chooseGame = [&client, &games_list] () {
+
+            std::string game_choice = games_list[MenuManager::get_selected_index()];
+            client.send( game_choice );
+
+        };
+
+        // Create the "Creat lobby" menu page with the given games
+
+        MenuPage::NameList create_lobby_fields = {};
+
+        MenuPage::NameList create_lobby_items = {};
+
+        for ( const char *game_name : games_list ) {
+            create_lobby_items.push_back( game_name );
+        }
+        const char *back_string = "back";
+        create_lobby_items.push_back( back_string );
+
+        MenuPage::FunctionList create_lobby_item_results = {}; 
+
+        for ( int i = 0; i < games_list.size(); i++ ) {
+            create_lobby_item_results.push_back( chooseGame );
+        }
+        create_lobby_item_results.insert( 
+            create_lobby_item_results.begin(), moveBackToMainMenuPage );     
+
+        std::string create_lobby_name = "Create lobby";
+        MenuPage *create_lobby_page = new MenuPage( create_lobby_name,
+                                                create_lobby_fields, 
+                                                create_lobby_items, 
+                                                create_lobby_item_results );  
+        MenuManager::add_menu_page( create_lobby_name, create_lobby_page ); 
+
+        // The games are all loaded and the page is setup, so switch to the page
+
+        std::string next_page = "Create lobby";
+        MenuManager::switch_page( next_page );
+    };
+
+    main_menu_item_results.insert( main_menu_item_results.begin(), moveToCreateLobbyPage );
+    main_menu_item_results.insert( main_menu_item_results.begin(), moveToJoinLobbyPage );
 
     string main_menu_name = "Main menu";
     MenuPage *main_menu_page = new MenuPage( main_menu_name,
@@ -85,13 +147,15 @@ int main(int argc, char* argv[]) {
     MenuManager::add_menu_page( main_menu_name, main_menu_page );
 
 
+
     // Join lobby menu
-    MenuPage::NameList join_lobby_fields
+    const MenuPage::NameList join_lobby_fields
         = {"Lobby code:"};
 
-    MenuPage::NameList join_lobby_items
+    const MenuPage::NameList join_lobby_items
         = {"Join", "Back"};
         
+
     // Join lobby item functions
     auto joinLobby = [&done, &client, &chatWindow, &onTextEntry] () {
         std::string commad_type =  "!joinsession ";
@@ -113,11 +177,6 @@ int main(int argc, char* argv[]) {
         chatWindow = new ChatWindow(onTextEntry);
     };
 
-    auto moveBackToMainMenuPage = [] () {
-        std::string next_page = "Main menu";
-        MenuManager::switch_page( next_page );
-    };
-
     const MenuPage::FunctionList join_lobby_item_results
         = {joinLobby, moveBackToMainMenuPage};
 
@@ -127,27 +186,6 @@ int main(int argc, char* argv[]) {
                                              join_lobby_items, 
                                              join_lobby_item_results );
     MenuManager::add_menu_page( join_lobby_name, join_lobby_page );
-
-
-    // Create lobby menu
-    // TODO: Make the menu get the playable games, and then move to the game lobby
-        // with the generated lobby code displayed
-        // (insert game names to start of "create_lobby_items")
-    MenuPage::NameList create_lobby_fields = {};
-    MenuPage::NameList create_lobby_items
-        = {"Back"};
-
-    const MenuPage::FunctionList create_lobby_item_results
-        = {moveBackToMainMenuPage, moveBackToMainMenuPage, 
-           moveBackToMainMenuPage, moveBackToMainMenuPage
-           }; 
-
-    string create_lobby_name = "Create lobby";
-    MenuPage *create_lobby_page = new MenuPage( create_lobby_name,
-                                               create_lobby_fields, 
-                                               create_lobby_items, 
-                                               create_lobby_item_results );  
-    MenuManager::add_menu_page( create_lobby_name, create_lobby_page ); 
 
     MenuManager::set_current_page( main_menu_page );
 
