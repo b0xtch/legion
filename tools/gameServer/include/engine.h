@@ -72,7 +72,7 @@ namespace Engine {
         } variables;
         
         template<typename PP>
-        struct PerPlayer>: GenType<std::string, PP>{
+        struct PerPlayer: GenType<std::string, PP>{
             GenType map;
         } per_player;
 
