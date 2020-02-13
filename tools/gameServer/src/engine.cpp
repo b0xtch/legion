@@ -6,7 +6,6 @@
 #include <algorithm>
 #include "engine.h"
 #include <json.hpp>
-#include <any>
 #include "jsonvalidator.h"
 
 using json = nlohmann::json;
@@ -77,8 +76,8 @@ namespace Engine {
         return configuration;
     }
 
-    cvpa& EngineImpl<T>::setConstants(const T& constants){
-        cvpa constants;
+    CVPA& EngineImpl<T>::setConstants(const T& constants){
+        CVPA constants;
 
         this->gameConfig["constants"] = constants;
         return constants;

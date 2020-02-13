@@ -27,7 +27,8 @@ namespace Engine {
     // logic
     // ===============================================================
 
-    template <typename G, typename V> 
+    //not sure if this is good design, needs to do more research. A few things depend on this type now
+    template <typename G, typename... Args> 
     struct GenType {
         GenType() : map() {};
         GenType(std::unordered_map<G, V> &param) : map(param) {};
@@ -37,28 +38,33 @@ namespace Engine {
         //     return;
         // }
 
-        std::unordered_map<G, V> map;
+        std::unordered_map<G, Args...> map;
         G value;
+        V key;
     };
 
     struct Configuration {
-        GenType<std::string> name {"config"};
-        struct PlayerCount: GenType<int> { // move all the nested structs outside
-            GenType min;
-            GenType max;
-        };
-        GenType<bool> audience;
+        std::string name;
+        PlayerCount* playecount;
+        bool audience;
+        Setup* setup;
 
-        // {
-        //   "kind": <<data kind>>,
-        //   "prompt": <<Description of what data the owner should provide>>
-        // }
-        using KindPair = std::pair<std::string, std::string>;
-        struct setup: GenType<KindPair> {
-            setup(const KindPair &param)
-                : GenType(param) {};
-        };
     } configuration;
+
+    struct PlayerCount: GenType<int> {
+        GenType min;
+        GenType max;
+    };
+
+    // {
+    //   "kind": <<data kind>>,
+    //   "prompt": <<Description of what data the owner should provide>>
+    // }
+    using KindPair = std::pair<std::string, std::string>; // TODO this bad
+    struct setup: GenType<KindPair> {
+        setup(const KindPair &param)
+            : GenType(param) {};
+    };
 
     template<typename T>
     struct CVPA: GenType<std::string, T> {
