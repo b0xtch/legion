@@ -4,7 +4,8 @@
 #include <json.hpp>
 #include <iostream>  
 #include <any>
-#include "jsonDSL.h"
+#include <variant>
+// #include "jsonDSL.h"
 
 using namespace std; 
 
@@ -28,64 +29,20 @@ namespace Engine {
     // ===============================================================
 
     //not sure if this is good design, needs to do more research. A few things depend on this type now
-    template <typename G, typename... Args> 
+    template <typename K, typename V> 
     struct GenType {
-        GenType() : map() {};
-        GenType(std::unordered_map<G, V> &param) : map(param) {};
-        GenType(const G &param) : value(param) {};
 
-        // V get(const G& key) const {
-        //     return;
+        // K set(const G& key, const G& value) const {
+        //     map[key] = value;
         // }
 
-        std::unordered_map<G, Args...> map;
-        G value;
-        V key;
-    };
+        // V get(const G& key) const {
+        //     return map[key];
+        // }
 
-    struct Configuration {
-        std::string name;
-        PlayerCount* playecount;
-        bool audience;
-        Setup* setup;
-
-    } configuration;
-
-    struct PlayerCount: GenType<int> {
-        GenType min;
-        GenType max;
-    };
-
-    // {
-    //   "kind": <<data kind>>,
-    //   "prompt": <<Description of what data the owner should provide>>
-    // }
-    using KindPair = std::pair<std::string, std::string>; // TODO this bad
-    struct setup: GenType<KindPair> {
-        setup(const KindPair &param)
-            : GenType(param) {};
-    };
-
-    template<typename T>
-    struct CVPA: GenType<std::string, T> {
-
-        struct Constants {
-            GenType map;
-        } constants;
-
-        struct Variables {
-            GenType map;
-        } variables;
-        
-        template<typename PP>
-        struct PerPlayer>: GenType<std::string, PP>{
-            GenType map;
-        } per_player;
-
-        template<typename PA>
-        struct PerAudience: GenType<std::string, PA> {
-            GenType map;
-        } per_audience;
+        std::unordered_map<K, V> map;
+        K key;
+        V value;
     };
 
     /**
@@ -99,22 +56,22 @@ namespace Engine {
 
         // List of all the rules under Rules struct\
         // Control Structures
-        struct ControlStructures {}
+        struct ControlStructures {};
 
         // List Operations
-        struct ListOperations {}
+        struct ListOperations {};
 
         // Arithmetic Operations -> example provided using the arithmetic struct provided above
-        struct Arithmetic {} // basically the one below this main struct
+        struct Arithmetic {}; // basically the one below this main struct
 
         // Timing
-        struct Timing {} 
+        struct Timing {};
 
         // Human Input
-        struct HumanInput {} 
+        struct HumanInput {};
 
         // Output
-        struct Output {} 
+        struct Output {}; 
     };
 
     // mostly for arithmetic operations
@@ -156,7 +113,7 @@ namespace Engine {
             component.visit(arithmetic<E, T>{type});
         }
 
-        Components<A> component;
+        Components<A>* component;
         E type;
     };
 
@@ -220,34 +177,70 @@ namespace Engine {
         // Create a vector of variants
         std::vector<component> entities;
     };
+        struct PlayerCount {
+        int min;
+        int max;
+    };
 
-    Struct Game {
-        Components comps;
-    }
+    // {
+    //   "kind": <<data kind>>,
+    //   "prompt": <<Description of what data the owner should provide>>
+    // }
+    using KindPair = std::pair<std::string, std::string>; // TODO this bad
+    struct Setup: GenType<std::string, KindPair> {
+        Setup(const KindPair &param)
+            : Setup(param) {};
+    };
+
+    struct CVPA
+        : GenType<std::string, Components<std::string, int, bool> >
+    {
+        // constants, variables, perPlayer, perAudience are the same
+        GenType constants;
+        GenType variables;
+        GenType per_player;
+        GenType per_audience;
+    };
+
+    struct Configuration {
+        std::string name;
+        PlayerCount* playecount;
+        bool audience;
+        Setup* setup;
+
+    } configuration;
+
+    struct Game {
+        Components<
+        Configuration,
+        CVPA
+        // Rules don't even touch rules now
+        > components;
+    };
 
     template <typename T> 
     class EngineImpl { 
         public:
             EngineImpl (T& input);
-
-            bool validGameConfig(T& input);
             Game getGameConfig() const;
+
+            Game initalizeEngine();
 
         private:
             T input;
-            Game gameConfig;
+            GenType<std::string, Game> gameConfig;
 
             // Domain level set functions
-            Configuration setConfiguration(const T& configuration);
-            CVPA setConstants(const T& constants);
-            CVPA setVariables(const T& variables);
-            CVPA setPerPlayer(const T& perPlayer);
-            CVPA setPerAudience(const T& perAudience);
-            Rules setRules(const T& rules);
+            Configuration& setConfiguration(const T& configuration);
+            CVPA& setConstants(const T& constants);
+            CVPA& setVariables(const T& variables);
+            CVPA& setPerPlayer(const T& perPlayer);
+            CVPA& setPerAudience(const T& perAudience);
+            // Rules& setRules(const T& rules);
 
             // Parser Related methods
-            void initalizeEngine();
-            void buildGame();
+            bool validGameConfig(T& input);
+            Game buildGame();
             void mapKeyToValue(T& key, T& value);
             T mapValueToFuntion(T& value);
 
