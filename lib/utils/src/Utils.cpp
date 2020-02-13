@@ -4,6 +4,7 @@
 #include <sstream>
 #include <random>
 #include <stdexcept>
+#include <boost/filesystem.hpp>
 
 namespace Utils {
     
@@ -32,6 +33,15 @@ namespace Utils {
         std::stringstream contents{};
         contents << fileStream.rdbuf();
         return contents.str();
+    }
+    
+    std::vector<std::string> listFiles(const std::string& directory) {
+        // https://gist.github.com/vivithemage/9517678#gistcomment-2316153
+        std::vector<std::string> files{};
+        for (const auto& file : boost::filesystem::directory_iterator(directory)) {
+            files.push_back(file.path().generic_string());
+        }
+        return files;
     }
 }
 
