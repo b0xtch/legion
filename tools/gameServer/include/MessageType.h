@@ -5,10 +5,12 @@
 
 namespace MessageType {
     enum Type {
+        Invalid,
         Other,
         ServerStop,
         CreateSession,
-        JoinSession
+        JoinSession,
+        LeaveServer
     };
     
     /** Determines the type of message received from a client. */
