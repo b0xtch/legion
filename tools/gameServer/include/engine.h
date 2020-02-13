@@ -18,97 +18,141 @@ using namespace std;
  * Implement the rest of the JsonDsl types just put them into lambda functions with (ENUM& )
  * change any type in setup and GenType struct
  * define a desgin of hiercarhy
+ * Map of string to structs => <"configuratin" -> configuration (type struct)>
 */
 
 namespace Engine {
 
-    // these enums are here for testing ill move them out once I am done
-    enum SetupTypes{
-        Kind, SetupPrompt,
-        KindInteger, KindString, KindBoolean,
-        KindQuestionAnswer, KindMultipleChoice  
-    };
 
-    enum RuleTypes{
-        Foreach, Loop, InParallel, Parallelfor,
-        Switch, When, Extend, Reverse, Shuffle, 
-        Sort, Deal, Discard, Add, Timer, 
-        InputChoice, InputText, InputVote, 
-        Message, GlobalMessage, Scores
-    };
+    // logic
+    // ===============================================================
 
-    template <typename G> 
+    template <typename G, typename V> 
     struct GenType {
         GenType() : map() {};
-        GenType(std::map<G, std::any> &param) : map(param) {};
+        GenType(std::unordered_map<G, V> &param) : map(param) {};
         GenType(const G &param) : value(param) {};
 
-        std::map<G, std::any> map;
+        // V get(const G& key) const {
+        //     return;
+        // }
+
+        std::unordered_map<G, V> map;
         G value;
     };
 
-    // {
-    //   "kind": <<data kind>>,
-    //   "prompt": <<Description of what data the owner should provide>>
-    // }
-    struct Setup: GenType<std::pair<std::string, std::any>> {
-        using KindPair = std::pair<std::string, std::any>;
+    struct Configuration {
+        GenType<std::string> name {"config"};
+        struct PlayerCount: GenType<int> { // move all the nested structs outside
+            GenType min;
+            GenType max;
+        };
+        GenType<bool> audience;
 
-        Setup(const KindPair &param) // change the any to json
-            : GenType(param) {}; 
+        // {
+        //   "kind": <<data kind>>,
+        //   "prompt": <<Description of what data the owner should provide>>
+        // }
+        using KindPair = std::pair<std::string, std::string>;
+        struct setup: GenType<KindPair> {
+            setup(const KindPair &param)
+                : GenType(param) {};
+        };
+    } configuration;
+
+    template<typename T>
+    struct CVPA: GenType<std::string, T> {
+
+        struct Constants {
+            GenType map;
+        } constants;
+
+        struct Variables {
+            GenType map;
+        } variables;
         
-        // Example of how to add two numbers
-        using KindPair = std::pair<int, int>;
-        Components<KindPair> comp2;
-        KindPair b {1, 1};
-        comp2.entities.emplace_back(b);
-        comp2.visit(Interpreter<Arithmetic> {add});
+        template<typename PP>
+        struct PerPlayer>: GenType<std::string, PP>{
+            GenType map;
+        } per_player;
 
-        std::cout << std::endl;
+        template<typename PA>
+        struct PerAudience: GenType<std::string, PA> {
+            GenType map;
+        } per_audience;
+    };
 
-        // overload the cout to be able to cout a custom thing like the KindPair for example
+    /**
+     * Each individual rule is a map of attributes describing the rule. 
+     * Lists of rules define a sequence of operations in which each rule 
+     * must be performed in sequential order.
+    */
+    template<typename T, typename... Args>
+    struct Rules: GenType<T, Args> {
+        std::string add {"rules"};
+
+        // List of all the rules under Rules struct\
+        // Control Structures
+        struct ControlStructures {}
+
+        // List Operations
+        struct ListOperations {}
+
+        // Arithmetic Operations -> example provided using the arithmetic struct provided above
+        struct Arithmetic {} // basically the one below this main struct
+
+        // Timing
+        struct Timing {} 
+
+        // Human Input
+        struct HumanInput {} 
+
+        // Output
+        struct Output {} 
     };
 
 
     // mostly for arithmetic operations
-    template<typename E>
+    template<typename E, typename A>
     struct arithmetic {
-        arithmetic(const E& value): value(value) {} // change this to accept a pair for addition
-        auto operator()(Arithmetic& type){
-            switch (type){
-                // switch different arithmetic rules
+        arithmetic(const E& type): type(type) {}
+        
+        template<typename T>
+        auto& operator()(const T& value) {
+            switch (type) {
                 case upFrom:
-                    std::cout << "adding one" << std::endl;
-                    value += 1;
+                    value++;
                     break;
                 case downFrom:
-                    std::cout << "minus one" << std::endl;
-                    value -= 1;
-                    break;
-                case add:
-                    std::cout << "adding" << std::endl;
-                    value.first + value.second;
-                    break;
-                default:
+                    value--;
                     break;
             }
         }
 
-        E value;
+        auto& operator()(const A& value){
+            switch (type) {
+                case add:
+                    std::cout << value.first + value.second << std::endl;
+                    return value;
+                    break;
+            }
+        }
+
+        E type;
     };
 
-    template<typename E>
+    template<typename E, typename A> // switch this to accept an varidic args
     struct Interpreter {
-        Interpreter(const E& value){
-            component.entities.emplace_back(value);
-        }
+        Interpreter(const E& type): type(type) {}
 
-        template <class T>
+        template <typename T>
         auto operator()(T&& value){
-            component.visit(arithmetic<T>{value});
+            component.entities.emplace_back(value);
+            component.visit(arithmetic<E, T>{type});
         }
 
-        Components<E> component;
+        Components<A> component;
+        E type;
     };
 
     /**
@@ -172,6 +216,9 @@ namespace Engine {
         std::vector<component> entities;
     };
 
+    Struct Game {
+        Components comps;
+    }
 
     template <typename T> 
     class EngineImpl { 
@@ -179,18 +226,28 @@ namespace Engine {
             EngineImpl (T& input);
 
             bool validGameConfig(T& input);
-            GenType<T> getGameConfig();
+            Game getGameConfig() const;
 
         private:
             T input;
-            GenType<T> gameConfig;
+            Game gameConfig;
 
+            // Domain level set functions
+            Configuration setConfiguration(const T& configuration);
+            CVPA setConstants(const T& constants);
+            CVPA setVariables(const T& variables);
+            CVPA setPerPlayer(const T& perPlayer);
+            CVPA setPerAudience(const T& perAudience);
+            Rules setRules(const T& rules);
+
+            // Parser Related methods
             void initalizeEngine();
             void buildGame();
             void mapKeyToValue(T& key, T& value);
             T mapValueToFuntion(T& value);
 
-            // Control Structure Methods
+
+            // Game related methods
             void findAndExecute(/* find a specific function and execute dynamically*/);
     };
 

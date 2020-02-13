@@ -16,10 +16,18 @@ using Engine::GenType;
 namespace Engine {
     
     template <typename T>
-    EngineImpl<T>::EngineImpl (T& input) {
+    EngineImpl<T>::EngineImpl (T& input): 
+    this->input(input) {}
+
+    template <typename T> 
+    void EngineImpl<T>::initalizeEngine() { 
+        std::cout << "Engine Initalizing!" << endl;
+
         if(this->validGameConfig(input)) this->initalizeEngineImpl(); 
 
-        std::cout << "EngineImpl could not read game specification" << endl;
+        for (auto& [key, value] : this->input.items()){
+            this->mapKeyToValue(key, value); 
+        }
     }
 
     template <typename T> 
@@ -32,15 +40,6 @@ namespace Engine {
         this->input = input; 
         return true;
     } 
-
-    template <typename T> 
-    void EngineImpl<T>::initalizeEngine() { 
-        std::cout << "EngineImpl Initalizing!" << endl;
-
-        for (auto& [key, value] : this->input.items()){
-            this->mapKeyToValue(key, value); 
-        }
-    }
     
     template <typename T> 
     void EngineImpl<T>::buildGame() { 
@@ -64,12 +63,53 @@ namespace Engine {
     }
 
     template <typename T> 
-    GenType<T> EngineImpl<T>::getGameConfig(){
-        for (const auto&[key, value] : this->gameConfig.map) {
-            cout << key << " " << std::any_cast<T>(value) << endl;
-        }
-
+    Game EngineImpl<T>::getGameConfig(){
         return this->gameConfig;
+    }
+
+    /////////////////////////////////////////////////////////////////////////////
+    // Main Parser from Type T to DSL
+    /////////////////////////////////////////////////////////////////////////////
+    Configuration& EngineImpl<T>::setConfiguration(const T& configuration) {
+        Configuration configuration = Configuration();
+
+        this->gameConfig["configuration"] = configuration;
+        return configuration;
+    }
+
+    cvpa& EngineImpl<T>::setConstants(const T& constants){
+        cvpa constants;
+
+        this->gameConfig["constants"] = constants;
+        return constants;
+    }
+
+    CVPA& EngineImpl<T>::setVariables(const T& variables){
+        CVPA variables;
+
+        this->gameConfig["variables"] = variables;
+        return variables;
+    }
+
+    CVPA& EngineImpl<T>::setPerPlayer(const T& perPlayer){
+        CVPA perPlayer;
+
+        this->gameConfig["perPlayer"] = perPlayer;
+        return perPlayer;
+    }
+
+    CVPA& EngineImpl<T>::setPerAudience(const T& perAudience){
+        CVPA perAudience;
+
+        this->gameConfig["perAudience"] = perAudience;
+        return perAudience;
+    }
+
+    Rules& EngineImpl<T>::setRules(const T& rules){
+        Rules rules;
+
+        this->gameConfig["rules"] = rules;
+        return rules;
     }
 
     /////////////////////////////////////////////////////////////////////////////
