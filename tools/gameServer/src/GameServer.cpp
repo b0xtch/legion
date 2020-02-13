@@ -23,6 +23,9 @@ GameServerConfig::GameServerConfig(const std::string& configLocation) :
     try {
         j = json::parse(Utils::loadFile(configLocation));
         gameDir = j[CFGKEY_GAME_DIR];
+        
+        // NOTE: Be careful when using "." or ".." as the value for "games" in the configuration file.
+        // Those will refer to the working directory of the program rather than the location of the config file.
     }
     catch (const json::parse_error& e) {
         std::cerr << "There was a problem reading the configuration file." << std::endl;
