@@ -50,8 +50,8 @@ namespace Engine {
      * Lists of rules define a sequence of operations in which each rule 
      * must be performed in sequential order.
     */
-    template<typename T, typename... Args>
-    struct Rules: GenType<T, Args> {
+    // template<typename T, typename... Args>
+    struct Rules {
         std::string add {"rules"};
 
         // List of all the rules under Rules struct\
@@ -81,23 +81,23 @@ namespace Engine {
         
         template<typename T>
         auto& operator()(const T& value) {
-            switch (type) {
-                case upFrom:
-                    value++;
-                    break;
-                case downFrom:
-                    value--;
-                    break;
-            }
+            // switch (type) {
+            //     case upFrom:
+            //         value++;
+            //         break;
+            //     case downFrom:
+            //         value--;
+            //         break;
+            // }
         }
 
         auto& operator()(const A& value){
-            switch (type) {
-                case add:
-                    std::cout << value.first + value.second << std::endl;
-                    return value;
-                    break;
-            }
+            // switch (type) {
+            //     case add:
+            //         std::cout << value.first + value.second << std::endl;
+            //         return value;
+            //         break;
+            // }
         }
 
         E type;
@@ -107,23 +107,15 @@ namespace Engine {
     struct Interpreter {
         Interpreter(const E& type): type(type) {}
 
-        template <typename T>
-        auto operator()(T&& value){
-            component.entities.emplace_back(value);
-            component.visit(arithmetic<E, T>{type});
-        }
+        // template <typename T>
+        // auto operator()(T&& value){
+        //     component.entities.emplace_back(value);
+        //     component.visit(arithmetic<E, T>{type});
+        // }
 
-        Components<A>* component;
+        // Components<A> component;
         E type;
     };
-
-    /**
-     * Convert my interpreter into self executing lambda functions
-     * from this cool article on dev
-     * still grasping how to use variants for each component of our game
-     * 
-     * https://dev.to/tmr232/that-overloaded-trick-overloading-lambdas-in-c17
-    */
 
     template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>; 
@@ -143,25 +135,25 @@ namespace Engine {
         void visit(){
             for (auto& entity : entities){
                 std::visit(overloaded {
-                    [](JsonDSL::SpecificationFields value){
-                        std::cout << "SpecificationFields" << std::endl;
-                    },
-                    [](JsonDSL::ConfigFields value){
-                        std::cout << "ConfigFields" << std::endl;
-                    },
-                    [](JsonDSL::RuleType value){
-                        std::cout << "RuleType" << std::endl;
-                    },
-                    [](JsonDSL::RuleParameters value){
-                        std::cout << "RuleParameters" << std::endl;
-                    },
-                    [](JsonDSL::TimerModes value){
-                        std::cout << "TimerModes" << std::endl;
-                    },
-                    [](JsonDSL::SetupFields value){
-                        std::cout << "Upload your json!" << std::endl;
-                        //Setup( /* map[ make_pair("kind", json ] = "the prompt"; */ );
-                    }
+                    // [](JsonDSL::SpecificationFields value){
+                    //     std::cout << "SpecificationFields" << std::endl;
+                    // },
+                    // [](JsonDSL::ConfigFields value){
+                    //     std::cout << "ConfigFields" << std::endl;
+                    // },
+                    // [](JsonDSL::RuleType value){
+                    //     std::cout << "RuleType" << std::endl;
+                    // },
+                    // [](JsonDSL::RuleParameters value){
+                    //     std::cout << "RuleParameters" << std::endl;
+                    // },
+                    // [](JsonDSL::TimerModes value){
+                    //     std::cout << "TimerModes" << std::endl;
+                    // },
+                    // [](JsonDSL::SetupFields value){
+                    //     std::cout << "Upload your json!" << std::endl;
+                    //     //Setup( /* map[ make_pair("kind", json ] = "the prompt"; */ );
+                    // }
                 }, entity);
             }
         }
@@ -177,19 +169,31 @@ namespace Engine {
         // Create a vector of variants
         std::vector<component> entities;
     };
-        struct PlayerCount {
+
+    struct PlayerCount {
         int min;
         int max;
     };
 
+    // testing only
+    enum SetupTypes {
+        INTEGER,
+        STRING,
+        BOOLEAN,
+        Q_A,
+        M_C
+    };
     // {
     //   "kind": <<data kind>>,
     //   "prompt": <<Description of what data the owner should provide>>
     // }
-    using KindPair = std::pair<std::string, std::string>; // TODO this bad
-    struct Setup: GenType<std::string, KindPair> {
-        Setup(const KindPair &param)
-            : Setup(param) {};
+    struct Setup {
+        Components<
+            GenType<SetupTypes, std::string>, 
+            int, 
+            std::string, 
+            bool
+        > setup;
     };
 
     struct CVPA
@@ -208,13 +212,13 @@ namespace Engine {
         bool audience;
         Setup* setup;
 
-    } configuration;
+    };
 
     struct Game {
         Components<
         Configuration,
-        CVPA
-        // Rules don't even touch rules now
+        CVPA,
+        Rules
         > components;
     };
 
@@ -222,9 +226,9 @@ namespace Engine {
     class EngineImpl { 
         public:
             EngineImpl (T& input);
-            Game getGameConfig() const;
+            GenType<std::string, Game> getGameConfig() const;
 
-            Game initalizeEngine();
+            GenType<std::string, Game> initalizeEngine();
 
         private:
             T input;
@@ -240,7 +244,7 @@ namespace Engine {
 
             // Parser Related methods
             bool validGameConfig(T& input);
-            Game buildGame();
+            GenType<std::string, Game> buildGame();
             void mapKeyToValue(T& key, T& value);
             T mapValueToFuntion(T& value);
 

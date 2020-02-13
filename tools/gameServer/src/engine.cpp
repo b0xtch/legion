@@ -18,7 +18,7 @@ namespace Engine {
     input(input) {}
 
     template <typename T> 
-    Game EngineImpl<T>::initalizeEngine() { 
+    GenType<std::string, Game> EngineImpl<T>::initalizeEngine() { 
         std::cout << "Engine Initalizing!" << endl;
 
         if(this->validGameConfig(input)){
@@ -42,7 +42,7 @@ namespace Engine {
     } 
     
     template <typename T> 
-    Game EngineImpl<T>::buildGame() { 
+    GenType<std::string, Game> EngineImpl<T>::buildGame() { 
         std::cout << "Building new game from the following configs..." << endl;
         std::cout << this->input << endl;
 
@@ -64,7 +64,7 @@ namespace Engine {
     }
 
     template <typename T> 
-    Game EngineImpl<T>::getGameConfig() const {
+    GenType<std::string, Game> EngineImpl<T>::getGameConfig() const {
         return this->gameConfig;
     }
 
