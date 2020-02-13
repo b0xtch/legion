@@ -27,13 +27,25 @@ string makeServerMessage(string input);
 int main(int argc, char* argv[]) {
 
     if (argc < 3) {
-        // Give user message about incorrect arguments
+        printf("Incorrect Arguments");
         return 1;
     }
 
-    networking::Client client{argv[1], argv[2]};
-
+    enum menuMode { mainMenu, chatMenu };
+    menuMode currentMode = mainMenu;
     bool done = false;
+
+    // Start Chat Window
+    auto onTextEntry = [&done, &client] (std::string text) {
+    if ("!exit" == text || "!quit" == text) {
+            done = true;
+        } else {
+            client.send( makeServerMessage(text) );
+        }
+    };
+    ChatWindow chatWindow(onTextEntry);
+
+    networking::Client client{argv[1], argv[2]};
 
     MenuManager::initialize_menu_manager();
 
@@ -94,7 +106,8 @@ int main(int argc, char* argv[]) {
         std::string serverMessage = makeServerMessage( command );
         client.send( serverMessage );
 
-        // TODO: move to lobby (chat room?)
+        currentMode = chatMenu;
+        MenuManager::cleanup();
     };
 
     auto moveBackToMainMenuPage = [] () {
@@ -139,59 +152,36 @@ int main(int argc, char* argv[]) {
 
     MenuManager::initialize_starting_page();
 
-    // ----------------------------------------------------
-    // Setup menu loop
-
-    while (!done && !client.isDisconnected() &&
-        MenuManager::get_current_page()->change_selected_option_on_input()) {
-
-        MenuManager::main_menu_driver();
-
-        try {
-            client.update();
-        } catch (std::exception& e) {
-            // Give user message about exception
-            done = true;
-        }
-    
-        auto response = client.receive();
-        if (!response.empty()) {
-            // Give user response
-
-            // Recieve game list
-        }
-
-    }
-
-    // ----------------------------------------------------
-    // Game loop
-
-    auto onTextEntry = [&done, &client] (std::string text) {
-    if ("exit" == text || "quit" == text) {
-        done = true;
-        } else {
-        client.send(text);
-        }
-    };
-
-    ChatWindow chatWindow(onTextEntry);
     while (!done && !client.isDisconnected()) {
 
         try {
             client.update();
         } catch (std::exception& e) {
-            // Give user message about exception
+            printf("Exception from Client update.");
             done = true;
         }
-    
-        auto response = client.receive();
-        if (!response.empty()) {
-            chatWindow.displayText(response);
-        }
-        chatWindow.update();
-    }
 
-    MenuManager::cleanup();
+        if (currentMode == mainMenu) {
+
+            MenuManager::get_current_page()->change_selected_option_on_input();
+            MenuManager::main_menu_driver();
+
+        } else if (currentMode == chatMenu) {
+
+            auto response = client.receive();
+            if (!response.empty()) {
+                chatWindow.displayText(response);
+            }
+            chatWindow.update();
+
+        } else {
+
+            printf("Incorrect Mode.");
+            done = true;
+
+        }
+
+    }
 
     return 0;
 }
@@ -214,6 +204,7 @@ string makeServerMessage(string input) {
     possibleCommands.push_back("!leavesession");
     possibleCommands.push_back("!gameinput");
     possibleCommands.push_back("!whisper");
+    possibleCommands.push_back("!requestGames");
 
     string command = "{ \"command\": \"";
     
