@@ -4,8 +4,9 @@
 #include <vector>
 // #include "session.h"
 #include "player.h"
+#include "engine.h"
 
-class Game{
+class Game: public Engine{
 public:
   Game(const stringVar&, const int& , const stringVar&); // general constructor to support additional games, will add more parameterss
   Game(const stringVar&);

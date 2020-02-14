@@ -45,7 +45,7 @@ namespace Engine {
 
     struct Configuration {
         std::string name;
-        PlayerCount* playecount;
+        PlayerCount* playercount;
         bool audience;
         Setup* setup;
 
@@ -222,7 +222,7 @@ namespace Engine {
         std::vector<component> entities;
     };
 
-    Struct Game {
+    struct Game {
         Components comps;
     }
 
