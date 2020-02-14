@@ -1,14 +1,16 @@
 #include <iostream>
 #include <string>
 #include <unistd.h>
+#include <chrono>
+#include <thread>
 
 #include "GameServer.h"
 
 // This is the file that the server admin must run to start the server.
 
 int main(int argc, char** argv) {
-    if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <port>";
+    if (argc < 3) {
+        std::cerr << "Usage: " << argv[0] << " <port> <config-file-path>" << std::endl;
         return 1;
     }
     
@@ -31,7 +33,8 @@ int main(int argc, char** argv) {
         return 1;
     }
     
-    GameServer gameServer{port, ""};
+    GameServerConfig gsConfig{argv[2]};
+    GameServer gameServer{gsConfig, port, ""};
     
     bool keepRunning = true;
     while (keepRunning) {
@@ -45,6 +48,9 @@ int main(int argc, char** argv) {
         
         gameServer.receive();
         keepRunning = gameServer.getKeepRunning();
+        
+        // https://stackoverflow.com/a/10613664
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
     
     return 0;

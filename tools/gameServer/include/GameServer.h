@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include "SimpleServer.h"
 #include "SessionManager.h"
+#include "Server.h"
 
 /** Handles the loading and parsing of the server configuation file only. */
 class GameServerConfig {
@@ -16,26 +16,27 @@ public:
     
 private:
     std::string_view configLocation;
-    std::string_view gameConfigDir;
-}
+    std::string gameDir;
+    
+    const std::string CFGKEY_GAME_DIR = "games";
+};
 
 class GameServer {
 public:
-    GameServer(int port, const std::string& htmlFile);
+
+    GameServer(GameServerConfig gameServerConfig, int port, const std::string& htmlFile);
     
     /** Useful for testing the GameServer. Perfroms an std::move on the server. */
-    GameServer(networking::Server& server, SessionManager& sessionManager);
+    GameServer(GameServerConfig gameServerConfig, networking::Server& server, SessionManager& sessionManager);
     
     /** Sends out all the messages passed to the intended clients. */
     void send(const std::deque<networking::Message>& messages);
-    /** Sends out text to the given clients. */
-    void sendTextTo(const std::vector<Connection>& connections, std::string text);
     
     /** Allows the server to queue new incoming messages to receive them. */
     void update();
     
     /** Allows the server to update games, sessions, and basically work. */
-    std::string receive();
+    void receive();
     
     /** Returns the port that the server was initialized with. */
     int getPort() const;
@@ -50,12 +51,9 @@ private:
     bool keepRunning;
     int port;
     std::string_view htmlFile;
-    SimpleServer server;
+    networking::Server server;
     SessionManager sessionManager;
     GameServerConfig gameServerConfig;
-    
-    std::vector<Connection> clients;
-    
 };
 
 #endif
