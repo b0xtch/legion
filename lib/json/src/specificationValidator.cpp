@@ -16,14 +16,16 @@ void SpecificationValidator::validateAllNecessaryFieldsPresent(const json& j_obj
     JsonDSL dsl;
     std::pair<specificationIterator, specificationIterator> mapIterator = dsl.getSpecBeginEndIterators();
     
-    std::for_each(mapIterator.first, mapIterator.second, 
+    auto it = std::find_if(mapIterator.first, mapIterator.second, 
         [&j_object](auto& pair){
             std::string fieldToBeChecked = pair.first;
-            if(!j_object.contains(fieldToBeChecked)){
-                throw std::invalid_argument("Top level specification field: " + fieldToBeChecked + " not found");
-            }
+            return !j_object.contains(fieldToBeChecked);
         }
     );
+
+    if(it != mapIterator.second){
+        throw std::invalid_argument("Top level specification Field: " + it->first + " not found.");
+    }
 }
 
 void SpecificationValidator::validateAllFieldsAreValid(const json& j_object){

@@ -14,8 +14,6 @@ JsonDSL::JsonDSL(){
     mapStringToConfigFields.insert({"player count", JsonDSL::PlayerCount});
     mapStringToConfigFields.insert({"audience", JsonDSL::AllowAudience});
     mapStringToConfigFields.insert({"setup", JsonDSL::Setup});
-    mapStringToConfigFields.insert({"min", JsonDSL::MinPlayers});
-    mapStringToConfigFields.insert({"max", JsonDSL::MaxPlayers});
 
     mapStringToRule.insert({"foreach", JsonDSL::Foreach});
     mapStringToRule.insert({"loop", JsonDSL::Loop});
@@ -72,6 +70,8 @@ JsonDSL::JsonDSL(){
     mapStringToSetup.insert({"question-answer", JsonDSL::KindQuestionAnswer});
     mapStringToSetup.insert({"multiple-choice", JsonDSL::KindMultipleChoice});
 
+    minPlayerString = "min";
+    maxPlayerString = "max";
 }
 
 bool JsonDSL::isValidSpecificationField(const std::string& strSpecificationFIeld){
@@ -80,6 +80,10 @@ bool JsonDSL::isValidSpecificationField(const std::string& strSpecificationFIeld
 
 bool JsonDSL::isValidConfigField(const std::string& strConfigField){
     return mapStringToConfigFields.left.count(strConfigField) == 1;
+}
+
+bool JsonDSL::isValidPlayerRestrictionField(const std::string& strRestrictionField){
+    return minPlayerString.compare(strRestrictionField) || maxPlayerString.compare(strRestrictionField);
 }
 
 bool JsonDSL::isValidRule(const std::string& strRule){
@@ -134,6 +138,14 @@ std::string JsonDSL::getStringOfSpecificationCommand(JsonDSL::SpecificationField
 
 std::string JsonDSL::getStringOfConfigCommand(JsonDSL::ConfigFields config){
     return mapStringToConfigFields.right.find(config)->second;
+}
+
+std::string JsonDSL::getStringOfPlayerRestrictionCommand(JsonDSL::PlayerRestriction restriction){
+    if(restriction == JsonDSL::MinPlayers){
+        return minPlayerString;
+    } else{
+        return maxPlayerString;
+    }
 }
 
 std::string JsonDSL::getStringOfRuleCommand(JsonDSL::RuleType rule){

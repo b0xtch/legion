@@ -14,7 +14,10 @@ public:
         PerPlayer, PerAudience, Rules};
 
     enum ConfigFields{
-        GameName, PlayerCount, AllowAudience, Setup,
+        GameName, PlayerCount, AllowAudience, Setup
+    };
+
+    enum PlayerRestriction{
         MinPlayers, MaxPlayers
     };
 
@@ -63,6 +66,7 @@ public:
 
     bool isValidSpecificationField(const std::string&);
     bool isValidConfigField(const std::string&);
+    bool isValidPlayerRestrictionField(const std::string&);
     bool isValidRule(const std::string&);
     bool isValidRuleParameter(const std::string&);
     bool isValidTimerMode(const std::string&);
@@ -89,6 +93,7 @@ public:
 
     std::string getStringOfSpecificationCommand(SpecificationFields specification);
     std::string getStringOfConfigCommand(ConfigFields config);
+    std::string getStringOfPlayerRestrictionCommand(PlayerRestriction restriction);
     std::string getStringOfRuleCommand(RuleType rule);
     std::string getStringOfRuleParameterCommand(RuleParameters paramter);
     std::string getStringOfTimerModesCommand(TimerModes timerMode);
@@ -101,5 +106,7 @@ private:
     ruleParameterMap mapStringToRuleParameters;
     timerModeMap mapStringToTimerModes;
     setupMap mapStringToSetup;
+    std::string minPlayerString;
+    std::string maxPlayerString;
 };
 #endif
