@@ -14,7 +14,7 @@ GameServerConfig::GameServerConfig() :
     
 }
 
-GameServerConfig::GameServerConfig(std::string_view configText) {
+void GameServerConfig::parse(const std::string& configText) {
     using json = nlohmann::json;
     
     try {
@@ -37,7 +37,7 @@ GameServerConfig::GameServerConfig(std::string_view configText) {
     }
 }
 
-std::string_view GameServerConfig::getGameConfigDir() const {
+std::string GameServerConfig::getGameConfigDir() const {
     return gameDir;
 }
 

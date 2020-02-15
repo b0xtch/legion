@@ -10,9 +10,9 @@
 class GameServerConfig {
 public:
     GameServerConfig();
-    GameServerConfig(std::string_view configData);
+    void parse(const std::string& configData);
     
-    std::string_view getGameConfigDir() const;
+    std::string getGameConfigDir() const;
     int getMaxSessions() const;
     int getMaxConnections() const;
 private:

@@ -34,11 +34,11 @@ int main(int argc, char** argv) {
         return 1;
     }
     
-    std::string_view configText;
+    std::string configText;
     GameServerConfig gsConfig{};
     try {
         configText = Utils::loadFile(argv[2]);
-        gsConfig = {configText};
+        gsConfig.parse(configText);
     }
     catch (std::runtime_error& e) {
         std::cerr << e.what() << std::endl;
