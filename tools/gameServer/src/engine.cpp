@@ -6,6 +6,7 @@
 #include <algorithm>
 #include "engine.h"
 #include <json.hpp>
+#include <any>
 // #include "jsonvalidator.h"
 
 using json = nlohmann::json;
@@ -99,8 +100,12 @@ namespace Engine {
     template <typename T> 
     CVPA& EngineImpl<T>::setConstants(const T& in){
         CVPA constants;
-
-        // this->gameConfig["constants"] = constants;
+        json constantsJson = this->gameConfig["constants"];
+        std::unordered_map<std::string, std::any> constantsMap;
+        for(auto jsonItem : constantsJson.items()){
+            constantsMap[jsonItem.key()] = jsonItem.value()
+        }
+        constants.constants.map = constantsMap;
         return constants;
     }
 
