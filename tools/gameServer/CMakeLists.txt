@@ -30,7 +30,7 @@ target_include_directories(User
 target_link_libraries(User networking)
 
 add_executable(server src/main.cpp)
-target_link_libraries(server GameServer)
+target_link_libraries(server GameServer Utils)
 
 # https://stackoverflow.com/a/29871891
 set(THREADS_PREFER_PTHREAD_FLAG ON)

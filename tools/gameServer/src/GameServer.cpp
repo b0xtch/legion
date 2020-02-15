@@ -8,30 +8,22 @@
 #include "json.hpp"
 #include "Utils.h"
 
-GameServerConfig::GameServerConfig() :
-    GameServerConfig{"./configuration.txt"}
-{
-    
-}
-
-GameServerConfig::GameServerConfig(const std::string& configLocation) :
-    configLocation{configLocation}
-{
+GameServerConfig::GameServerConfig(std::string_view configText) {
     using json = nlohmann::json;
     
     json j;
     try {
-        j = json::parse(Utils::loadFile(configLocation));
+        j = json::parse(configText);
         gameDir = j[CFGKEY_GAME_DIR];
         
         // NOTE: Be careful when using "." or ".." as the value for "games" in the configuration file.
         // Those will refer to the working directory of the program rather than the location of the config file.
     }
     catch (const json::parse_error& e) {
-        std::cerr << "There was a problem reading the configuration file." << std::endl;
+        std::cerr << "There was a problem reading the configuration data." << std::endl;
     }
     catch (const json::type_error& e) {
-        std::cerr << "There are missing configurations in the file." << std::endl;
+        std::cerr << "There are missing configurations." << std::endl;
     }
     catch (const std::runtime_error& e) {
         std::cerr << "There was an error opening the configuration file." << std::endl;

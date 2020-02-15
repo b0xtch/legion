@@ -9,13 +9,11 @@
 /** Handles the loading and parsing of the server configuation file only. */
 class GameServerConfig {
 public:
-    GameServerConfig();
-    GameServerConfig(const std::string& configLocation);
+    GameServerConfig(std::string_view configData);
     
     std::string_view getGameConfigDir() const;
     
 private:
-    std::string_view configLocation;
     std::string gameDir;
     
     const std::string CFGKEY_GAME_DIR = "games";

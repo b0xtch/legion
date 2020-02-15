@@ -5,6 +5,7 @@
 #include <thread>
 
 #include "GameServer.h"
+#include "Utils.h"
 
 // This is the file that the server admin must run to start the server.
 
@@ -33,7 +34,15 @@ int main(int argc, char** argv) {
         return 1;
     }
     
-    GameServerConfig gsConfig{argv[2]};
+    std::string_view configText;
+    try {
+        configText = Utils::loadFile(argv[2]);
+    }
+    catch (std::runtime_error& e) {
+        std::cerr << "Error: Configuration file could not be opened!" << std::endl;
+    }
+    
+    GameServerConfig gsConfig{configText};
     GameServer gameServer{gsConfig, port, ""};
     
     bool keepRunning = true;
