@@ -65,22 +65,22 @@ public:
     bool isValidSetupKind(const std::string&);
 
     std::pair<specificationMap::left_const_iterator, 
-                specificationMap::left_const_iterator> getSpecificationIterator();
+                specificationMap::left_const_iterator> getSpecBeginEndIterators();
                 
     std::pair<configMap::left_const_iterator, 
-                configMap::left_const_iterator>getConfigIterator();
+                configMap::left_const_iterator>getConfigBeginEndIterators();
 
     std::pair<ruleMap::left_const_iterator, 
-                ruleMap::left_const_iterator> getRuleIterator();
+                ruleMap::left_const_iterator> getRuleBeginEndIterators();
 
     std::pair<ruleParameterMap::left_const_iterator, 
-                ruleParameterMap::left_const_iterator>getRuleParameterIterator();
+                ruleParameterMap::left_const_iterator>getRuleParameterBeginEndIterators();
 
     std::pair<timerModeMap::left_const_iterator, 
-                timerModeMap::left_const_iterator>getTimerModeIterator();
+                timerModeMap::left_const_iterator>getTimerModeBeginEndIterators();
 
     std::pair<setupMap::left_const_iterator, 
-                setupMap::left_const_iterator>getSetupIterator();
+                setupMap::left_const_iterator>getSetupBeginEndIterators();
 
 
     std::string getStringOfSpecificationCommand(SpecificationFields specification);

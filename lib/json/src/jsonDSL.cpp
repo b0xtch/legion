@@ -99,32 +99,32 @@ bool JsonDSL::isValidSetupKind(const std::string& strSetupKind){
 }
 
 std::pair<JsonDSL::specificationMap::left_const_iterator, 
-            JsonDSL::specificationMap::left_const_iterator> JsonDSL::getSpecificationIterator(){
+            JsonDSL::specificationMap::left_const_iterator> JsonDSL::getSpecBeginEndIterators(){
     return std::make_pair(mapStringToSpecification.left.begin(), mapStringToSpecification.left.end());
 }
 
 std::pair<JsonDSL::configMap::left_const_iterator, 
-            JsonDSL::configMap::left_const_iterator> JsonDSL::getConfigIterator(){
+            JsonDSL::configMap::left_const_iterator> JsonDSL::getConfigBeginEndIterators(){
     return std::make_pair(mapStringToConfigFields.left.begin(), mapStringToConfigFields.left.end());
 }
 
 std::pair<JsonDSL::ruleMap::left_const_iterator, 
-            JsonDSL::ruleMap::left_const_iterator> JsonDSL::getRuleIterator(){
+            JsonDSL::ruleMap::left_const_iterator> JsonDSL::getRuleBeginEndIterators(){
     return std::make_pair(mapStringToRule.left.begin(), mapStringToRule.left.end());
 }
 
 std::pair<JsonDSL::ruleParameterMap::left_const_iterator, 
-            JsonDSL::ruleParameterMap::left_const_iterator> JsonDSL::getRuleParameterIterator(){
+            JsonDSL::ruleParameterMap::left_const_iterator> JsonDSL::getRuleParameterBeginEndIterators(){
     return std::make_pair(mapStringToRuleParameters.left.begin(), mapStringToRuleParameters.left.end());
 }
 
 std::pair<JsonDSL::timerModeMap::left_const_iterator, 
-            JsonDSL::timerModeMap::left_const_iterator> JsonDSL::getTimerModeIterator(){
+            JsonDSL::timerModeMap::left_const_iterator> JsonDSL::getTimerModeBeginEndIterators(){
     return std::make_pair(mapStringToTimerModes.left.begin(), mapStringToTimerModes.left.end());
 }
 
 std::pair<JsonDSL::setupMap::left_const_iterator, 
-            JsonDSL::setupMap::left_const_iterator> JsonDSL::getSetupIterator(){
+            JsonDSL::setupMap::left_const_iterator> JsonDSL::getSetupBeginEndIterators(){
     return std::make_pair(mapStringToSetup.left.begin(), mapStringToSetup.left.end());
 }
 

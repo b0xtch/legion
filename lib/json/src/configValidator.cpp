@@ -13,9 +13,9 @@ RuleValidator ConfigValidator::validateConfig(const json& j_object){
     return RuleValidator();
 }
 
-void ConfigValidator::validateAllFieldsAreValid(const json& j_object){
+void ConfigValidator::validateAllNecessaryFieldsPresent(const json& j_object){
     JsonDSL dsl;
-    std::pair<configIterator, configIterator> mapIterator = dsl.getConfigIterator();
+    std::pair<configIterator, configIterator> mapIterator = dsl.getConfigBeginEndIterators();
     json configurations = j_object[dsl.getStringOfSpecificationCommand(JsonDSL::Configuration)];
     
     std::string minPlayerStr = dsl.getStringOfConfigCommand(JsonDSL::MinPlayers);
@@ -32,7 +32,7 @@ void ConfigValidator::validateAllFieldsAreValid(const json& j_object){
     );
 }
 
-void ConfigValidator::validateAllNecessaryFieldsPresent(const json& j_object){
+void ConfigValidator::validateAllFieldsAreValid(const json& j_object){
     JsonDSL dsl;
     json configuration = j_object[dsl.getStringOfSpecificationCommand(JsonDSL::Configuration)];
     for(auto jsonItem : configuration.items()){
