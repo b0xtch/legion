@@ -6,7 +6,7 @@
 #include <assert.h>
 #include <map>
 
-#include "player.h"
+// #include "player.h"
 
 using namespace std; 
 
@@ -32,15 +32,15 @@ typedef string message;
 //     Score, Ascending
 
 struct GenRule{
-	GenRule() {};
 	GenRule(const string &name) : 
 		rule_name{name} 
 		{};
+	GenRule() {};
 
 	string rule_name;
 };
 
-using RulesList = const vector<GenRule>;
+using RulesList = vector<GenRule>;
 
 /*************************************
 *
@@ -50,8 +50,7 @@ using RulesList = const vector<GenRule>;
 
 template <typename T> 
 struct ForEach : GenRule{
-	ForEach() {};
-	ForEach(const vector<T> &v, const T &el, RulesList &r) : 
+	ForEach(vector<T> v, T el, RulesList r) : 
 		GenRule{"ForEach"}, //passing it as is?
 		list{v},
 		element{el},
@@ -168,7 +167,7 @@ struct Deal : GenRule{
 		count{count}
 		{};
 
-	vector<T> list from, to;
+	vector<T> from, to;
 	int count;
 };
 
@@ -181,7 +180,7 @@ struct Discard : GenRule{
 		count{count}
 		{};
 
-	vector<T> list from
+	vector<T> from;
 	int count;
 };
 
@@ -224,9 +223,9 @@ struct Timer : GenRule {
 		rules_to_run{r},
 		flag{flag}
 		{
-			if(mode != "track"){
-				assert flag == nullptr;
-			}
+			// if(mode != "track"){
+			// 	assert flag == nullptr;
+			// }
 		};
 
 	seconds seconds;
@@ -242,48 +241,48 @@ struct Timer : GenRule {
 *
 **************************************/
 
-template <typename T> 
-struct InputText : GenRule {
-	InputText() {};
-	//change to from type Player to type accepting both audience and player
-	InputText(Player *to, const message &prompt, T &ret, seconds &timeout) :
-		GenRule{"InputText"},
-		to{to},
-		prompt{prompt};
-		ret{ret},
-		timeout{timeout}
-		{};
+// template <typename T> 
+// struct InputText : GenRule {
+// 	InputText() {};
+// 	//change to from type Player to type accepting both audience and player
+// 	InputText(Player *to, const message &prompt, T &ret, seconds &timeout) :
+// 		GenRule{"InputText"},
+// 		to{to},
+// 		prompt{prompt};
+// 		ret{ret},
+// 		timeout{timeout}
+// 		{};
 
-	Player *to;
-	message prompt;
-	T ret;
-	seconds timeout;
-};
+// 	Player *to;
+// 	message prompt;
+// 	T ret;
+// 	seconds timeout;
+// };
 
-template <typename T, typename Y> 
-struct InputVote : GenRule {
-	InputVote() {};
-	//change to from type Player to type accepting both audience and player
-	InputVote(
-		const vector<Player> &to, 
-		const message &prompt, 
-		const vector<T> &choices, 
-		Y &ret,
-		seconds &timeout) :
+// template <typename T, typename Y> 
+// struct InputVote : GenRule {
+// 	InputVote() {};
+// 	//change to from type Player to type accepting both audience and player
+// 	InputVote(
+// 		const vector<Player> &to, 
+// 		const message &prompt, 
+// 		const vector<T> &choices, 
+// 		Y &ret,
+// 		seconds &timeout) :
 
-		GenRule{"InputVote"},
-		to{to},
-		prompt{prompt};
-		ret{ret},
-		timeout{timeout}
-		{};
+// 		GenRule{"InputVote"},
+// 		to{to},
+// 		prompt{prompt};
+// 		ret{ret},
+// 		timeout{timeout}
+// 		{};
 
-	vector<Player> to;
-	message prompt;
-	vector<T> choices;
-	Y ret;
-	seconds timeout;
-};
+// 	vector<Player> to;
+// 	message prompt;
+// 	vector<T> choices;
+// 	Y ret;
+// 	seconds timeout;
+// };
 
 /*************************************
 *
@@ -291,18 +290,18 @@ struct InputVote : GenRule {
 *
 **************************************/
 
-struct Message : GenRule {
-	Message() {};
-	//need to support python style () later
-	Message(const vector<Player> &to, const message &value) :
-		GenRule{"Message"},
-		to{to},
-		value{value}
-		{};
+// struct Message : GenRule {
+// 	Message() {};
+// 	//need to support python style () later
+// 	Message(const vector<Player> &to, const message &value) :
+// 		GenRule{"Message"},
+// 		to{to},
+// 		value{value}
+// 		{};
 
-	vector<Player> to;
-	message value;
-};
+// 	vector<Player> to;
+// 	message value;
+// };
 
 struct GlobalMessage : GenRule {
 	GlobalMessage() {};
@@ -313,6 +312,17 @@ struct GlobalMessage : GenRule {
 		{};
 
 	message value;
+};
+
+//WIP
+class ScoreBoard {
+public:
+	// addScore();
+	// getScore();
+	ScoreBoard();
+
+private:
+	// map<Player, int> scoreboard;
 };
 
 struct Scores : GenRule {
@@ -326,17 +336,5 @@ struct Scores : GenRule {
 	ScoreBoard scoreboard;
 	condition ascending;
 };
-
-//WIP
-Class ScoreBoard {
-public:
-	// addScore();
-	// getScore();
-	ScoreBoard();
-
-private:
-	map<Player, int> scoreboard;
-};
-
 
 #endif
