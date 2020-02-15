@@ -3,15 +3,31 @@
 
 #include <string>
 
-#include "Server.h"
 #include "SessionManager.h"
+#include "Server.h"
+
+/** Handles the loading and parsing of the server configuation file only. */
+class GameServerConfig {
+public:
+    GameServerConfig();
+    GameServerConfig(const std::string& configLocation);
+    
+    std::string_view getGameConfigDir() const;
+    
+private:
+    std::string_view configLocation;
+    std::string gameDir;
+    
+    const std::string CFGKEY_GAME_DIR = "games";
+};
 
 class GameServer {
 public:
-    GameServer(int port, const std::string& htmlFile);
+
+    GameServer(GameServerConfig gameServerConfig, int port, const std::string& htmlFile);
     
     /** Useful for testing the GameServer. Perfroms an std::move on the server. */
-    GameServer(networking::Server& server, SessionManager& sessionManager);
+    GameServer(GameServerConfig gameServerConfig, networking::Server& server, SessionManager& sessionManager);
     
     /** Sends out all the messages passed to the intended clients. */
     void send(const std::deque<networking::Message>& messages);
@@ -37,6 +53,7 @@ private:
     std::string_view htmlFile;
     networking::Server server;
     SessionManager sessionManager;
+    GameServerConfig gameServerConfig;
 };
 
 #endif

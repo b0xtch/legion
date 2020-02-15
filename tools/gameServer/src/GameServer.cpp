@@ -2,11 +2,50 @@
 
 #include <algorithm>
 
+#include <iostream>
+
 #include "MessageType.h"
+#include "json.hpp"
+#include "Utils.h"
+
+GameServerConfig::GameServerConfig() :
+    GameServerConfig{"./configuration.txt"}
+{
+    
+}
+
+GameServerConfig::GameServerConfig(const std::string& configLocation) :
+    configLocation{configLocation}
+{
+    using json = nlohmann::json;
+    
+    json j;
+    try {
+        j = json::parse(Utils::loadFile(configLocation));
+        gameDir = j[CFGKEY_GAME_DIR];
+        
+        // NOTE: Be careful when using "." or ".." as the value for "games" in the configuration file.
+        // Those will refer to the working directory of the program rather than the location of the config file.
+    }
+    catch (const json::parse_error& e) {
+        std::cerr << "There was a problem reading the configuration file." << std::endl;
+    }
+    catch (const json::type_error& e) {
+        std::cerr << "There are missing configurations in the file." << std::endl;
+    }
+    catch (const std::runtime_error& e) {
+        std::cerr << "There was an error opening the configuration file." << std::endl;
+    }
+}
+
+std::string_view GameServerConfig::getGameConfigDir() const {
+    return gameDir;
+}
 
 // PUBLIC
 
-GameServer::GameServer(int port, const std::string& htmlFile) :
+GameServer::GameServer(GameServerConfig gameServerConfig, int port, const std::string& htmlFile) :
+    gameServerConfig{gameServerConfig},
     keepRunning{true},
     port{port},
     htmlFile{htmlFile},
@@ -22,7 +61,8 @@ GameServer::GameServer(int port, const std::string& htmlFile) :
     
 }
 
-GameServer::GameServer(networking::Server& server, SessionManager& sessionManager) :
+GameServer::GameServer(GameServerConfig gameServerConfig, networking::Server& server, SessionManager& sessionManager) :
+    gameServerConfig{gameServerConfig},
     server{std::move(server)},
     sessionManager{sessionManager},
     keepRunning{true}, port{-1}, htmlFile{""}
@@ -34,37 +74,21 @@ void GameServer::send(const std::deque<networking::Message>& messages) {
     server.send(messages);
 }
 
+void GameServer::update() {
+    server.update();
+}
+
 void GameServer::receive() {
     auto incomingMessages = server.receive();
     
     // Check and deal with messages about creating/joining rooms or server shutdowns.
-    std::vector<networking::Message> unhandledMessages;
-    std::for_each(incomingMessages.front(), incomingMessages.back(),
-        [this, &unhandledMessages] (networking::Message msg) {
-            auto msgType = MessageType::interpretType(msg.text);
-            switch (msgType) {
-                case MessageType::Type::ServerStop:
-                    this->keepRunning = false;
-                    break;
-                case MessageType::Type::CreateSession:
-                    this->sessionManager.createNewSession();
-                    break;
-                case MessageType::Type::JoinSession:
-                    //this->sessionManager.joinToSession(); Currently no implementation
-                    break;
-                default:
-                    unhandledMessages.push_back(msg);
-                    break;
-            }
-        }
-    );
+    std::deque<networking::Message> batchToSend{};
+    for (auto& msg : incomingMessages) {
+        std::vector<networking::Message> toSend = sessionManager.processMessage(msg);
+        batchToSend.insert(batchToSend.end(), toSend.begin(), toSend.end());
+    }
     
-    // Pass the remaining messages to SessionManager for distribution and handling
-    //sessionManager.process(unhandledMessages); Currently no implementation
-}
-
-void GameServer::update() {
-    server.update();
+    send(batchToSend);
 }
 
 int GameServer::getPort() const {

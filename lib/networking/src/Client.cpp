@@ -34,7 +34,8 @@ public:
       ioService{},
       websocket{ioService} {
     boost::asio::ip::tcp::resolver resolver{ioService};
-    connect(resolver.resolve(address, port));
+    //connect(resolver.resolve(address, port));
+    connect(resolver.resolve(static_cast<std::string>(address), static_cast<std::string>(port)));
   }
 
   void disconnect();
