@@ -3,7 +3,14 @@
 #include <variant>
 #include <vector>
 #include <map>
+#include <any>
 #include <unordered_map>
+#include <iostream>
+#include <string>
+#include <variant>
+#include <vector>
+#include <map>
+#include <any>
 
 // TODO
 /**
@@ -29,9 +36,28 @@ enum RuleTypes{
 
 enum Arithmetic {
     upFrom,
-    downFrom,
-    add
+    downFrom
 };
+
+
+template<class...>
+struct type_list{};
+
+template<class... TYPES>
+struct visitor_base
+{
+    using types = type_list<TYPES...>;
+};
+
+struct print_visitor : visitor_base<int, double, std::string, bool, RuleTypes, SetupTypes>
+{
+    template<class T>
+    void operator()(T& _in)
+    {
+        std::cout << _in << " ";
+    }
+};
+
 
 template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>; 
@@ -69,50 +95,44 @@ struct Components{
 };
 
 
-template<typename E, typename A>
-struct arithm {
-    arithm(const E& type): type(type) {} // change this to accept a pair for addition
-    
-    template<typename T>
-    auto& operator()(const T& value){
-        switch (type)
-        {
+template<typename E>
+struct arithm
+{
+    arithm(const E& value): value(value) {}
+    auto operator()(Arithmetic& type){
+        switch (type){
             case upFrom:
-                value++;
+                std::cout << "adding one" << std::endl;
+                value += 1;
                 break;
             case downFrom:
-                value--;
+                std::cout << "minus one" << std::endl;
+                value -= 1;
+                break;
+                
+            default:
                 break;
         }
     }
 
-    auto& operator()(const A& value){
-        switch (type)
-        {
-            case add:
-                std::cout << value.first + value.second << std::endl;
-                return value;
-                break;
-        }
-    }
-
-    E type;
+    E value;
 };
 
-template<typename E, typename A> // switch this to accept an varidic args
+template<typename E>
 struct Interpreter
 {
-    Interpreter(const E& type): type(type) {}
-
-    template <typename T>
-    auto operator()(T&& value){
+    Interpreter(const E& value){
         component.entities.emplace_back(value);
-        component.visit(arithm<E, T>{type});
     }
 
-    Components<A> component;
-    E type;
+    template <class T>
+    auto operator()(T&& value){
+        component.visit(arithm<T>{value});
+    }
+
+    Components<E> component;
 };
+
 
 template <typename G, typename... Args> 
 struct tes3 {
@@ -135,6 +155,7 @@ struct Configuration{
 
 int main()
 {    
+
     tes3<std::string, Configuration> w {{
         {"config", config}
     }};
@@ -142,73 +163,68 @@ int main()
     for(auto& n : w.map) {
         std::cout << "Key:[" << n.first << "] Value:[" << n.second.map["example"].map["name"] << "]\n";
     }
-    
-    using var_t = std::variant<int, const char*>;
-    std::vector<var_t> vars = {1, 2, "Hello, World!"};
+    // using var_t = std::variant<int, const char*>;
+    // std::vector<var_t> vars = {1, 2, "Hello, World!"};
 
-    for (auto& v : vars) {
-        std::visit(overloaded {  // (3)
-            [](int i) { printf("%d\n", i); },
-            [](const char* str) { puts(str); }
-        }, v);
-    }
+    // for (auto& v : vars) {
+    //     std::visit(overloaded {  // (3)
+    //         [](int i) { printf("%d\n", i); },
+    //         [](const char* str) { puts(str); }
+    //     }, v);
+    // }
 
+    auto printer = [](auto&& value){std::cout << value << " ";};
     // auto print_container = [](VariantContainer<int, double, std::string, bool, FragileItem, Setup>& value){
     //     value.visit(print_visitor{}); 
     //     std::cout << std::endl;
     // };
 
-
-    auto printer = [](auto&& value){std::cout << value << " ";};
-
     Components<int, double, std::string, bool, RuleTypes, SetupTypes> comp1;
-    comp1.entities.emplace_back(44);
-    comp1.entities.emplace_back(3.127);
+    comp1.entities.emplace_back(1);
+    comp1.entities.emplace_back(2.2);
     comp1.entities.emplace_back("foo");
     comp1.entities.emplace_back(false);
     comp1.entities.emplace_back(KindQuestionAnswer);
     comp1.entities.emplace_back(Scores);
 
-    comp1.visit(printer);
-    std::cout << std::endl;
-    
-    comp1.visit();
 
-    comp1.visit();
-    
-    comp1.visit(printer);
+    Components<int> comp2;
+    comp2.entities.emplace_back(1);
+
+    comp2.visit(printer);
     std::cout << std::endl;
 
+    comp2.visit(Interpreter<Arithmetic> {upFrom});
 
-    // Components<int> comp2;
-    // comp2.entities.emplace_back(1);
+    comp2.visit(printer);
+    std::cout << std::endl;
 
-    // comp2.visit(printer);
+    std::cout << std::endl;
+
+    Components<int> comp3;
+    comp3.entities.emplace_back(2);
+
+    comp3.visit(printer);
+    std::cout << std::endl;
+
+    comp3.visit(Interpreter<Arithmetic> {downFrom});
+
+    comp3.visit(printer);
+    std::cout << std::endl;
+
+
+    // print them
+    // game_components.visit(printer);
     // std::cout << std::endl;
 
-    // comp2.visit(Interpreter<Arithmetic> {upFrom});
+    //
+    // game_components.visit();
 
-    // comp2.visit(printer);
-    // std::cout << std::endl;
-
-    // std::cout << std::endl;
-
-    // Components<int> comp3;
-    // comp3.entities.emplace_back(2);
-
-    // comp3.visit(printer);
-    // std::cout << std::endl;
-
-    // comp3.visit(Interpreter<Arithmetic> {downFrom});
-
-    // comp3.visit(printer);
-    // std::cout << std::endl;
+    // double them
+    // comp1.visit(Interpreter{});
     
+    // print again
+    // comp1.visit(printer);
+    // std::cout << std::endl;
 
-    using KindPair = std::pair<int, int>;
-    Components<KindPair> comp4;
-    KindPair b {1, 1};
-    comp4.entities.emplace_back(b);
-
-    comp4.visit(Interpreter<Arithmetic, KindPair> {add});
 }
