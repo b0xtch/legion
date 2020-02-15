@@ -22,6 +22,11 @@ target_include_directories(configValidator
     PUBLIC $<INSTALL_INTERFACE:include>)
 target_link_libraries(configValidator nlohmann_json jsonDSL)
 
+add_library (variableValidator ./src/variableValidator.cpp ./include/fieldValidators.h)
+target_include_directories(variableValidator
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PUBLIC $<INSTALL_INTERFACE:include>)
+target_link_libraries(variableValidator nlohmann_json jsonDSL)
 
 # if you want to add a new library (for example, jsonParser) that uses nlohmann_json,
 # then add the line { target_link_libraries(jsonParser nlohmann_json) } to the CMakeLists.txt that adds the library

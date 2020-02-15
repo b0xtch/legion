@@ -14,7 +14,10 @@ public:
         PerPlayer, PerAudience, Rules};
 
     enum ConfigFields{
-        GameName, PlayerCount, AllowAudience, Setup,
+        GameName, PlayerCount, AllowAudience, Setup
+    };
+
+    enum PlayerRestriction{
         MinPlayers, MaxPlayers
     };
 
@@ -43,6 +46,10 @@ public:
         KindQuestionAnswer, KindMultipleChoice  
     };
 
+    enum VariableDataType{
+        VarInteger, VarBoolean, VarString, VarStructured
+    };
+
     // TODO:: get it to kevs standard
     enum Arithmetic {
         upFrom,
@@ -59,32 +66,34 @@ public:
 
     bool isValidSpecificationField(const std::string&);
     bool isValidConfigField(const std::string&);
+    bool isValidPlayerRestrictionField(const std::string&);
     bool isValidRule(const std::string&);
     bool isValidRuleParameter(const std::string&);
     bool isValidTimerMode(const std::string&);
     bool isValidSetupKind(const std::string&);
 
     std::pair<specificationMap::left_const_iterator, 
-                specificationMap::left_const_iterator> getSpecificationIterator();
+                specificationMap::left_const_iterator> getSpecBeginEndIterators();
                 
     std::pair<configMap::left_const_iterator, 
-                configMap::left_const_iterator>getConfigIterator();
+                configMap::left_const_iterator>getConfigBeginEndIterators();
 
     std::pair<ruleMap::left_const_iterator, 
-                ruleMap::left_const_iterator> getRuleIterator();
+                ruleMap::left_const_iterator> getRuleBeginEndIterators();
 
     std::pair<ruleParameterMap::left_const_iterator, 
-                ruleParameterMap::left_const_iterator>getRuleParameterIterator();
+                ruleParameterMap::left_const_iterator>getRuleParameterBeginEndIterators();
 
     std::pair<timerModeMap::left_const_iterator, 
-                timerModeMap::left_const_iterator>getTimerModeIterator();
+                timerModeMap::left_const_iterator>getTimerModeBeginEndIterators();
 
     std::pair<setupMap::left_const_iterator, 
-                setupMap::left_const_iterator>getSetupIterator();
+                setupMap::left_const_iterator>getSetupBeginEndIterators();
 
 
     std::string getStringOfSpecificationCommand(SpecificationFields specification);
     std::string getStringOfConfigCommand(ConfigFields config);
+    std::string getStringOfPlayerRestrictionCommand(PlayerRestriction restriction);
     std::string getStringOfRuleCommand(RuleType rule);
     std::string getStringOfRuleParameterCommand(RuleParameters paramter);
     std::string getStringOfTimerModesCommand(TimerModes timerMode);
@@ -97,5 +106,7 @@ private:
     ruleParameterMap mapStringToRuleParameters;
     timerModeMap mapStringToTimerModes;
     setupMap mapStringToSetup;
+    std::string minPlayerString;
+    std::string maxPlayerString;
 };
 #endif

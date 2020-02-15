@@ -12,21 +12,23 @@ ConfigValidator SpecificationValidator::validateSpecification(const json& j_obje
     return ConfigValidator();
 }
 
-void SpecificationValidator::validateAllFieldsAreValid(const json& j_object){
+void SpecificationValidator::validateAllNecessaryFieldsPresent(const json& j_object){
     JsonDSL dsl;
-    std::pair<specificationIterator, specificationIterator> mapIterator = dsl.getSpecificationIterator();
+    std::pair<specificationIterator, specificationIterator> mapIterator = dsl.getSpecBeginEndIterators();
     
-    std::for_each(mapIterator.first, mapIterator.second, 
+    auto it = std::find_if(mapIterator.first, mapIterator.second, 
         [&j_object](auto& pair){
             std::string fieldToBeChecked = pair.first;
-            if(!j_object.contains(fieldToBeChecked)){
-                throw std::invalid_argument("Top level specification field: " + fieldToBeChecked + " not found");
-            }
+            return !j_object.contains(fieldToBeChecked);
         }
     );
+
+    if(it != mapIterator.second){
+        throw std::invalid_argument("Top level specification Field: " + it->first + " not found.");
+    }
 }
 
-void SpecificationValidator::validateAllNecessaryFieldsPresent(const json& j_object){
+void SpecificationValidator::validateAllFieldsAreValid(const json& j_object){
     JsonDSL dsl;
     for(auto jsonItem : j_object.items()){
         if(!dsl.isValidSpecificationField(jsonItem.key())){
