@@ -63,7 +63,7 @@ GameServer::GameServer(GameServerConfig gameServerConfig, int port, const std::s
         [this] (networking::Connection c) {
             //this->sessionManager.removeConnection(c); Currently no implementation
         }},
-    sessionManager{}
+    sessionManager{3}
 {
     
 }
