@@ -3,7 +3,7 @@
 #include <variant>
 #include <vector>
 #include <map>
-#include <any>
+#include <unordered_map>
 
 // TODO
 /**
@@ -114,18 +114,44 @@ struct Interpreter
     E type;
 };
 
+template <typename G, typename... Args> 
+struct tes3 {
+    std::unordered_map<G, Args...> map;
+};
+
+struct Example{
+    std::string name {"all the way inside"};
+    std::map<std::string, std::string> map {{"name", name}};
+};
+
+struct Configuration{
+    Example ex;
+
+    std::string name{"config"};
+    std::map<std::string, Example> map {
+        {"example", ex}
+    };
+}config;
 
 int main()
 {    
-    // using var_t = std::variant<int, const char*>;
-    // std::vector<var_t> vars = {1, 2, "Hello, World!"};
+    tes3<std::string, Configuration> w {{
+        {"config", config}
+    }};
+    
+    for(auto& n : w.map) {
+        std::cout << "Key:[" << n.first << "] Value:[" << n.second.map["example"].map["name"] << "]\n";
+    }
+    
+    using var_t = std::variant<int, const char*>;
+    std::vector<var_t> vars = {1, 2, "Hello, World!"};
 
-    // for (auto& v : vars) {
-    //     std::visit(overloaded {  // (3)
-    //         [](int i) { printf("%d\n", i); },
-    //         [](const char* str) { puts(str); }
-    //     }, v);
-    // }
+    for (auto& v : vars) {
+        std::visit(overloaded {  // (3)
+            [](int i) { printf("%d\n", i); },
+            [](const char* str) { puts(str); }
+        }, v);
+    }
 
     // auto print_container = [](VariantContainer<int, double, std::string, bool, FragileItem, Setup>& value){
     //     value.visit(print_visitor{}); 
@@ -135,23 +161,23 @@ int main()
 
     auto printer = [](auto&& value){std::cout << value << " ";};
 
-    // Components<int, double, std::string, bool, RuleTypes, SetupTypes> comp1;
-    // comp1.entities.emplace_back(44);
-    // comp1.entities.emplace_back(3.127);
-    // comp1.entities.emplace_back("foo");
-    // comp1.entities.emplace_back(false);
-    // comp1.entities.emplace_back(KindQuestionAnswer);
-    // comp1.entities.emplace_back(Scores);
+    Components<int, double, std::string, bool, RuleTypes, SetupTypes> comp1;
+    comp1.entities.emplace_back(44);
+    comp1.entities.emplace_back(3.127);
+    comp1.entities.emplace_back("foo");
+    comp1.entities.emplace_back(false);
+    comp1.entities.emplace_back(KindQuestionAnswer);
+    comp1.entities.emplace_back(Scores);
 
-    // comp1.visit(printer);
-    // std::cout << std::endl;
+    comp1.visit(printer);
+    std::cout << std::endl;
     
-    // comp1.visit();
+    comp1.visit();
 
-    // comp1.visit();
+    comp1.visit();
     
-    // comp1.visit(printer);
-    // std::cout << std::endl;
+    comp1.visit(printer);
+    std::cout << std::endl;
 
 
     // Components<int> comp2;
