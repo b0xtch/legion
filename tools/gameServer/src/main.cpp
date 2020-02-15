@@ -35,14 +35,15 @@ int main(int argc, char** argv) {
     }
     
     std::string_view configText;
+    GameServerConfig gsConfig{};
     try {
         configText = Utils::loadFile(argv[2]);
+        gsConfig = {configText};
     }
     catch (std::runtime_error& e) {
-        std::cerr << "Error: Configuration file could not be opened!" << std::endl;
+        std::cerr << e.what() << std::endl;
     }
     
-    GameServerConfig gsConfig{configText};
     GameServer gameServer{gsConfig, port, ""};
     
     bool keepRunning = true;

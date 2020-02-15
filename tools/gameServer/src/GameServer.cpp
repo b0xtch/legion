@@ -8,6 +8,12 @@
 #include "json.hpp"
 #include "Utils.h"
 
+GameServerConfig::GameServerConfig() :
+    gameDir{"games/"}, maxSessions{10}, maxConnections{100}
+{
+    
+}
+
 GameServerConfig::GameServerConfig(std::string_view configText) {
     using json = nlohmann::json;
     
@@ -21,13 +27,13 @@ GameServerConfig::GameServerConfig(std::string_view configText) {
         // Those will refer to the working directory of the program rather than the location of the config file.
     }
     catch (const json::parse_error& e) {
-        std::cerr << "There was a problem reading the configuration data." << std::endl;
+        throw std::runtime_error("There was a problem reading the configuration data.");
     }
     catch (const json::type_error& e) {
-        std::cerr << "There are missing configurations." << std::endl;
+        throw std::runtime_error("There are missing configurations.");
     }
     catch (const std::runtime_error& e) {
-        std::cerr << "There was an error opening the configuration file." << std::endl;
+        throw std::runtime_error("There was an error opening the configuration file.");
     }
 }
 

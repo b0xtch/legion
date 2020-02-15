@@ -9,6 +9,7 @@
 /** Handles the loading and parsing of the server configuation file only. */
 class GameServerConfig {
 public:
+    GameServerConfig();
     GameServerConfig(std::string_view configData);
     
     std::string_view getGameConfigDir() const;
@@ -16,8 +17,8 @@ public:
     int getMaxConnections() const;
 private:
     std::string gameDir;
-    int maxSessions = 10;
-    int maxConnections = 50;
+    int maxSessions;
+    int maxConnections;
     
     const std::string CFGKEY_GAME_DIR = "games";
     const std::string CFGKEY_MAX_SESSIONS = "maxSessions";
