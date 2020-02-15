@@ -1,32 +1,36 @@
-add_library(Session src/Session.cpp include/Session.h)
-target_include_directories(Session
+add_library(GameServer src/GameServer.cpp include/GameServer.h)
+add_library(MessageType src/MessageType.cpp include/MessageType.h)
+add_library(SessionManager src/SessionManager.cpp include/SessionManager.h)
+add_library(Session src/session.cpp include/session.h)
+add_library(User src/User.cpp include/User.h)
+
+target_include_directories(GameServer
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PUBLIC $<INSTALL_INTERFACE:include>)
-target_link_libraries(Session networking Utils)
+target_link_libraries(GameServer SessionManager User networking Utils nlohmann_json)
 
-add_library(MessageType src/MessageType.cpp include/MessageType.h)
 target_include_directories(MessageType
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PUBLIC $<INSTALL_INTERFACE:include>)
 target_link_libraries(MessageType nlohmann_json)
 
-
-add_library(SessionManager src/SessionManager.cpp include/SessionManager.h)
 target_include_directories(SessionManager
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PUBLIC $<INSTALL_INTERFACE:include>)
-target_link_libraries(SessionManager nlohmann_json Session networking)
+target_link_libraries(SessionManager nlohmann_json Session networking User Utils)
 
-
-add_library(GameServer src/GameServer.cpp include/GameServer.h)
-target_include_directories(GameServer
+target_include_directories(Session
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PUBLIC $<INSTALL_INTERFACE:include>)
-target_link_libraries(GameServer networking MessageType SessionManager nlohmann_json Utils)
+target_link_libraries(Session nlohmann_json User networking Utils)
 
+target_include_directories(User
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PUBLIC $<INSTALL_INTERFACE:include>)
+target_link_libraries(User networking)
 
 add_executable(server src/main.cpp)
-target_link_libraries(server GameServer)
+target_link_libraries(server GameServer Utils)
 
 # https://stackoverflow.com/a/29871891
 set(THREADS_PREFER_PTHREAD_FLAG ON)
