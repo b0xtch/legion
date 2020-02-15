@@ -12,11 +12,16 @@ public:
     GameServerConfig(std::string_view configData);
     
     std::string_view getGameConfigDir() const;
-    
+    int getMaxSessions() const;
+    int getMaxConnections() const;
 private:
     std::string gameDir;
+    int maxSessions = 10;
+    int maxConnections = 50;
     
     const std::string CFGKEY_GAME_DIR = "games";
+    const std::string CFGKEY_MAX_SESSIONS = "maxSessions";
+    const std::string CFGKEY_MAX_CONNECTIONS = "maxConnections";
 };
 
 class GameServer {

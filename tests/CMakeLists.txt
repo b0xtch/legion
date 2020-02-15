@@ -7,9 +7,10 @@ add_executable(runAllTests
   Dummy.cpp # This file is a placeholder and tests nothing.
   
   UserTests.cpp
+  GameServerConfigTests.cpp
 )
 
 target_link_libraries(runAllTests gmock gtest gtest_main)
-target_link_libraries(runAllTests User networking)
+target_link_libraries(runAllTests User networking GameServer)
 
 add_test(NAME AllTests COMMAND runAllTests)

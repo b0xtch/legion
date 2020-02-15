@@ -11,10 +11,11 @@
 GameServerConfig::GameServerConfig(std::string_view configText) {
     using json = nlohmann::json;
     
-    json j;
     try {
-        j = json::parse(configText);
-        gameDir = j[CFGKEY_GAME_DIR];
+        json j = json::parse(configText);
+        gameDir = j[CFGKEY_GAME_DIR].get<std::string>();
+        maxSessions = j[CFGKEY_MAX_SESSIONS].get<int>();
+        maxConnections = j[CFGKEY_MAX_CONNECTIONS].get<int>();
         
         // NOTE: Be careful when using "." or ".." as the value for "games" in the configuration file.
         // Those will refer to the working directory of the program rather than the location of the config file.
@@ -32,6 +33,14 @@ GameServerConfig::GameServerConfig(std::string_view configText) {
 
 std::string_view GameServerConfig::getGameConfigDir() const {
     return gameDir;
+}
+
+int GameServerConfig::getMaxSessions() const {
+    return maxSessions;
+}
+
+int GameServerConfig::getMaxConnections() const {
+    return maxConnections;
 }
 
 // PUBLIC
