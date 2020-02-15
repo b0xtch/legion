@@ -15,7 +15,7 @@ add_library(SessionManager src/SessionManager.cpp include/SessionManager.h)
 target_include_directories(SessionManager
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PUBLIC $<INSTALL_INTERFACE:include>)
-target_link_libraries(SessionManager Session networking)
+target_link_libraries(SessionManager nlohmann_json Session networking)
 
 
 add_library(GameServer src/GameServer.cpp include/GameServer.h)

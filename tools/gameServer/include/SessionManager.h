@@ -32,7 +32,7 @@ public:
   
   void sendMessage(const Connection& connection);
   
-  Session getSessionForConnection(const Connection& connection);
+  Session& getSessionForConnection(const Connection& connection);
 
 private:
   std::unordered_map<std::string, Session> sessions;

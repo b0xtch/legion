@@ -87,8 +87,10 @@ int main(int argc, char* argv[]) {
         client.send( serverMessage );
 
         auto response = client.receive();
+        std::cout << response << std::endl;
         while ( response.empty() ) {
             response = client.receive();
+            std::cout << response << std::endl;
         }
 
         MenuPage::NameList games_list = {"Game 1", "Game 2"};

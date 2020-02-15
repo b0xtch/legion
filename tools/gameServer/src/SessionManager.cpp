@@ -1,7 +1,8 @@
 #include "SessionManager.h"
 #include <algorithm>
 #include <iostream>
-
+#include "json.hpp"
+using json = nlohmann::json;
 
 /**
  * Session manager constructor that takes in max number of session allowed
@@ -70,13 +71,13 @@ void SessionManager::addToSession(const Connection& connectionToAdd, std::string
 /**
  * Find session for particular connection
  * **/  
-Session SessionManager::getSessionForConnection(const Connection& connection){
+Session& SessionManager::getSessionForConnection(const Connection& connection){
   auto it = find_if(
     sessions.begin(), sessions.end(), [&](std::unordered_map<std::string, Session>::value_type& v){
       return v.second.isClient(connection);
     }
   );
-  std::cout << "Get Session: " << it->first << std::endl; 
+  // std::cout << "Get Session: " << it->first << std::endl; 
   if(it != sessions.end()){
     return it->second;
   }
@@ -104,10 +105,20 @@ std::vector<Message> SessionManager::constructMessage(const std::string& message
  * This function recieves messages and returns new vector of
  * Message struct which will be used by server to forward messages 
  * **/
+// std::unordered_map<std::string, SessionManager*> functionMap;
 std::vector<Message> SessionManager::processMessage(const Message& message){
-  
-  std::string msg = message.text;
-  if(message.text == "create"){
+   json jsonMessage = json::parse(message.text);
+
+  std::string command = jsonMessage.at("command");
+  std::string msg = jsonMessage.at("data");
+
+  if(command == "!requestGames"){
+    std::unordered_map<ConnectionId, Connection> connections;
+    connections[message.connection.id] = message.connection;
+    return constructMessage("Game", connections);
+  }
+
+  if(command == "!createsession"){
     Session s = createNewSession();
     s.addClient(message.connection);
     msg = s.getSessionId();
@@ -115,15 +126,6 @@ std::vector<Message> SessionManager::processMessage(const Message& message){
     return constructMessage(msg, connections);
   }
 
-  std::string sessionA = "ABC";
-  if(message.text == "ABC"){
-    addToSession(message.connection, sessionA);
-    Session s = sessions[sessionA];
-    msg = message.connection.id;
-    std::cout << "Added to session ABC" << std::endl;
-    std::unordered_map<ConnectionId, Connection>& connections = s.getAllClients();
-    return constructMessage(msg, connections);
-  }
   
   if(sessions.size() == 0){
     std::unordered_map<ConnectionId, Connection> connections;

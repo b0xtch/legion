@@ -6,7 +6,7 @@
 /**
  * Construct with session id
  * **/
-Session::Session(): sessionId{"ABC"}{};
+Session::Session(): sessionId{Utils::generateSessionId(6)}{};
 
 
 /**
@@ -32,11 +32,11 @@ Connection Session::getClient(const Connection& connection){
  * This function adds new connection to session given session limit has'nt reached yet
  * **/
 void Session::addClient(const Connection& connection){
-        if(clients.size() >= MAX_SESSION_SIZE){
+    if(clients.size() >= MAX_SESSION_SIZE){
         throw;// SessSessionLimitExceeded();
-        };
+    };
 
-        clients[connection.id] = connection;
+    clients[connection.id] = connection;
 };
 
 
