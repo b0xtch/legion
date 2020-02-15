@@ -3,12 +3,15 @@
 #include <variant>
 #include <vector>
 #include <map>
-#include <any>
+#include <unordered_map>
 
-/*
- * I realize this is not a test but ill get to converting to a test
- * I thought it would be helpful to see how the interpreter is working
- * */
+// TODO
+/**
+ * 
+ * Create a way to output from each struct type
+ * Implement the rest of the JsonDsl types just put them into lambda functions with (ENUM& )
+ * 
+*/
 
 enum SetupTypes{
     Kind, SetupPrompt,
@@ -26,7 +29,8 @@ enum RuleTypes{
 
 enum Arithmetic {
     upFrom,
-    downFrom
+    downFrom,
+    add
 };
 
 template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
@@ -65,47 +69,96 @@ struct Components{
 };
 
 
-template<typename E>
-struct arithm
-{
-    arithm(const E& value): value(value) {}
-    auto operator()(Arithmetic& type){
-        switch (type){
+template<typename E, typename A>
+struct arithm {
+    arithm(const E& type): type(type) {} // change this to accept a pair for addition
+    
+    template<typename T>
+    auto& operator()(const T& value){
+        switch (type)
+        {
             case upFrom:
-                std::cout << "adding one" << std::endl;
-                value += 1;
+                value++;
                 break;
             case downFrom:
-                std::cout << "minus one" << std::endl;
-                value -= 1;
-                break;
-                
-            default:
+                value--;
                 break;
         }
     }
 
-    E value;
+    auto& operator()(const A& value){
+        switch (type)
+        {
+            case add:
+                std::cout << value.first + value.second << std::endl;
+                return value;
+                break;
+        }
+    }
+
+    E type;
 };
 
-template<typename E>
+template<typename E, typename A> // switch this to accept an varidic args
 struct Interpreter
 {
-    Interpreter(const E& value){
-        component.entities.emplace_back(value);
-    }
+    Interpreter(const E& type): type(type) {}
 
-    template <class T>
+    template <typename T>
     auto operator()(T&& value){
-        component.visit(arithm<T>{value});
+        component.entities.emplace_back(value);
+        component.visit(arithm<E, T>{type});
     }
 
-    Components<E> component;
+    Components<A> component;
+    E type;
 };
 
+template <typename G, typename... Args> 
+struct tes3 {
+    std::unordered_map<G, Args...> map;
+};
 
-int main(){    
+struct Example{
+    std::string name {"all the way inside"};
+    std::map<std::string, std::string> map {{"name", name}};
+};
+
+struct Configuration{
+    Example ex;
+
+    std::string name{"config"};
+    std::map<std::string, Example> map {
+        {"example", ex}
+    };
+}config;
+
+int main()
+{    
+    tes3<std::string, Configuration> w {{
+        {"config", config}
+    }};
     
+    for(auto& n : w.map) {
+        std::cout << "Key:[" << n.first << "] Value:[" << n.second.map["example"].map["name"] << "]\n";
+    }
+    
+    using var_t = std::variant<int, const char*>;
+    std::vector<var_t> vars = {1, 2, "Hello, World!"};
+
+    for (auto& v : vars) {
+        std::visit(overloaded {  // (3)
+            [](int i) { printf("%d\n", i); },
+            [](const char* str) { puts(str); }
+        }, v);
+    }
+
+    // auto print_container = [](VariantContainer<int, double, std::string, bool, FragileItem, Setup>& value){
+    //     value.visit(print_visitor{}); 
+    //     std::cout << std::endl;
+    // };
+
+
     auto printer = [](auto&& value){std::cout << value << " ";};
 
     Components<int, double, std::string, bool, RuleTypes, SetupTypes> comp1;
@@ -118,7 +171,6 @@ int main(){
 
     comp1.visit(printer);
     std::cout << std::endl;
-
     
     comp1.visit();
 
@@ -128,28 +180,35 @@ int main(){
     std::cout << std::endl;
 
 
-    Components<int> comp2;
-    comp2.entities.emplace_back(1);
+    // Components<int> comp2;
+    // comp2.entities.emplace_back(1);
 
-    comp2.visit(printer);
-    std::cout << std::endl;
+    // comp2.visit(printer);
+    // std::cout << std::endl;
 
-    comp2.visit(Interpreter<Arithmetic> {upFrom});
+    // comp2.visit(Interpreter<Arithmetic> {upFrom});
 
-    comp2.visit(printer);
-    std::cout << std::endl;
+    // comp2.visit(printer);
+    // std::cout << std::endl;
 
-    std::cout << std::endl;
+    // std::cout << std::endl;
 
-    Components<int> comp3;
-    comp3.entities.emplace_back(2);
+    // Components<int> comp3;
+    // comp3.entities.emplace_back(2);
 
-    comp3.visit(printer);
-    std::cout << std::endl;
+    // comp3.visit(printer);
+    // std::cout << std::endl;
 
-    comp3.visit(Interpreter<Arithmetic> {downFrom});
+    // comp3.visit(Interpreter<Arithmetic> {downFrom});
 
-    comp3.visit(printer);
-    std::cout << std::endl;
+    // comp3.visit(printer);
+    // std::cout << std::endl;
+    
 
+    using KindPair = std::pair<int, int>;
+    Components<KindPair> comp4;
+    KindPair b {1, 1};
+    comp4.entities.emplace_back(b);
+
+    comp4.visit(Interpreter<Arithmetic, KindPair> {add});
 }

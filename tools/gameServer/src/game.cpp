@@ -1,16 +1,24 @@
 #include <iostream>
 #include <string>
 #include <vector>
-
 #include "game.h"
 #include "player.h"
+#include <json.hpp>
 
 using namespace std;
+using json = nlohmann::json;
+using Engine::Game;
 
 //general constructor -- WIP
 Game::Game(const stringVar& name, const int& maxPlayers, const stringVar& rules): gameName(name), numPlayersMax(maxPlayers), numPlayers(0), rulesOfTheGame(rules){}
 
 Game::Game(const stringVar& name): gameName(name){}
+
+Game::startGame(const json* config){
+	EngineImpl<json> engine {config};
+	Game game = engine.initalizeEngine();
+	
+}
 
 void Game::addPlayer(const Player& p){
 	if(numPlayers != numPlayersMax){

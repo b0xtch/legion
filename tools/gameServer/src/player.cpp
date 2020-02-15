@@ -4,7 +4,7 @@
 
 
 Player::Player(const variable& pid, const stringVar& name): playerID(pid), playerName(name){}
-
+Player::Player() : playerID(0), playerName("not_initialized") {};
 
 // void Player::incrementPoints(const variable& x){playerPoints += x;}
 
