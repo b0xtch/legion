@@ -5,9 +5,17 @@
 #ifndef FIELD_VALIDATORS_H
 #define FIELD_VALIDATORS_H
 
+class VariableValidator{
+public:
+    void validateVariableUsage(const nlohmann::json& j_object);
+private:
+    std::vector<std::pair<std::string, JsonDSL::VariableDataType>> findVariableUsage(const nlohmann::json& j_object);private:
+    JsonDSL::VariableDataType checkForDataType(const nlohmann::json& j_object);
+};
+
 class RuleValidator{
 public:
-    void validateRules(const nlohmann::json& j_object, JsonDSL::RuleType rule);
+    VariableValidator validateRules(const nlohmann::json& j_object, JsonDSL::RuleType rule);
 };
 
 class ConfigValidator{

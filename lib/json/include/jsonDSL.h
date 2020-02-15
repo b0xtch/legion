@@ -43,6 +43,10 @@ public:
         KindQuestionAnswer, KindMultipleChoice  
     };
 
+    enum VariableDataType{
+        VarInteger, VarBoolean, VarString, VarStructured
+    };
+
     // TODO:: get it to kevs standard
     enum Arithmetic {
         upFrom,
