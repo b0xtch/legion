@@ -1,7 +1,6 @@
-#include <string>
 #include "MenuPage.h"
 
-MenuPage::MenuPage( const std::string &menu_name,
+MenuPage::MenuPage( const MenuPage::MenuName &menu_name,
                     const MenuPage::NameList &field_names,
                     const MenuPage::NameList &item_names,
                     const MenuPage::FunctionList &item_results )
@@ -10,7 +9,7 @@ MenuPage::MenuPage( const std::string &menu_name,
       item_names( item_names ), 
       item_results( item_results ) { }
 
-std::vector<const char *> MenuPage::get_field_names() {
+std::vector<MenuPage::ItemName> MenuPage::get_field_names() {
     return field_names;
 }
 
@@ -34,7 +33,7 @@ bool MenuPage::has_form() {
     return !field_names.empty();
 }
 
-std::vector<const char *> MenuPage::get_item_names() {
+std::vector<MenuPage::ItemName> MenuPage::get_item_names() {
     return item_names;
 }
 
@@ -67,7 +66,7 @@ const MenuPage::FunctionList MenuPage::get_item_results() {
     return item_results;
 }
 
-std::string MenuPage::get_menu_name() {
+MenuPage::MenuName MenuPage::get_menu_name() {
     return menu_name;
 }
 

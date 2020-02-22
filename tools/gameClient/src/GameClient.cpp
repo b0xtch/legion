@@ -1,4 +1,3 @@
-#include <iostream>
 #include <ncurses.h>
 #include <menu.h>
 #include <form.h>
@@ -27,7 +26,7 @@ void initialize_menu_pages( MenuManager &menu_manager, bool &done,
                             auto &onTextEntry );
 
 // Make json message for server
-string makeServerMessage(string input);
+std::string makeServerMessage(string input);
 
 // Controls which window is active
 enum menuMode { mainMenu, chatMenu };
@@ -52,7 +51,7 @@ int main(int argc, char* argv[]) {
             client.send( makeServerMessage(text) );
         }
     };
-    ChatWindow *chatWindow;
+    ChatWindow *chatWindow = nullptr;
 
     MenuManager menu_manager;
     
@@ -93,7 +92,9 @@ int main(int argc, char* argv[]) {
 
     }
 
-    delete chatWindow;
+    if ( chatWindow != nullptr ) {
+        delete chatWindow;
+    }
 
     menu_manager.cleanup();
 
@@ -152,7 +153,7 @@ void initialize_menu_pages( MenuManager &menu_manager, bool &done,
 
     // Main menu item functions
     auto moveToJoinLobbyPage = [&menu_manager] () {
-        std::string next_page = "Join lobby";
+        MenuPage::MenuName next_page = "Join lobby";
         menu_manager.switch_page( next_page );
     };
 
@@ -187,10 +188,10 @@ void initialize_menu_pages( MenuManager &menu_manager, bool &done,
 
         MenuPage::NameList create_lobby_items = {};
 
-        for ( const char *game_name : games_list ) {
+        for ( auto game_name : games_list ) {
             create_lobby_items.push_back( game_name );
         }
-        const char *back_string = "back";
+        MenuPage::ItemName back_string = "back";
         create_lobby_items.push_back( back_string );
 
         MenuPage::FunctionList create_lobby_item_results = {}; 
@@ -200,12 +201,12 @@ void initialize_menu_pages( MenuManager &menu_manager, bool &done,
         }
         
         auto moveBackToMainMenuPage = [&menu_manager] () {
-            std::string next_page = "Main menu";
+            MenuPage::MenuName next_page = "Main menu";
             menu_manager.switch_page( next_page );
         };
         create_lobby_item_results.push_back( moveBackToMainMenuPage );     
 
-        std::string create_lobby_name = "Create lobby";
+        MenuPage::MenuName create_lobby_name = "Create lobby";
         MenuPage *create_lobby_page = new MenuPage( create_lobby_name,
                                                     create_lobby_fields, 
                                                     create_lobby_items, 
@@ -214,7 +215,7 @@ void initialize_menu_pages( MenuManager &menu_manager, bool &done,
 
         // The games are all loaded and the page is setup, so switch to the page
 
-        std::string next_page = "Create lobby";
+        MenuPage::MenuName next_page = "Create lobby";
         menu_manager.switch_page( next_page );
     };
 
@@ -226,7 +227,7 @@ void initialize_menu_pages( MenuManager &menu_manager, bool &done,
                                                       moveToCreateLobbyPage,
                                                       exitProgram };
 
-    std::string main_menu_name = "Main menu";
+    MenuPage::MenuName main_menu_name = "Main menu";
     MenuPage *main_menu_page = new MenuPage( main_menu_name,
                                              main_menu_fields, 
                                              main_menu_items, 
@@ -243,7 +244,7 @@ void initialize_menu_pages( MenuManager &menu_manager, bool &done,
     // Join lobby item functions
 
     auto moveBackToMainMenuPage = [&menu_manager] () {
-        std::string next_page = "Main menu";
+        MenuPage::MenuName next_page = "Main menu";
         menu_manager.switch_page( next_page );
     };
 
@@ -270,7 +271,7 @@ void initialize_menu_pages( MenuManager &menu_manager, bool &done,
     const MenuPage::FunctionList join_lobby_item_results
         = {joinLobby, moveBackToMainMenuPage};
 
-    string join_lobby_name = "Join lobby";
+    MenuPage::MenuName join_lobby_name = "Join lobby";
     MenuPage *join_lobby_page = new MenuPage( join_lobby_name,
                                               join_lobby_fields,
                                               join_lobby_items, 

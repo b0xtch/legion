@@ -1,8 +1,7 @@
-#include <string>
 #include "MenuPage.h"
 #include "MenuManager.h"
 
-#include <iostream>
+#include <string_view>
 #include <assert.h>
 
 MenuManager::MenuManager() : selected_index(0), is_on_menu(true) {
@@ -72,7 +71,7 @@ void MenuManager::add_page( MenuPage *page ) {
     page->set_menu( new_menu( page->get_item_list()->data() ) );
 
     int max_menu_item_length = 0;
-    for ( std::string item_name : page->get_item_names() ) {
+    for ( std::string_view item_name : page->get_item_names() ) {
         if ( item_name.length() > max_menu_item_length ) {
             max_menu_item_length = item_name.length() + 1;
         }
@@ -129,7 +128,7 @@ int MenuManager::get_selected_index() {
     return selected_index;
 }
 
-void MenuManager::switch_page( std::string &next_page_name ) {
+void MenuManager::switch_page( MenuPage::MenuName &next_page_name ) {
 
     menu_driver( current_page->get_menu(), REQ_FIRST_ITEM );
     selected_index = 0;
@@ -264,11 +263,11 @@ void MenuManager::main_menu_driver() {
 }
 
 void MenuManager::cleanup() {
-    
+     
     for ( const auto &page : menu_pages ) {
         page.second->cleanup();
     }
-
+   
     delwin( form_window );
 	delwin( menu_window );
 	delwin( main_window );
