@@ -1,5 +1,5 @@
-#ifndef SETUPMENU_H
-#define SETUPMENU_H
+#ifndef MENU_PAGE_H
+#define MENU_PAGE_H
 
 #include <vector>
 #include <functional>
@@ -13,8 +13,11 @@ class MenuPage {
 public:
 
     using PageMap = std::map<std::string, MenuPage *>;
-    using FunctionList = std::vector<std::function<void()>>;
+    using ItemFunction = std::function<void()>;
+    using FunctionList = std::vector<ItemFunction>;
     using NameList = std::vector<const char *>;
+    using ItemList = std::vector<ITEM *>;
+    using FieldList = std::vector<FIELD *>;
     
     MenuPage( const std::string &menu_name,
               const NameList &field_names, 
@@ -22,24 +25,28 @@ public:
               const FunctionList &item_results );
 
     void cleanup();
-    
-    static WINDOW *main_window;
-    static WINDOW *form_window;
-    static WINDOW *menu_window;
 
     int get_selected_option();
     int change_selected_option_on_input();
 
     std::vector<const char *> get_field_names();
-    std::vector<FIELD *> get_field_list();
+    FieldList* get_field_list();
+    void add_field( FIELD *field );
     FORM* get_form();
+    void set_form( FORM *form );
     bool has_form();
 
     std::vector<const char *> get_item_names();
     const FunctionList get_item_results();
+    void add_item( ITEM *item );
     MENU* get_menu();
+    void set_menu( MENU *menu );
+    ItemList* get_item_list();
+
+    std::string get_menu_name();
 
 private:
+
     MenuPage();
 
     std::string menu_name;
@@ -52,34 +59,8 @@ private:
 
     MENU *menu;
     std::vector<const char *> item_names;
-    std::vector<ITEM *> item_list;
+    ItemList item_list;
     const FunctionList item_results;
-};
-
-
-
-class MenuManager {
-
-public:
-
-    static void initialize_menu_manager();
-    static void initialize_windows();
-    static void initialize_starting_page();
-    static void add_menu_page( std::string &page_name, MenuPage *page );
-    static std::map<std::string, MenuPage *> get_menu_pages();
-    static void set_current_page( MenuPage *page );
-    static MenuPage *get_current_page();
-    static int get_selected_index();
-    static void switch_page( std::string &next_page_name );
-    static void main_menu_driver();
-    static void cleanup();
-
-private:
-    static std::map<std::string, MenuPage *> menu_pages;
-    static MenuPage *current_page;
-    static int selected_index;
-    static bool is_on_menu;
-
 };
 
 #endif
