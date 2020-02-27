@@ -8,9 +8,11 @@ add_executable(runAllTests
   
   UserTests.cpp
   GameServerConfigTests.cpp
+  ValidatorTest.cpp
 )
-
+target_include_directories(runAllTests PUBLIC ${CMAKE_SOURCE_DIR}/lib/json/include)
 target_link_libraries(runAllTests gmock gtest gtest_main)
 target_link_libraries(runAllTests User networking GameServer)
+target_link_libraries(runAllTests configValidator specificationValidator)
 
 add_test(NAME AllTests COMMAND runAllTests)

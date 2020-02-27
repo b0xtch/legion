@@ -1,7 +1,7 @@
 add_library(GameServer src/GameServer.cpp include/GameServer.h)
 add_library(MessageType src/MessageType.cpp include/MessageType.h)
 add_library(SessionManager src/SessionManager.cpp include/SessionManager.h)
-add_library(Session src/session.cpp include/session.h)
+add_library(Session src/Session.cpp include/Session.h)
 add_library(User src/User.cpp include/User.h)
 
 target_include_directories(GameServer
