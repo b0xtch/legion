@@ -16,11 +16,17 @@ target_include_directories(specificationValidator
     PUBLIC $<INSTALL_INTERFACE:include>)
 target_link_libraries(specificationValidator nlohmann_json jsonDSL)
 
+add_library (ruleValidator ./src/ruleValidator.cpp ./include/fieldValidators.h)
+target_include_directories(ruleValidator
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PUBLIC $<INSTALL_INTERFACE:include>)
+target_link_libraries(ruleValidator nlohmann_json jsonDSL)
+
 add_library (configValidator ./src/configValidator.cpp ./include/fieldValidators.h)
 target_include_directories(configValidator
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PUBLIC $<INSTALL_INTERFACE:include>)
-target_link_libraries(configValidator nlohmann_json jsonDSL)
+target_link_libraries(configValidator nlohmann_json jsonDSL ruleValidator)
 
 add_library (variableValidator ./src/variableValidator.cpp ./include/fieldValidators.h)
 target_include_directories(variableValidator
