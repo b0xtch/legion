@@ -30,11 +30,13 @@ protected:
         json j_object = json::parse(jsonText);
         SpecificationValidator specValidator;
         try{
+
             ConfigValidator confValidator = specValidator.validateSpecification(j_object);
             if(level == specification){
                 FAIL() << "Expected specification validator to fail";
             }
             confValidator.validateConfig(j_object);
+
         }catch(std::invalid_argument e){
             EXPECT_EQ(e.what(), expectedMessage);
         }catch(...){
@@ -45,9 +47,18 @@ protected:
     void runValidatorWithoutThrow(std::string& jsonText, validatorLevels level){
         json j_object = json::parse(jsonText);
         SpecificationValidator specValidator;
-        ASSERT_NO_THROW(specValidator.validateSpecification(j_object));
-        if(level == specification){
-            return;
+        try{
+            
+            ConfigValidator confValidator = specValidator.validateSpecification(j_object);
+            if(level == specification){
+                return;
+            }
+            confValidator.validateConfig(j_object);
+
+        }catch(std::invalid_argument e){
+            FAIL() << "Invalid Argument error thrown when it shouldn't be";
+        }catch(...){
+            FAIL() << "Unexpected error thrown.";
         }
     }
 };
@@ -85,77 +96,98 @@ TEST_F(ValidatorTests, detectValidSpecification){
     runValidatorWithoutThrow(jsonText, specification);
 }
 
-// void test3(){
-//     std::string jsontext = R"###({
-//     "configuration": {
-//         "name": "Zen Game",
-//         "player count": {"max": 0},
-//         "audience": {},
-//         "setup": { }
-//     },
-//     )###";
-//     jsontext = jsontext + suffixExtra;
-//     json j = json::parse(jsontext);
-//     SpecificationValidator spec;
-//     spec.validateSpecification(j).validateConfig(j);
-// }
+TEST_F(ValidatorTests, detectMissingConfigFields){
+    std::string jsonText = R"###({
+    "configuration": {
+        "player count": {"min": 0, "max": 0}
+    },
+    )###";
+    jsonText = jsonText + emptySuffix;
+    std::string expectedMessage = "Config Field: audience not found.";
+    runValidatorWithThrow(jsonText, expectedMessage, config);
+}
 
-// void test4(){
-//     std::string jsontext = R"###({
-//     "configuration": {
-//         "name": "Zen Game",
-//         "player count": {"min": 10, "max": 0},
-//         "audience": {},
-//         "setup": { }
-//     },
-//     )###";
-//     jsontext = jsontext + suffixExtra;
-//     json j = json::parse(jsontext);
-//     SpecificationValidator spec;
-//     spec.validateSpecification(j).validateConfig(j);
-// }
+TEST_F(ValidatorTests, detectIllegalConfig){
+    std::string jsonText = R"###({
+    "configuration": {
+        "name": "Zen Game",
+        "player count": {"min": 10.2, "max": 0},
+        "audience": {},
+        "setup": { },
+        "adasasdasdasdas": {}
+    },
+    )###";
+    jsonText = jsonText + emptySuffix;
+    std::string expectedMessage = "An illegal key was found in the configuration level of the json file";
+    runValidatorWithThrow(jsonText, expectedMessage, config);
+}
 
-// void test5(){
-//     std::string jsontext = R"###({
-//     "configuration": {
-//         "name": "Zen Game",
-//         "player count": {"min": 10.2, "max": 0},
-//         "audience": {},
-//         "setup": { }
-//     },
-//     )###";
-//     jsontext = jsontext + suffixExtra;
-//     json j = json::parse(jsontext);
-//     SpecificationValidator spec;
-//     spec.validateSpecification(j).validateConfig(j);
-// }
+TEST_F(ValidatorTests, detectMissingPlayerConfigField){
+    std::string jsonText = R"###({
+    "configuration": {
+        "name": "Zen Game",
+        "player count": {"max": 0},
+        "audience": {},
+        "setup": { }
+    },
+    )###";
 
-// void test6(){
-//     std::string jsontext = R"###({
-//     "configuration": {
+    jsonText = jsonText + emptySuffix;
+    std::string expectedMessage = "Min player count not found";
+    runValidatorWithThrow(jsonText, expectedMessage, config);
+}
 
-//         "player count": {"min": 0, "max": 0}
+TEST_F(ValidatorTests, detectMinPlayersGreaterThanMaxPlayers){
+    std::string jsonText = R"###({
+    "configuration": {
+        "name": "Zen Game",
+        "player count": {"min": 10, "max": 0},
+        "audience": {},
+        "setup": { }
+    },
+    )###";
+    jsonText = jsonText + emptySuffix;
+    std::string expectedMessage = "The minimum number of players must be less than or equal to the number of max players";
+    runValidatorWithThrow(jsonText, expectedMessage, config);
+}
 
-//     },
-//     )###";
-//     jsontext = jsontext + suffixExtra;
-//     json j = json::parse(jsontext);
-//     SpecificationValidator spec;
-//     spec.validateSpecification(j).validateConfig(j);
-// }
+TEST_F(ValidatorTests, detectInvalidFloatPlayerValues){
+    std::string jsonText = R"###({
+    "configuration": {
+        "name": "Zen Game",
+        "player count": {"min": 10.2, "max": 0},
+        "audience": {},
+        "setup": { }
+    },
+    )###";
+    jsonText = jsonText + emptySuffix;
+    std::string expectedMessage = "The values inside the players count object are not both integers";
+    runValidatorWithThrow(jsonText, expectedMessage, config);
+}
 
-// void test7(){
-//     std::string jsontext = R"###({
-//     "configuration": {
-//         "name": "Zen Game",
-//         "player count": {"min": 10.2, "max": 0},
-//         "audience": {},
-//         "setup": { },
-//         "adasasdasdasdas": {}
-//     },
-//     )###";
-//     jsontext = jsontext + suffixExtra;
-//     json j = json::parse(jsontext);
-//     SpecificationValidator spec;
-//     spec.validateSpecification(j).validateConfig(j);
-// }
+TEST_F(ValidatorTests, detectInvalidStringPlayerValues){
+    std::string jsonText = R"###({
+    "configuration": {
+        "name": "Zen Game",
+        "player count": {"min": "str", "max": 0},
+        "audience": {},
+        "setup": { }
+    },
+    )###";
+    jsonText = jsonText + emptySuffix;
+    std::string expectedMessage = "The values inside the players count object are not both integers";
+    runValidatorWithThrow(jsonText, expectedMessage, config);
+}
+
+TEST_F(ValidatorTests, detectValidConfig){
+    std::string jsonText = R"###({
+    "configuration": {
+        "name": "Zen Game",
+        "player count": {"min": 0, "max": 0},
+        "audience": {},
+        "setup": { }
+    },
+    )###";
+    jsonText = jsonText + emptySuffix;
+    runValidatorWithoutThrow(jsonText, config);
+}
