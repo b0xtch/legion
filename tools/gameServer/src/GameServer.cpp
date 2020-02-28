@@ -51,7 +51,7 @@ int GameServerConfig::getMaxConnections() const {
 
 // PUBLIC
 
-GameServer::GameServer(GameServerConfig gameServerConfig, int port, const std::string& htmlFile) :
+GameServer::GameServer(GameServerConfig gameServerConfig, unsigned short port, const std::string& htmlFile) :
     gameServerConfig{gameServerConfig},
     keepRunning{true},
     port{port},
@@ -72,7 +72,7 @@ GameServer::GameServer(GameServerConfig gameServerConfig, networking::Server& se
     gameServerConfig{gameServerConfig},
     server{std::move(server)},
     sessionManager{sessionManager},
-    keepRunning{true}, port{-1}, htmlFile{""}
+    keepRunning{true}, port{0}, htmlFile{""}
 {
     
 }
@@ -98,7 +98,7 @@ void GameServer::receive() {
     send(batchToSend);
 }
 
-int GameServer::getPort() const {
+unsigned short GameServer::getPort() const {
     return port;
 }
 
