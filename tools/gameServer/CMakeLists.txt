@@ -1,28 +1,28 @@
 add_library(GameServer src/GameServer.cpp include/GameServer.h)
-add_library(MessageType src/MessageType.cpp include/MessageType.h)
+add_library(ParsedMessage src/ParsedMessage.cpp include/ParsedMessage.h)
 add_library(SessionManager src/SessionManager.cpp include/SessionManager.h)
-add_library(Session src/session.cpp include/session.h)
+add_library(Session src/Session.cpp include/Session.h)
 add_library(User src/User.cpp include/User.h)
 
 target_include_directories(GameServer
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PUBLIC $<INSTALL_INTERFACE:include>)
-target_link_libraries(GameServer SessionManager User networking Utils nlohmann_json)
+target_link_libraries(GameServer SessionManager User networking Utils nlohmann_json ParsedMessage)
 
-target_include_directories(MessageType
+target_include_directories(ParsedMessage
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PUBLIC $<INSTALL_INTERFACE:include>)
-target_link_libraries(MessageType nlohmann_json)
+target_link_libraries(ParsedMessage nlohmann_json)
 
 target_include_directories(SessionManager
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PUBLIC $<INSTALL_INTERFACE:include>)
-target_link_libraries(SessionManager nlohmann_json Session networking User Utils)
+target_link_libraries(SessionManager nlohmann_json Session networking User Utils ParsedMessage)
 
 target_include_directories(Session
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PUBLIC $<INSTALL_INTERFACE:include>)
-target_link_libraries(Session nlohmann_json User networking Utils)
+target_link_libraries(Session nlohmann_json User networking Utils ParsedMessage)
 
 target_include_directories(User
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

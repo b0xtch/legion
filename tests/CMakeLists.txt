@@ -8,9 +8,10 @@ add_executable(runAllTests
   
   UserTests.cpp
   GameServerConfigTests.cpp
+  ParsedMessageTest.cpp
 )
 
 target_link_libraries(runAllTests gmock gtest gtest_main)
-target_link_libraries(runAllTests User networking GameServer)
+target_link_libraries(runAllTests User networking GameServer ParsedMessage)
 
 add_test(NAME AllTests COMMAND runAllTests)
