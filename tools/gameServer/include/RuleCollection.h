@@ -124,6 +124,80 @@ struct When : GenRule{
 	T condition;
 	vector<GenRule> rules_to_run;
 };
+
+template<typename T>
+struct Extend : GenRule{
+	Extend(){};
+	Extend(const T& targ, const vector<T> &v):
+		GenRule{"Extend"},
+		list{v},
+		target{targ}
+		{};
+	
+	vector<T> list;
+	T target;
+};
+
+template<typename T>
+struct Reverse : GenRule{
+	Reverse(){};
+	Reverse(const vector<T>& v):
+		GenRule{"Reverse"},
+		list{v}
+		{};
+
+	vector<T> list;
+};
+
+template<typename T>
+struct Shuffle : GenRule{
+	Shuffle(){};
+	Shuffe(const vector<T>& v):
+		GenRule{"Shuffle"},
+		list{v}
+		{};
+
+	vector<T> list;
+};
+
+template<typename T>
+struct Sort : GenRule{
+	Sort(){};
+	Sort(const vector<T>& v):
+		GenRule("Sort"),
+		list{v}
+		{};
+	
+	vector<T> list;
+};
+
+template<typename T>
+struct Deal : GenRule{
+	Deal(){};
+	Deal(const T& f, const T& t, const int& c):
+		GenRule("Deal"),
+		from{f},
+		to{t},
+		count{c}
+		{};
+	
+	T from;
+	T to;
+	int count;
+};
+
+template<typename T>
+struct Discard : GenRule{
+	Discard(){};
+	Discard(const T& f, const int& c):
+		GenRule("Discard"),
+		from{f},
+		count{c}
+		{};
+	
+	T from;
+	int count;
+};
 // TO DO: add rest of rules
 
 
