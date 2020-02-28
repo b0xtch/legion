@@ -5,7 +5,7 @@
 #include <iostream>  
 #include <any>
 #include <variant>
-// #include "jsonDSL.h"
+#include "jsonDSL.h"
 
 using namespace std; 
 
@@ -24,11 +24,9 @@ using namespace std;
 
 namespace Engine {
 
-
-    // logic
-    // ===============================================================
-
-    //not sure if this is good design, needs to do more research. A few things depend on this type now
+    /**
+     * Support types 
+     */
     template <typename K, typename V> 
     struct GenType {
 
@@ -46,39 +44,15 @@ namespace Engine {
     };
 
     /**
-     * Each individual rule is a map of attributes describing the rule. 
-     * Lists of rules define a sequence of operations in which each rule 
-     * must be performed in sequential order.
-    */
-    // template<typename T, typename... Args>
-    struct Rules {
-        std::string add {"rules"};
+     * rules
+     */
 
-        // List of all the rules under Rules struct\
-        // Control Structures
-        struct ControlStructures {};
+    struct ControlStructures {};
 
-        // List Operations
-        struct ListOperations {};
+    struct ListOperations {};
 
-        // Arithmetic Operations -> example provided using the arithmetic struct provided above
-        struct Arithmetic {}; // basically the one below this main struct
-
-        // Timing
-        struct Timing {};
-
-        // Human Input
-        struct HumanInput {};
-
-        // Output
-        struct Output {}; 
-    };
-
-
-    // mostly for arithmetic operations
-    template<typename E, typename A>
-    struct arithmetic {
-        arithmetic(const E& type): type(type) {}
+    struct Arithmetic {
+        Arithmetic(const JsonDSL::Arithmetic type): type(type) {}
         
         template<typename T>
         auto& operator()(const T& value) {
@@ -104,6 +78,24 @@ namespace Engine {
         E type;
     };
 
+    struct Timing {};
+
+    struct HumanInput {};
+
+    struct Output {};
+
+    struct Rules {
+        ControlStructures controlStructures;
+        ListOperations listOperations;
+        Arithmetic arithmetic;
+        Timing timing;
+        HumanInput humanInput;
+        Output output;
+    };
+
+    /**
+     * Interpreter for rules
+    */
     template<typename E, typename A> // switch this to accept an varidic args
     struct Interpreter {
         Interpreter(const E& type): type(type) {}
@@ -151,10 +143,6 @@ namespace Engine {
                     // [](JsonDSL::TimerModes value){
                     //     std::cout << "TimerModes" << std::endl;
                     // },
-                    // [](JsonDSL::SetupFields value){
-                    //     std::cout << "Upload your json!" << std::endl;
-                    //     //Setup( /* map[ make_pair("kind", json ] = "the prompt"; */ );
-                    // }
                 }, entity);
             }
         }
@@ -172,8 +160,8 @@ namespace Engine {
     };
 
     struct PlayerCount {
-        int min;
-        int max;
+        int64_t min;
+        int64_t max;
     };
 
     // testing only
@@ -184,56 +172,56 @@ namespace Engine {
         Q_A,
         M_C
     };
+
     // {
     //   "kind": <<data kind>>,
     //   "prompt": <<Description of what data the owner should provide>>
     // }
     struct Setup {
         Components<
-            GenType<SetupTypes, std::string>, 
+            GenType<SetupTypes, std::string_view>, 
             int, 
-            std::string, 
+            std::string_view, 
             bool
         > setup;
     };
 
     struct CVPA
-        : GenType<std::string, Components<std::string, int, bool> >
-    {
+        : GenType<std::string_view, Components<std::string_view, int64_t, bool> > {
         // constants, variables, perPlayer, perAudience are the same
         GenType constants;
         GenType variables;
-        GenType per_player;
-        GenType per_audience;
+        GenType perPlayer;
+        GenType perAudience;
     };
 
     struct Configuration {
-        std::string name;
-        PlayerCount* playecount;
+        std::string_view name;
+        PlayerCount* playerCount;
         bool audience;
         Setup* setup;
-
     };
 
+    /**
+     * Main game component
+    */
     struct Game {
-        Components<
-        Configuration,
-        CVPA,
-        Rules
-        > components;
+        Configuration configuration;
+        CVPA cvpa;
+        Rules rules;
     };
 
     template <typename T> 
     class EngineImpl { 
         public:
             EngineImpl (const T& input);
-            GenType<std::string, Game> getGameConfig() const;
+            GenType<std::string_view, Game> getGameConfig() const;
 
-            GenType<std::string, Game> initalizeEngine();
+            GenType<std::string_view, Game> initalizeEngine();
 
         private:
             T input;
-            GenType<std::string, Game> gameConfig;
+            GenType<std::string_view, Game> gameConfig;
 
             // Domain level set functions
             Configuration& setConfiguration(const T& configuration);
@@ -245,7 +233,7 @@ namespace Engine {
 
             // Parser Related methods
             bool validGameConfig(const T& input);
-            GenType<std::string, Game> buildGame();
+            GenType<std::string_view, Game> buildGame();
             void mapKeyToValue(const T& key, const T& value);
             T mapValueToFuntion(const T& value);
 
