@@ -12,7 +12,7 @@ std::string ParsedMessage::getData() const {
     return data;
 }
 
-ParsedMessage ParsedMessage::interpretType(const std::string& text) {
+ParsedMessage ParsedMessage::interpret(const std::string& text) {
     using json = nlohmann::json;
     
     json jsonObj;
@@ -20,14 +20,14 @@ ParsedMessage ParsedMessage::interpretType(const std::string& text) {
     std::string msgData;
     try {
         jsonObj = json::parse(text);
-        msgType = jsonObj[PMConstants::KEY_COMMAND];
-        msgData = jsonObj[PMConstants::KEY_DATA];
+        msgType = jsonObj[PMConstants::KEY_COMMAND].get<std::string>();
+        msgData = jsonObj[PMConstants::KEY_DATA].get<std::string>();
     }
     catch (json::parse_error& e) {
-        return {Type::Invalid, ""};
+        return {Type::Invalid, "JSON Parse error"};
     }
     catch (json::type_error& e) {
-        return {Type::Invalid, ""};
+        return {Type::Invalid, "JSON Type error"};
     }
     
     ParsedMessage ret;

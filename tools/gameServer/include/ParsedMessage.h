@@ -32,7 +32,7 @@ public:
     std::string getData() const;
     
     /** Determines the type of message received from a client. */
-    static ParsedMessage interpretType(const std::string& text);
+    static ParsedMessage interpret(const std::string& text);
     
 private:
     ParsedMessage();
