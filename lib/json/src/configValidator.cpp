@@ -6,21 +6,15 @@
 using json = nlohmann::json;
 using configIterator = JsonDSL::configMap::left_const_iterator;
 
-RuleValidator ConfigValidator::validateConfig(const json& j_object){
-    ConfigValidator::validateAllFieldsAreValid(j_object);
-    ConfigValidator::validateAllNecessaryFieldsPresent(j_object);
-    ConfigValidator::validateNumPlayersRestrictionValid(j_object);
-    return RuleValidator();
-}
+static JsonDSL dsl;
 
-void ConfigValidator::validateAllNecessaryFieldsPresent(const json& j_object){
-    JsonDSL dsl;
+static void validateAllNecessaryFieldsPresent(const json& j_object){
     std::pair<configIterator, configIterator> mapIterator = dsl.getConfigBeginEndIterators();
     std::string configuration = dsl.getStringOfSpecificationCommand(JsonDSL::Configuration);
     json configurations = j_object[configuration];
     
     auto it = std::find_if(mapIterator.first, mapIterator.second, 
-        [&configurations, &dsl](auto& pair) {
+        [&configurations](auto& pair) {
             std::string fieldToBeChecked = pair.first;
             return !configurations.contains(fieldToBeChecked);
         }
@@ -45,8 +39,7 @@ void ConfigValidator::validateAllNecessaryFieldsPresent(const json& j_object){
 
 }
 
-void ConfigValidator::validateAllFieldsAreValid(const json& j_object){
-    JsonDSL dsl;
+static void validateAllFieldsAreValid(const json& j_object){
     json configuration = j_object[dsl.getStringOfSpecificationCommand(JsonDSL::Configuration)];
     for(auto jsonItem : configuration.items()){
         if(!dsl.isValidConfigField(jsonItem.key())){
@@ -55,9 +48,7 @@ void ConfigValidator::validateAllFieldsAreValid(const json& j_object){
     }
 }
 
-void ConfigValidator::validateNumPlayersRestrictionValid(const json& j_object){
-    JsonDSL dsl;
-
+static void validateNumPlayersRestrictionValid(const json& j_object){
     std::string configuration = dsl.getStringOfSpecificationCommand(JsonDSL::Configuration);
     std::string playerCount = dsl.getStringOfConfigCommand(JsonDSL::PlayerCount);
     std::string minPlayerStr = dsl.getStringOfPlayerRestrictionCommand(JsonDSL::MinPlayers);
@@ -81,3 +72,12 @@ void ConfigValidator::validateNumPlayersRestrictionValid(const json& j_object){
         throw std::invalid_argument("The minimum number of players must be less than or equal to the number of max players");
     }
 }
+
+RuleValidator ConfigValidator::validateConfig(const json& j_object){
+    validateAllFieldsAreValid(j_object);
+    validateAllNecessaryFieldsPresent(j_object);
+    validateNumPlayersRestrictionValid(j_object);
+    return RuleValidator();
+}
+
+ConfigValidator::ConfigValidator(){}
