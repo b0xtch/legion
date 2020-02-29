@@ -62,26 +62,12 @@ namespace Engine {
                     // [](ControlStructures rule){},
                     // [](ListOperations rule){},
                     [](Arithmetic rule){
-                        switch (rule.operation)
-                        {
-                        case ADD:
-                            rule.result = rule.values.first + rule.values.second;
-                            std::cout << rule.result << std::endl;
-                            break;
-                        case SUBTRACT:
-                            rule.result = rule.values.first - rule.values.second;
-                            std::cout << rule.result << std::endl;
-                            break;
-                        case MULTIPLY:
-                            rule.result = rule.values.first * rule.values.second;
-                            std::cout << rule.result << std::endl;
-                            break;
-                        case DIVIDE:
-                            rule.result = rule.values.first / rule.values.second;
-                            std::cout << rule.result << std::endl;
-                            break;
-                        default:
-                            break;
+                        switch (rule.operation) {
+                            case JsonDSL::Arithmetic::ADD:      rule.result = rule.values.first + rule.values.second; break;
+                            case JsonDSL::Arithmetic::SUBTRACT: rule.result = rule.values.first - rule.values.second; break;
+                            case JsonDSL::Arithmetic::MULTIPLY: rule.result = rule.values.first * rule.values.second; break;
+                            case JsonDSL::Arithmetic::DIVIDE:   rule.result = rule.values.first / rule.values.second; break;
+                            default: break;
                         }
                     },
                     // [](Timing rule){},
