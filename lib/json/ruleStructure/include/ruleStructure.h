@@ -7,20 +7,23 @@
 #define RULE_STRUCTURE_H
 
 
-namespace ruleStructure{
-    class Rule;
-    using StringToRuleMap = std::map<std::string, Rule>;
-    StringToRuleMap getStringToRuleMap();
+namespace ruleValidationHelper{
+    struct Rule;
+    using RuleMap = std::map<JsonDSL::RuleType, Rule>;
+    RuleMap getRuleMap();
 }
 
-class ruleStructure::Rule{
+struct ruleValidationHelper::Rule{
 public:
-    Rule(std::string name, std::vector<JsonDSL::RuleParameters> parameters, bool hasCases, bool hasSetOfRules);
+    Rule(JsonDSL::RuleType name, std::vector<JsonDSL::RuleParameters> parameters, bool hasCases, bool hasSetOfRules);
+    int getParameterCount() const;
+    bool hasParameter(JsonDSL::RuleParameters) const;
+    const JsonDSL::RuleType name;
+    const bool hasCases;
+    const bool hasSetOfRules;
 private:
-    std::string name;
-    std::vector<JsonDSL::RuleParameters> parameters;
-    bool hasCases;
-    bool hasSetOfRules;
+    const std::vector<JsonDSL::RuleParameters> parameters;
+
 };
 
 #endif
