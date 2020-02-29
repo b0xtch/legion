@@ -10,6 +10,8 @@ target_include_directories(jsonDSL
     PUBLIC $<INSTALL_INTERFACE:include>)
 target_link_libraries(jsonDSL nlohmann_json)
 
+add_subdirectory(ruleStructure)
+
 add_library (specificationValidator ./src/specificationValidator.cpp ./include/fieldValidators.h)
 target_include_directories(specificationValidator
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
