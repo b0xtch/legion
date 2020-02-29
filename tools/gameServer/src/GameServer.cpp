@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-#include "MessageType.h"
+#include "ParsedMessage.h"
 #include "json.hpp"
 #include "Utils.h"
 

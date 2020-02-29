@@ -9,6 +9,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
 
 add_subdirectory (lib)
-add_subdirectory (tests)
 add_subdirectory (tools)
+add_subdirectory (tests)
+
 
