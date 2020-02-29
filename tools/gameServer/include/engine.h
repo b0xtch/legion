@@ -148,15 +148,6 @@ namespace Engine {
         int64_t max;
     };
 
-    struct Setup {
-        Components<
-            GenType<SetupTypes, std::string_view>, 
-            int, 
-            std::string_view, 
-            bool
-        > setup;
-    };
-
     struct CVPA
         : GenType<std::string_view, Components<std::string_view, int64_t, bool> > {
         // constants, variables, perPlayer, perAudience are the same
@@ -169,11 +160,21 @@ namespace Engine {
     /**
      * Main game configuration
     */
+
+    struct Setup {
+        Components<
+            GenType<SetupTypes, std::string_view>, 
+            int, 
+            std::string_view, 
+            bool
+        > setup;
+    };
+
     struct Configuration {
         std::string_view name;
-        PlayerCount* playerCount;
+        PlayerCount playerCount;
         bool audience;
-        Setup* setup;
+        Setup setup;
     };
 
     /**
@@ -196,13 +197,13 @@ namespace Engine {
             T input;
             GenType<std::string_view, Game> gameConfig;
 
-            // Domain level set functions
-            Configuration& setConfiguration(const T& configuration);
-            CVPA& setConstants(const T& constants);
-            CVPA& setVariables(const T& variables);
-            CVPA& setPerPlayer(const T& perPlayer);
-            CVPA& setPerAudience(const T& perAudience);
-            // Rules& setRules(const T& rules);
+            // Domain level set functions, these should never throw if we do our validation correctly
+            Configuration& setConfiguration(const T& configuration) const noexcept;
+            CVPA& setConstants(const T& constants) const noexcept;
+            CVPA& setVariables(const T& variables) const noexcept;
+            CVPA& setPerPlayer(const T& perPlayer) const noexcept;
+            CVPA& setPerAudience(const T& perAudience) const noexcept;
+            Rules& setRules(const T& rules) const noexcept;
 
             // Parser Related methods
             bool validGameConfig(const T& input);
