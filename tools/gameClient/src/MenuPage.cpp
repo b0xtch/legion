@@ -1,85 +1,85 @@
 #include "MenuPage.h"
 
-MenuPage::MenuPage( const MenuPage::MenuName &menu_name,
-                    const MenuPage::NameList &field_names,
-                    const MenuPage::NameList &item_names,
-                    const MenuPage::FunctionList &item_results )
-    : menu_name( menu_name ), 
-      field_names( field_names ), 
-      item_names( item_names ), 
-      item_results( item_results ) { }
+MenuPage::MenuPage( const MenuPage::MenuName &menuName,
+                    const MenuPage::NameList &fieldNames,
+                    const MenuPage::NameList &itemNames,
+                    const MenuPage::FunctionList &itemResults )
+    : menuName( menuName ), 
+      fieldNames( fieldNames ), 
+      itemNames( itemNames ), 
+      itemResults( itemResults ) { }
 
-std::vector<MenuPage::ItemName> MenuPage::get_field_names() {
-    return field_names;
+std::vector<MenuPage::ItemName> MenuPage::getFieldNames() {
+    return fieldNames;
 }
 
-MenuPage::FieldList *MenuPage::get_field_list() {
-    return &field_list;
+MenuPage::FieldList *MenuPage::getFieldList() {
+    return &fieldList;
 }
 
-FORM* MenuPage::get_form() {
+FORM* MenuPage::getForm() {
     return form;
 }
 
-void MenuPage::set_form( FORM* form ) {
+void MenuPage::setForm( FORM* form ) {
     this->form = form;
 }
 
-void MenuPage::add_field( FIELD *field ) {
-    field_list.push_back( field );
+void MenuPage::addField( FIELD *field ) {
+    fieldList.push_back( field );
 }
 
-bool MenuPage::has_form() {
-    return !field_names.empty();
+bool MenuPage::hasForm() {
+    return !fieldNames.empty();
 }
 
-std::vector<MenuPage::ItemName> MenuPage::get_item_names() {
-    return item_names;
+std::vector<MenuPage::ItemName> MenuPage::getItemNames() {
+    return itemNames;
 }
 
-MENU *MenuPage::get_menu() {
+MENU *MenuPage::getMenu() {
     return menu;
 }
 
-void MenuPage::set_menu( MENU *menu ) {
+void MenuPage::setMenu( MENU *menu ) {
     this->menu = menu;
 }
 
-void MenuPage::add_item( ITEM *item ) {
-    item_list.push_back( item );
+void MenuPage::addItem( ITEM *item ) {
+    itemList.push_back( item );
 }
 
-MenuPage::ItemList *MenuPage::get_item_list() {
-    return &item_list;
+MenuPage::ItemList *MenuPage::getItemList() {
+    return &itemList;
 }
 
-int MenuPage::get_selected_option() {
-    return selected_option;
+int MenuPage::getSelectedOption() {
+    return selectedOption;
 }
 
-int MenuPage::change_selected_option_on_input() {
-    selected_option = getch();
-    return selected_option;
+int MenuPage::changeSelectedOptionOnInput() {
+    selectedOption = getch();
+    return selectedOption;
 }
 
-const MenuPage::FunctionList MenuPage::get_item_results() {
-    return item_results;
+const MenuPage::FunctionList MenuPage::getItemResults() {
+    return itemResults;
 }
 
-MenuPage::MenuName MenuPage::get_menu_name() {
-    return menu_name;
+MenuPage::MenuName MenuPage::getMenuName() {
+    return menuName;
 }
 
 void MenuPage::cleanup() {
     unpost_form( form );
-    for ( int i = 0; i < item_names.size(); i++ ) {
-        free_item( item_list[i] );
+    for ( int i = 0; i < itemNames.size(); i++ ) {
+        free_item( itemList[i] );
     }
     free_menu( menu );
 
     unpost_menu( menu );
-    for ( int i = 0; i < field_names.size(); i++ ) {
-        free_field( field_list[i] );
+    for ( int i = 0; i < fieldNames.size(); i++ ) {
+        free_field( fieldList[i] );
     }
     free_form( form );
 }

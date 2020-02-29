@@ -21,7 +21,7 @@ using json = nlohmann::json;
 //    https://alan-mushi.github.io/2015/05/26/simple-ncurses-popup-in-C.html
 
 
-void initialize_menu_pages( MenuManager &menu_manager, bool &done,
+void initializeMenuPages( MenuManager &menuManager, bool &done,
                             networking::Client &client, ChatWindow *chatWindow, 
                             auto &onTextEntry );
 
@@ -53,14 +53,14 @@ int main(int argc, char* argv[]) {
     };
     ChatWindow *chatWindow = nullptr;
 
-    MenuManager menu_manager;
+    MenuManager menuManager;
     
-    initialize_menu_pages( menu_manager, done, client, chatWindow, onTextEntry );
+    initializeMenuPages( menuManager, done, client, chatWindow, onTextEntry );
 
 
     // Start menu
 
-    menu_manager.initialize_starting_page();
+    menuManager.initializeStartingPage();
 
     while (!done && !client.isDisconnected()) {
 
@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
 
         if (currentMode == mainMenu) {
 
-            menu_manager.main_menu_driver();
+            menuManager.update();
 
         } else if (currentMode == chatMenu) {
 
@@ -96,7 +96,7 @@ int main(int argc, char* argv[]) {
         delete chatWindow;
     }
 
-    menu_manager.cleanup();
+    menuManager.cleanup();
 
     return 0;
 }
@@ -142,27 +142,27 @@ string makeServerMessage(string input) {
 }
 
 
-void initialize_menu_pages( MenuManager &menu_manager, bool &done,
+void initializeMenuPages( MenuManager &menuManager, bool &done,
                             networking::Client &client, ChatWindow *chatWindow, 
                             auto &onTextEntry ) {
 
     // Main menu
-    MenuPage::NameList main_menu_fields = {};
+    MenuPage::NameList mainMenuGields = {};
 
-    MenuPage::NameList main_menu_items = { "Join lobby", "Create lobby", "Exit" };
+    MenuPage::NameList mainMenuItems = { "Join lobby", "Create lobby", "Exit" };
 
     // Main menu item functions
-    auto moveToJoinLobbyPage = [&menu_manager] () {
-        MenuPage::MenuName next_page = "Join lobby";
-        menu_manager.switch_page( next_page );
+    auto moveToJoinLobbyPage = [&menuManager] () {
+        MenuPage::MenuName nextPage = "Join lobby";
+        menuManager.switchPage( nextPage );
     };
 
-    auto moveToCreateLobbyPage = [&client, &menu_manager] () {
+    auto moveToCreateLobbyPage = [&client, &menuManager] () {
 
         // Get the list of games
 
-        std::string commad_type =  "!requestGames ";
-        std::string serverMessage = makeServerMessage( commad_type );
+        std::string commadType =  "!requestGames ";
+        std::string serverMessage = makeServerMessage( commadType );
         client.send( serverMessage );
 
         auto response = client.receive();
@@ -170,113 +170,113 @@ void initialize_menu_pages( MenuManager &menu_manager, bool &done,
         //    response = client.receive();
         //}
 
-        MenuPage::NameList games_list = {"Game 1", "Game 2"};
+        MenuPage::NameList gamesList = {"Game 1", "Game 2"};
             /* TEMP create list from response */
 
         // Define the function that is called when a game is chosen
 
-        auto chooseGame = [&client, &games_list, &menu_manager] () {
+        auto chooseGame = [&client, &gamesList, &menuManager] () {
 
-            //std::string game_choice = games_list[menu_manager.get_selected_index()];
-            //client.send( game_choice );
+            //std::string gameChoice = gamesList[menuManager.getSelectedIndex()];
+            //client.send( gameChoice );
 
         };
 
         // Create the "Creat lobby" menu page with the given games
 
-        MenuPage::NameList create_lobby_fields = {};
+        MenuPage::NameList createLobbyGields = {};
 
-        MenuPage::NameList create_lobby_items = {};
+        MenuPage::NameList createLobbyItems = {};
 
-        for ( auto game_name : games_list ) {
-            create_lobby_items.push_back( game_name );
+        for ( auto gameName : gamesList ) {
+            createLobbyItems.push_back( gameName );
         }
-        MenuPage::ItemName back_string = "back";
-        create_lobby_items.push_back( back_string );
+        MenuPage::ItemName backString = "back";
+        createLobbyItems.push_back( backString );
 
-        MenuPage::FunctionList create_lobby_item_results = {}; 
+        MenuPage::FunctionList createLobbyItemResults = {}; 
 
-        for ( int i = 0; i < games_list.size(); i++ ) {
-            create_lobby_item_results.push_back( chooseGame );
+        for ( int i = 0; i < gamesList.size(); i++ ) {
+            createLobbyItemResults.push_back( chooseGame );
         }
         
-        auto moveBackToMainMenuPage = [&menu_manager] () {
-            MenuPage::MenuName next_page = "Main menu";
-            menu_manager.switch_page( next_page );
+        auto moveBackToMainMenuPage = [&menuManager] () {
+            MenuPage::MenuName nextPage = "Main menu";
+            menuManager.switchPage( nextPage );
         };
-        create_lobby_item_results.push_back( moveBackToMainMenuPage );     
+        createLobbyItemResults.push_back( moveBackToMainMenuPage );     
 
-        MenuPage::MenuName create_lobby_name = "Create lobby";
-        MenuPage *create_lobby_page = new MenuPage( create_lobby_name,
-                                                    create_lobby_fields, 
-                                                    create_lobby_items, 
-                                                    create_lobby_item_results );  
-        menu_manager.add_page( create_lobby_page ); 
+        MenuPage::MenuName createLobbyName = "Create lobby";
+        MenuPage *createLobbyPage = new MenuPage( createLobbyName,
+                                                    createLobbyGields, 
+                                                    createLobbyItems, 
+                                                    createLobbyItemResults );  
+        menuManager.addPage( createLobbyPage ); 
 
         // The games are all loaded and the page is setup, so switch to the page
 
-        MenuPage::MenuName next_page = "Create lobby";
-        menu_manager.switch_page( next_page );
+        MenuPage::MenuName nextPage = "Create lobby";
+        menuManager.switchPage( nextPage );
     };
 
     auto exitProgram = [&done] () {
         done = true;
     };
     
-    MenuPage::FunctionList main_menu_item_results = { moveToJoinLobbyPage,
+    MenuPage::FunctionList mainMenuItemResults = { moveToJoinLobbyPage,
                                                       moveToCreateLobbyPage,
                                                       exitProgram };
 
-    MenuPage::MenuName main_menu_name = "Main menu";
-    MenuPage *main_menu_page = new MenuPage( main_menu_name,
-                                             main_menu_fields, 
-                                             main_menu_items, 
-                                             main_menu_item_results );
-    menu_manager.add_page( main_menu_page );
+    MenuPage::MenuName mainMenuName = "Main menu";
+    MenuPage *mainMenuPage = new MenuPage( mainMenuName,
+                                             mainMenuGields, 
+                                             mainMenuItems, 
+                                             mainMenuItemResults );
+    menuManager.addPage( mainMenuPage );
 
 
 
     // Join lobby menu
-    const MenuPage::NameList join_lobby_fields = {"Lobby code:"};
+    const MenuPage::NameList joinLobbyGields = {"Lobby code:"};
 
-    const MenuPage::NameList join_lobby_items = {"Join", "Back"};
+    const MenuPage::NameList joinLobbyItems = {"Join", "Back"};
         
     // Join lobby item functions
 
-    auto moveBackToMainMenuPage = [&menu_manager] () {
-        MenuPage::MenuName next_page = "Main menu";
-        menu_manager.switch_page( next_page );
+    auto moveBackToMainMenuPage = [&menuManager] () {
+        MenuPage::MenuName nextPage = "Main menu";
+        menuManager.switchPage( nextPage );
     };
 
-    auto joinLobby = [&done, &client, &chatWindow, &onTextEntry, &menu_manager] () {
-        std::string commad_type =  "!joinsession ";
+    auto joinLobby = [&done, &client, &chatWindow, &onTextEntry, &menuManager] () {
+        std::string commadType =  "!joinsession ";
 
-        MenuPage *join_page = menu_manager.get_current_page();
-        MenuPage::FieldList *connect_fields = join_page->get_field_list();
+        MenuPage *joinPage = menuManager.getCurrentPage();
+        MenuPage::FieldList *connectGields = joinPage->getFieldList();
 
-        const int lobby_code_input_index = 1;
-        const char *lobby_code = 
-            field_buffer( connect_fields->at( lobby_code_input_index ), 0 );
-        std::string lobby_code_string(lobby_code);
+        const int lobbyCodeInputIndex = 1;
+        const char *lobbyCode = 
+            field_buffer( connectGields->at( lobbyCodeInputIndex ), 0 );
+        std::string lobbyCodeString(lobbyCode);
 
-        std::string command = commad_type + lobby_code_string;
+        std::string command = commadType + lobbyCodeString;
         std::string serverMessage = makeServerMessage( command );
         client.send( serverMessage );
 
         currentMode = chatMenu;
-        menu_manager.cleanup();
+        menuManager.cleanup();
         chatWindow = new ChatWindow(onTextEntry);
     };
 
-    const MenuPage::FunctionList join_lobby_item_results
+    const MenuPage::FunctionList joinLobbyItemResults
         = {joinLobby, moveBackToMainMenuPage};
 
-    MenuPage::MenuName join_lobby_name = "Join lobby";
-    MenuPage *join_lobby_page = new MenuPage( join_lobby_name,
-                                              join_lobby_fields,
-                                              join_lobby_items, 
-                                              join_lobby_item_results );
-    menu_manager.add_page( join_lobby_page );
+    MenuPage::MenuName joinLobbyName = "Join lobby";
+    MenuPage *joinLobbyPage = new MenuPage( joinLobbyName,
+                                              joinLobbyGields,
+                                              joinLobbyItems, 
+                                              joinLobbyItemResults );
+    menuManager.addPage( joinLobbyPage );
 
-    menu_manager.set_current_page( main_menu_page );
+    menuManager.setCurrentPage( mainMenuPage );
 }

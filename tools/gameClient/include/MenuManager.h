@@ -14,26 +14,30 @@ public:
 
     MenuManager();
 
-    void initialize_windows();
-    void initialize_starting_page();
-    void add_page( MenuPage *page );
-    void set_current_page( MenuPage *page );
-    MenuPage *get_current_page();
-    int get_selected_index();
-    void switch_page( MenuPage::MenuName &next_page_name );
-    void main_menu_driver();
+    void initializeWindows();
+    void initializeStartingPage();
+    void addPage( MenuPage *page );
+    void setCurrentPage( MenuPage *page );
+    MenuPage *getCurrentPage();
+    int getSelectedIndex();
+    void switchPage( MenuPage::MenuName &next_page_name );
+    void processInput();
+    void processMenuInput();
+    void processFormInput();
+    void refreshWindows();
+    void update();
     void cleanup();
 
 private:
 
-    WINDOW *main_window;
-    WINDOW *form_window;
-    WINDOW *menu_window;
+    WINDOW *mainWindow;
+    WINDOW *formWindow;
+    WINDOW *menuWindow;
 
-    std::map<MenuPage::MenuName, MenuPage *> menu_pages;
-    MenuPage *current_page;
-    int selected_index;
-    bool is_on_menu;
+    std::map<MenuPage::MenuName, MenuPage *> menuPages;
+    MenuPage *currentPage;
+    int selectedIndex;
+    bool isOnMenu;
 
 };
 

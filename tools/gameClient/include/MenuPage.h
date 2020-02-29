@@ -21,48 +21,48 @@ public:
     using ItemList = std::vector<ITEM *>;
     using FieldList = std::vector<FIELD *>;
     
-    MenuPage( const MenuName &menu_name,
-              const NameList &field_names, 
-              const NameList &item_names, 
-              const FunctionList &item_results );
+    MenuPage( const MenuName &menuName,
+              const NameList &fieldNames, 
+              const NameList &itemNames, 
+              const FunctionList &itemResults );
 
     void cleanup();
 
-    int get_selected_option();
-    int change_selected_option_on_input();
+    int getSelectedOption();
+    int changeSelectedOptionOnInput();
 
-    std::vector<ItemName> get_field_names();
-    FieldList* get_field_list();
-    void add_field( FIELD *field );
-    FORM* get_form();
-    void set_form( FORM *form );
-    bool has_form();
+    std::vector<ItemName> getFieldNames();
+    FieldList* getFieldList();
+    void addField( FIELD *field );
+    FORM* getForm();
+    void setForm( FORM *form );
+    bool hasForm();
 
-    std::vector<ItemName> get_item_names();
-    const FunctionList get_item_results();
-    void add_item( ITEM *item );
-    MENU* get_menu();
-    void set_menu( MENU *menu );
-    ItemList* get_item_list();
+    std::vector<ItemName> getItemNames();
+    const FunctionList getItemResults();
+    void addItem( ITEM *item );
+    MENU* getMenu();
+    void setMenu( MENU *menu );
+    ItemList* getItemList();
 
-    MenuName get_menu_name();
+    MenuName getMenuName();
 
 private:
 
     MenuPage();
 
-    MenuName menu_name;
-    int selected_option;
+    MenuName menuName;
+    int selectedOption;
 
     // Menu components
     FORM *form;
-    std::vector<ItemName> field_names;
-    std::vector<FIELD *> field_list;
+    std::vector<ItemName> fieldNames;
+    std::vector<FIELD *> fieldList;
 
     MENU *menu;
-    std::vector<ItemName> item_names;
-    ItemList item_list;
-    const FunctionList item_results;
+    std::vector<ItemName> itemNames;
+    ItemList itemList;
+    const FunctionList itemResults;
 };
 
 #endif
