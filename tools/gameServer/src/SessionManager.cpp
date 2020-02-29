@@ -22,6 +22,14 @@ Session SessionManager::createNewSession(){
   throw; // ServerLimitReached();
 };
 
+
+/**
+ * Get max session 
+ * **/
+int SessionManager::getMaxSessions(){
+    return MAX_SESSION_PER_SERVER;
+}
+
 /**
  * Function for adding a new connection which is not part of any session
  * **/

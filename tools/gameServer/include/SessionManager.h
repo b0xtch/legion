@@ -17,6 +17,8 @@ class SessionManager {
 
 public:
   SessionManager(int maxSessions);
+  
+  int getMaxSessions();
 
   Session createNewSession();
   
