@@ -51,7 +51,7 @@ int GameServerConfig::getMaxConnections() const {
 
 // PUBLIC
 
-GameServer::GameServer(GameServerConfig gameServerConfig, int port, const std::string& htmlFile) :
+GameServer::GameServer(GameServerConfig gameServerConfig, unsigned short port, const std::string& htmlFile) :
     gameServerConfig{gameServerConfig},
     keepRunning{true},
     port{port},
@@ -72,7 +72,7 @@ GameServer::GameServer(GameServerConfig gameServerConfig, networking::Server& se
     gameServerConfig{gameServerConfig},
     server{std::move(server)},
     sessionManager{sessionManager},
-    keepRunning{true}, port{-1}, htmlFile{""}
+    keepRunning{true}, port{0}, htmlFile{""}
 {
     
 }
@@ -88,17 +88,37 @@ void GameServer::update() {
 void GameServer::receive() {
     auto incomingMessages = server.receive();
     
+    // Check and deal with messages about requesting the list of games.
+    
+    
     // Check and deal with messages about creating/joining rooms or server shutdowns.
     std::deque<networking::Message> batchToSend{};
+    
     for (auto& msg : incomingMessages) {
-        std::vector<networking::Message> toSend = sessionManager.processMessage(msg);
+        std::cout << "[GameServer] " << msg.connection.id << ": \"" << msg.text << "\"" << std::endl;
+        
+        // If message about requesting the list of games or server shutdown, deal with it. Direct the rest to sessionManager.
+        ParsedMessage pMsg = ParsedMessage::interpret(msg.text);
+        std::vector<networking::Message> toSend{};
+        switch (pMsg.getType()) {
+            case ParsedMessage::Type::ListGames:
+                // WIP loop through all files from gameServerConfig's gameDir and format it into a message to send back.
+                break;
+            case ParsedMessage::Type::ServerStop:
+                keepRunning = false;
+                break;
+            default:
+                toSend = sessionManager.processMessage(msg);
+                break;
+        }
+        
         batchToSend.insert(batchToSend.end(), toSend.begin(), toSend.end());
     }
     
     send(batchToSend);
 }
 
-int GameServer::getPort() const {
+unsigned short GameServer::getPort() const {
     return port;
 }
 
