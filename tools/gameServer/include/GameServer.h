@@ -28,7 +28,7 @@ private:
 class GameServer {
 public:
 
-    GameServer(GameServerConfig gameServerConfig, int port, const std::string& htmlFile);
+    GameServer(GameServerConfig gameServerConfig, unsigned short port, const std::string& htmlFile);
     
     /** Useful for testing the GameServer. Perfroms an std::move on the server. */
     GameServer(GameServerConfig gameServerConfig, networking::Server& server, SessionManager& sessionManager);
@@ -43,7 +43,7 @@ public:
     void receive();
     
     /** Returns the port that the server was initialized with. */
-    int getPort() const;
+    unsigned short getPort() const;
     
     /** Returns if the server should keep running. */
     bool getKeepRunning() const;
@@ -53,7 +53,7 @@ public:
     
 private:
     bool keepRunning;
-    int port;
+    unsigned short port;
     std::string_view htmlFile;
     networking::Server server;
     SessionManager sessionManager;

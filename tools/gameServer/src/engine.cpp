@@ -137,14 +137,13 @@ namespace Engine {
         return perAudience;
     }
 
+    template <typename T> 
+    Rules& EngineImpl<T>::setRules(const T& in){
+        Rules rules;
 
-    // template <typename T> 
-    // Rules& EngineImpl<T>::setRules(const T& in){
-    //     Rules rules;
-
-    //     this->gameConfig["rules"] = rules;
-    //     return rules;
-    // }
+        this->gameConfig["rules"] = rules;
+        return rules;
+    }
 
     /////////////////////////////////////////////////////////////////////////////
     // Control Structures

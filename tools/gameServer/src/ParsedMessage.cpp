@@ -46,6 +46,9 @@ ParsedMessage ParsedMessage::interpret(const std::string& text) {
     else if (msgType.compare(PMConstants::TYPE_CHAT) == 0) {
         ret = {Type::Chat, msgData};
     }
+    else if (msgType.compare(PMConstants::TYPE_WHISPER) == 0) {
+        ret = {Type::Whisper, msgData};
+    }
     else if (msgType.compare(PMConstants::TYPE_LIST_GAMES) == 0) {
         ret = {Type::ListGames, msgData};
     }

@@ -5,30 +5,14 @@
 #include <iostream>  
 #include <any>
 #include <variant>
-// #include "jsonDSL.h"
-
-using namespace std; 
-
-// The main work is to split the string into the three components 
-// "player", ".", and "count" and turn these into instructions: "player" => look up 
-// "player" key; "." => expect it to be an inner map/object; "count" => look up 
-// "count" key in inner map/object
-/**
- * 
- * Create a way to output from each struct type
- * Implement the rest of the JsonDsl types just put them into lambda functions with (ENUM& )
- * change any type in setup and GenType struct
- * define a desgin of hiercarhy
- * Map of string to structs => <"configuratin" -> configuration (type struct)>
-*/
+#include "jsonDSL.h"
+#include "RuleCollection.h"
 
 namespace Engine {
 
-
-    // logic
-    // ===============================================================
-
-    //not sure if this is good design, needs to do more research. A few things depend on this type now
+    /**
+     * Support types 
+     */
     template <typename K, typename V> 
     struct GenType {
 
@@ -46,64 +30,10 @@ namespace Engine {
     };
 
     /**
-     * Each individual rule is a map of attributes describing the rule. 
-     * Lists of rules define a sequence of operations in which each rule 
-     * must be performed in sequential order.
-    */
-    // template<typename T, typename... Args>
-    struct Rules {
-        std::string add {"rules"};
+     * Rules
+     */
 
-        // List of all the rules under Rules struct\
-        // Control Structures
-        struct ControlStructures {};
-
-        // List Operations
-        struct ListOperations {};
-
-        // Arithmetic Operations -> example provided using the arithmetic struct provided above
-        struct Arithmetic {}; // basically the one below this main struct
-
-        // Timing
-        struct Timing {};
-
-        // Human Input
-        struct HumanInput {};
-
-        // Output
-        struct Output {}; 
-    };
-
-
-    // mostly for arithmetic operations
-    template<typename E, typename A>
-    struct arithmetic {
-        arithmetic(const E& type): type(type) {}
-        
-        template<typename T>
-        auto& operator()(const T& value) {
-            // switch (type) {
-            //     case upFrom:
-            //         value++;
-            //         break;
-            //     case downFrom:
-            //         value--;
-            //         break;
-            // }
-        }
-
-        auto& operator()(const A& value){
-            // switch (type) {
-            //     case add:
-            //         std::cout << value.first + value.second << std::endl;
-            //         return value;
-            //         break;
-            // }
-        }
-
-        E type;
-    };
-
+    // might delete as this is redunt now that componets are just rules now
     template<typename E, typename A> // switch this to accept an varidic args
     struct Interpreter {
         Interpreter(const E& type): type(type) {}
@@ -122,44 +52,31 @@ namespace Engine {
     template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>; 
 
     template<typename... T>
-    struct Components {
+    struct Components{
         using component = std::variant<T...>;
 
-        // These are the main types that we are going to 
-        // have and translate to from type T
-        // JsonDSL::SpecificationFields;
-        // JsonDSL::ConfigFields;
-        // JsonDSL::RuleType;
-        // JsonDSL::RuleParameters;
-        // JsonDSL::TimerModes;
-        // JsonDSL::SetupFields;
         void visit(){
             for (auto& entity : entities){
                 std::visit(overloaded {
-                    // [](JsonDSL::SpecificationFields value){
-                    //     std::cout << "SpecificationFields" << std::endl;
-                    // },
-                    // [](JsonDSL::ConfigFields value){
-                    //     std::cout << "ConfigFields" << std::endl;
-                    // },
-                    // [](JsonDSL::RuleType value){
-                    //     std::cout << "RuleType" << std::endl;
-                    // },
-                    // [](JsonDSL::RuleParameters value){
-                    //     std::cout << "RuleParameters" << std::endl;
-                    // },
-                    // [](JsonDSL::TimerModes value){
-                    //     std::cout << "TimerModes" << std::endl;
-                    // },
-                    // [](JsonDSL::SetupFields value){
-                    //     std::cout << "Upload your json!" << std::endl;
-                    //     //Setup( /* map[ make_pair("kind", json ] = "the prompt"; */ );
-                    // }
+                    [](int& value){value += value;},
+                    // [](ControlStructures rule){},
+                    // [](ListOperations rule){},
+                    [](Arithmetic rule){
+                        switch (rule.operation) {
+                            case JsonDSL::Arithmetic::ADD:      rule.result = rule.values.first + rule.values.second; break;
+                            case JsonDSL::Arithmetic::SUBTRACT: rule.result = rule.values.first - rule.values.second; break;
+                            case JsonDSL::Arithmetic::MULTIPLY: rule.result = rule.values.first * rule.values.second; break;
+                            case JsonDSL::Arithmetic::DIVIDE:   rule.result = rule.values.first / rule.values.second; break;
+                            default: break;
+                        }
+                    },
+                    // [](Timing rule){},
+                    // [](HumanInput rule){},
+                    // [](Output rule){}
                 }, entity);
             }
         }
-
-        // overlaoded function to take a cutom visitor i.e struct interpreter
+        
         template <typename V>
         void visit(V&& visitor){
             for (auto& entity : entities){
@@ -167,88 +84,132 @@ namespace Engine {
             }
         }
 
-        // Create a vector of variants
         std::vector<component> entities;
+    };     
+
+    struct ControlStructures {
+        ForEach forEach;
+        Loop loop;
+        Inparallel inparallel;
+        Parallelfor parallelfor;
+        Switch switch;
+        When when;
     };
+
+    struct ListOperations {
+        ListOP listOp;
+        Deal deal;
+        Discard discard;
+    };
+
+    struct Arithmetic {
+        // This type accept a pair of number i can see might need to 
+        // single values which we can easily support for now its a std::pair
+        using KindPair = std::pair<int, int>;
+        
+        Arithmetic(KindPair values, JsonDSL::Arithmetic operation)
+        : values(values),
+          operation(operation)
+          {}
+
+        Add add; // placeholder we might not need a Rulecollection for this
+        KindPair values;
+        JsonDSL::Arithmetic operation;
+        int64_t result;
+    };
+
+    struct Timing{
+        Timer timer;
+    };
+
+    struct HumanInput{};
+
+    struct Output {
+        GlobalMessage globalMessage;
+        ScoreBoard scoreboard;
+        Scores scores;
+    };
+
+    struct Rules {
+        ControlStructures controlStructures;
+        ListOperations listOperations;
+        Arithmetic arithmetic;
+        Timing timing;
+        HumanInput humanInput;
+        Output output;
+    }; 
+
+    /**
+     * Environment Types
+    */
 
     struct PlayerCount {
-        int min;
-        int max;
+        int64_t min;
+        int64_t max;
     };
 
-    // testing only
-    enum SetupTypes {
-        INTEGER,
-        STRING,
-        BOOLEAN,
-        Q_A,
-        M_C
+    struct CVPA
+        : GenType<std::string_view, Components<std::string_view, int64_t, bool> > {
+        // constants, variables, perPlayer, perAudience are the same
+        GenType constants;
+        GenType variables;
+        GenType perPlayer;
+        GenType perAudience;
     };
-    // {
-    //   "kind": <<data kind>>,
-    //   "prompt": <<Description of what data the owner should provide>>
-    // }
+
+    /**
+     * Main game configuration
+    */
+
     struct Setup {
         Components<
-            GenType<SetupTypes, std::string>, 
+            GenType<SetupTypes, std::string_view>, 
             int, 
-            std::string, 
+            std::string_view, 
             bool
         > setup;
     };
 
-    struct CVPA
-        : GenType<std::string, Components<std::string, int, bool> >
-    {
-        // constants, variables, perPlayer, perAudience are the same
-        GenType constants;
-        GenType variables;
-        GenType per_player;
-        GenType per_audience;
-    };
-
     struct Configuration {
-        std::string name;
-        PlayerCount* playecount;
+        std::string_view name;
+        PlayerCount playerCount;
         bool audience;
-        Setup* setup;
-
+        Setup setup;
     };
 
+    /**
+     * Main game component
+    */
     struct Game {
-        Components<
-        Configuration,
-        CVPA,
-        Rules
-        > components;
+        Configuration configuration;
+        CVPA cvpa;
+        Rules rules;
     };
 
     template <typename T> 
     class EngineImpl { 
         public:
             EngineImpl (const T& input);
-            GenType<std::string, Game> getGameConfig() const;
-
-            GenType<std::string, Game> initalizeEngine();
+            GenType<std::string_view, Game> getGameConfig() const noexcept;
+            GenType<std::string_view, Game> initalizeEngine();
 
         private:
             T input;
-            GenType<std::string, Game> gameConfig;
+            GenType<std::string_view, Game> gameConfig;
 
-            // Domain level set functions
-            Configuration& setConfiguration(const T& configuration);
-            CVPA& setConstants(const T& constants);
-            CVPA& setVariables(const T& variables);
-            CVPA& setPerPlayer(const T& perPlayer);
-            CVPA& setPerAudience(const T& perAudience);
-            // Rules& setRules(const T& rules);
+            // Domain level set functions, these should never throw if we do our validation correctly
+            Configuration& setConfiguration(const T& configuration) const noexcept;
+            CVPA& setConstants(const T& constants) const noexcept;
+            CVPA& setVariables(const T& variables) const noexcept;
+            CVPA& setPerPlayer(const T& perPlayer) const noexcept;
+            CVPA& setPerAudience(const T& perAudience) const noexcept;
+            Rules& setRules(const T& rules) const noexcept;
 
             // Parser Related methods
             bool validGameConfig(const T& input);
-            GenType<std::string, Game> buildGame();
+            GenType<std::string_view, Game> buildGame();
             void mapKeyToValue(const T& key, const T& value);
             T mapValueToFuntion(const T& value);
-
 
             // Game related methods
             void findAndExecute(/* find a specific function and execute dynamically*/);
