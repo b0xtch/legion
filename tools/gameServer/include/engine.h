@@ -190,7 +190,7 @@ namespace Engine {
     class EngineImpl { 
         public:
             EngineImpl (const T& input);
-            GenType<std::string_view, Game> getGameConfig() const;
+            GenType<std::string_view, Game> getGameConfig() const noexcept;
             GenType<std::string_view, Game> initalizeEngine();
 
         private:
