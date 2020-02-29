@@ -215,6 +215,14 @@ namespace Engine {
             void findAndExecute(/* find a specific function and execute dynamically*/);
     };
 
+
+    /*************************************
+    *
+    *     RuleCollection Implemention  
+    *
+    **************************************/
+
+    void forEachImpl(RuleCollection::ForEach &);
 }
 
 #endif

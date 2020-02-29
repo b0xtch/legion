@@ -7,6 +7,7 @@
 #include "engine.h"
 #include <json.hpp>
 #include <any>
+#include <tuple>
 // #include "jsonvalidator.h"
 
 using json = nlohmann::json;
@@ -151,4 +152,19 @@ namespace Engine {
 
     template <typename T> 
     void EngineImpl<T>::findAndExecute() { }
+
+    /*************************************
+    *
+    *     RuleCollection Implemention  
+    *
+    **************************************/
+
+    template <typename T>
+    void forEachImpl(RuleCollection::ForEach &data){
+        for(T &el : data.list){
+            for(RuleCollection::GenRule rule : data.rules_to_run){
+                std::apply(rule, el);
+            }
+        }
+    }
 }
