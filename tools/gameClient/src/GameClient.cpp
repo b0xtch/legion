@@ -1,6 +1,7 @@
 #include <ncurses.h>
 #include <menu.h>
 #include <form.h>
+#include <sstream>
 #include "json.hpp"
 
 #include "MenuPage.h"
@@ -26,7 +27,9 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
                             auto &onTextEntry );
 
 // Make json message for server
-std::string makeServerMessage(string input);
+std::string makeServerMessage(const std::string& input);
+// Parse json message from server
+std::string processServerMessage(const std::string& response);
 
 // Controls which window is active
 enum menuMode { mainMenu, chatMenu };
@@ -51,12 +54,11 @@ int main(int argc, char* argv[]) {
             client.send( makeServerMessage(text) );
         }
     };
-    ChatWindow *chatWindow = nullptr;
+    unique_ptr<ChatWindow> chatWindow;
 
     MenuManager menuManager;
 
     initializeMenuPages( menuManager, done, client, chatWindow, onTextEntry );
-
 
     // Start menu
 
@@ -79,7 +81,7 @@ int main(int argc, char* argv[]) {
 
             auto response = client.receive();
             if (!response.empty()) {
-                chatWindow->displayText(response);
+                chatWindow->displayText( processServerMessage(response) );
             }
             chatWindow->update();
 
@@ -90,10 +92,6 @@ int main(int argc, char* argv[]) {
 
         }
 
-    }
-
-    if ( chatWindow != nullptr ) {
-        delete chatWindow;
     }
 
     menuManager.cleanup();
@@ -111,36 +109,70 @@ Then the rest of the input is put in the data field.
 If the first word does not match a possible command, the input is assumed to be a chat message.
 The command is set to !chat, and the entire input is put in the data field.
 **/
-string makeServerMessage(string input) {
+std::string makeServerMessage(const std::string& input) {
 
-    vector<string> possibleCommands;
+    vector<std::string> possibleCommands;
     possibleCommands.push_back("!createsession");
     possibleCommands.push_back("!joinsession");
     possibleCommands.push_back("!leavesession");
     possibleCommands.push_back("!gameinput");
     possibleCommands.push_back("!whisper");
     possibleCommands.push_back("!requestGames");
+    possibleCommands.push_back("!chat");
 
-    string command = "{ \"command\": \"";
+    std::stringstream commandStream;
+    commandStream << "{ \"command\": \""; // Start the json object and declare the command field
 
+    // Get the command value
     size_t endOfCommand = input.find(" ");
-    string firstWord = input.substr(0,endOfCommand);
+    std::string firstWord = input.substr(0,endOfCommand);
     if ( std::find(possibleCommands.begin(), possibleCommands.end(), firstWord) != possibleCommands.end() ) {
-        command += firstWord;
+        commandStream << firstWord;
     } else {
-        command += "!chat";
+        commandStream << "!chat";
         endOfCommand = 0;
     }
 
-    string data = "\", \"data\": \"";
-    data += input.substr(endOfCommand, string::npos);
+    commandStream << "\", \"data\": \""; // Declare the data field
+    commandStream << input.substr(endOfCommand, string::npos); // Get the data value
+    commandStream << "\" }"; // End of the json object
 
-    auto message = json::parse( command+data+"\" }" );
+    json message = json::parse( commandStream.str() );
 
     return message.dump();
 
 }
 
+/**
+Takes the string response from the server and converts it into json.
+Then gets the command and data from the json and performs action depending on their values.
+Returns a string that is to be displayed to the client user.
+**/
+std::string processServerMessage(const std::string& response) {
+
+    std::stringstream responseData;
+    json serverJson = json::parse(response);
+
+    std::string command = serverJson.at("command");
+    std::string data = serverJson.at("data");
+
+    if (command == "!chat") {
+        responseData << data;
+    } else if (command == "!gameOutput") {
+        // WIP
+        // The game output should be displayed in a separate log than the chat
+        // To do: function that displays game data
+        responseData << "game output here";
+    } else if (command == "!gamesList") {
+        // WIP
+        // List of games should be displayed in the menu
+        // To do: function that displays games in menu
+        responseData << "games list here";
+    }
+
+    return responseData;
+
+}
 
 void initializeMenuPages( MenuManager &menuManager, bool &done,
                             networking::Client &client, ChatWindow *chatWindow,
@@ -265,7 +297,7 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
 
         currentMode = chatMenu;
         menuManager.cleanup();
-        chatWindow = new ChatWindow(onTextEntry);
+        chatWindow = make_unique<ChatWindow>(onTextEntry);
     };
 
     const MenuPage::FunctionList joinLobbyItemResults
