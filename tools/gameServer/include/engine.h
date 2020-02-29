@@ -101,8 +101,7 @@ namespace Engine {
         std::vector<component> entities;
     };     
 
-    struct ControlStructures
-    : ForEach, Loop, Inparallel, Parallelfor, Switch, When {
+    struct ControlStructures {
         ForEach forEach;
         Loop loop;
         Inparallel inparallel;
