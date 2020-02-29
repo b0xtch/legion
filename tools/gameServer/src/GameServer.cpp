@@ -88,10 +88,30 @@ void GameServer::update() {
 void GameServer::receive() {
     auto incomingMessages = server.receive();
     
+    // Check and deal with messages about requesting the list of games.
+    
+    
     // Check and deal with messages about creating/joining rooms or server shutdowns.
     std::deque<networking::Message> batchToSend{};
+    
     for (auto& msg : incomingMessages) {
-        std::vector<networking::Message> toSend = sessionManager.processMessage(msg);
+        std::cout << "[GameServer] " << msg.connection.id << ": \"" << msg.text << "\"" << std::endl;
+        
+        // If message about requesting the list of games or server shutdown, deal with it. Direct the rest to sessionManager.
+        ParsedMessage pMsg = ParsedMessage::interpret(msg.text);
+        std::vector<networking::Message> toSend{};
+        switch (pMsg.getType()) {
+            case ParsedMessage::Type::ListGames:
+                // WIP loop through all files from gameServerConfig's gameDir and format it into a message to send back.
+                break;
+            case ParsedMessage::Type::ServerStop:
+                keepRunning = false;
+                break;
+            default:
+                toSend = sessionManager.processMessage(msg);
+                break;
+        }
+        
         batchToSend.insert(batchToSend.end(), toSend.begin(), toSend.end());
     }
     
