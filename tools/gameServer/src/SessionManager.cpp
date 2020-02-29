@@ -22,6 +22,14 @@ Session SessionManager::createNewSession(){
   throw; // ServerLimitReached();
 };
 
+
+/**
+ * Get max session 
+ * **/
+int SessionManager::getMaxSessions(){
+    return MAX_SESSION_PER_SERVER;
+}
+
 /**
  * Function for adding a new connection which is not part of any session
  * **/
@@ -32,39 +40,38 @@ void SessionManager::addConnection(const Connection& connection){
 /**
  * Function for removing a connection
  * **/
-// void SessionManager::removeConnection(const Connection& connection){
-//   auto connectionIter = find_if(
-//     unassignedConnections.begin(), unassignedConnections.end(), [&](const Connection &connection){
-//       return connection == connection;
-//       }
-//   );
-//   if(connectionIter == unassignedConnections.end()){
-//     unassignedConnections.erase(connectionIter);
-//   } else if ()
+void SessionManager::removeConnection(const Connection& connection){
+    auto connectionIter = find_if(
+            unassignedConnections.begin(), unassignedConnections.end(), [&](const Connection &connection){
+            return connection == connection;
+        }
+    );
+    if(connectionIter == unassignedConnections.end()){
+        unassignedConnections.erase(connectionIter);
+    } else if ()
 
-
-// }
+}
 
 /**
  * Function for adding connection to existing session
  * **/
 void SessionManager::addToSession(const Connection& connectionToAdd, std::string& sessionId){
-  auto connectionIter = find_if(
-    unassignedConnections.begin(), unassignedConnections.end(), [&](const Connection &connection){
-      return connection == connectionToAdd;
-      }
-  );
-
-  if (connectionIter == unassignedConnections.end()){
-      throw; // ConnectionNotFound();
-  };
-
-  if (sessions.find(sessionId) == sessions.end()){
-      throw; // SessionNotFound();
-  };
-
-  std::cout<<"Session found"<< std::endl;
-  sessions[sessionId].addClient(connectionToAdd);
+    auto connectionIter = find_if(
+            unassignedConnections.begin(), unassignedConnections.end(), [&](const Connection &connection){
+            return connection == connectionToAdd;
+        }
+    );
+    
+    if (connectionIter == unassignedConnections.end()){
+        throw; // ConnectionNotFound();
+    };
+    
+    if (sessions.find(sessionId) == sessions.end()){
+        throw; // SessionNotFound();
+    };
+    
+    std::cout<<"Session found"<< std::endl;
+    sessions[sessionId].addClient(connectionToAdd);
 };
 
 
@@ -105,40 +112,25 @@ std::vector<Message> SessionManager::constructMessage(const std::string& message
  * This function recieves messages and returns new vector of
  * Message struct which will be used by server to forward messages 
  * **/
-// std::unordered_map<std::string, SessionManager*> functionMap;
 std::vector<Message> SessionManager::processMessage(const Message& message){
-   json jsonMessage = json::parse(message.text);
+    auto [type, data] = ParsedMessage::interpret(message.text);
+    if(type == ParsedMessage::Type::CreateSession){
+        Session session = createNewSession();
+        session.addClient(message.connection);
+        std::unordered_map<ConnectionId, Connection>& connections = session.getAllClients();
+        return constructMessage("New Player Joined", connections);
+   
+    } else if(type == ParsedMessage::Type::Chat){
+        Session session = getSessionForConnection(message.connection);
+        std::unordered_map<ConnectionId, Connection>& connections = s.getAllClients();
+        return constructMessage(message.text, connections);
 
-  std::string command = jsonMessage.at("command");
-  std::string msg = jsonMessage.at("data");
-
-  if(command == "!requestGames"){
-    std::unordered_map<ConnectionId, Connection> connections;
-    connections[message.connection.id] = message.connection;
-    return constructMessage("Game", connections);
-  }
-
-  if(command == "!createsession"){
-    Session s = createNewSession();
-    s.addClient(message.connection);
-    msg = s.getSessionId();
-    std::unordered_map<ConnectionId, Connection>& connections = s.getAllClients();
-    return constructMessage(msg, connections);
-  }
-
-  
-  if(sessions.size() == 0){
-    std::unordered_map<ConnectionId, Connection> connections;
-    for(auto c: unassignedConnections){
-      connections[c.id] = c;
-    }
-    return constructMessage(msg, connections);
-  } else {
-    Session s = getSessionForConnection(message.connection);
-    std::cout << "Session: " << s.getSessionId() << std::endl;
-    std::unordered_map<ConnectionId, Connection>& connections = s.getAllClients();
-    return constructMessage(message.text, connections);
-  }
+    } else if(type == ParsedMessage::Type::LeaveSession){
+        Session session = getSessionForConnection(message.connection);
+        session.removeConnection(message.connection);
+        std::unordered_map<ConnectionId, Connection>& connections = session.getAllClients();
+        return constructMessage("Player Left", connections);
+    } 
 }  
 
 

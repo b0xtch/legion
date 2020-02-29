@@ -9,6 +9,15 @@ using networking::Connection;
 using networking::Message;
 using ConnectionId = uintptr_t;
 
+
+/**
+ * A custom struct used for session id 
+ * **/
+struct SessionId{
+    std::string_view id;
+};
+
+
 /**
  * This class is responsible for handle communication between single game/session
  **/
@@ -18,13 +27,15 @@ public:
     
     Session();
     
-    std::unordered_map<ConnectionId, Connection>& getAllClients();
+    std::unordered_map<ConnectionId, Connection> getAllClients();
     
     Connection getClient(const Connection &connection);
     
     void addClient(const Connection &connection);
     
     bool isClient(const Connection &connection);
+
+    void removeConnection(const Connection &connection);
     
     std::string getSessionId();
 
@@ -32,7 +43,7 @@ private:
     
     std::unordered_map<ConnectionId, Connection> clients;
     
-    std::string sessionId;
+    SessionId sessionId;
     
     int MAX_SESSION_SIZE;
 };
