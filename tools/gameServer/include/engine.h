@@ -6,21 +6,7 @@
 #include <any>
 #include <variant>
 #include "jsonDSL.h"
-
-using namespace std; 
-
-// The main work is to split the string into the three components 
-// "player", ".", and "count" and turn these into instructions: "player" => look up 
-// "player" key; "." => expect it to be an inner map/object; "count" => look up 
-// "count" key in inner map/object
-/**
- * 
- * Create a way to output from each struct type
- * Implement the rest of the JsonDsl types just put them into lambda functions with (ENUM& )
- * change any type in setup and GenType struct
- * define a desgin of hiercarhy
- * Map of string to structs => <"configuratin" -> configuration (type struct)>
-*/
+#include "RuleCollection.h"
 
 namespace Engine {
 
@@ -44,45 +30,10 @@ namespace Engine {
     };
 
     /**
-     * rules
+     * Rules
      */
 
-    struct ControlStructures {};
-
-    struct ListOperations {};
-
-    struct Arithmetic {
-        using KindPair = std::pair<int, int>;
-        
-        Arithmetic(KindPair values, JsonDSL::Arithmetic operation)
-        : values(values),
-          operation(operation)
-          {}
-
-        KindPair values;
-        JsonDSL::Arithmetic operation;
-        int64_t result;
-    };
-
-
-    struct Timing {};
-
-    struct HumanInput {};
-
-    struct Output {};
-
-    struct Rules {
-        ControlStructures controlStructures;
-        ListOperations listOperations;
-        Arithmetic arithmetic;
-        Timing timing;
-        HumanInput humanInput;
-        Output output;
-    };
-
-    /**
-     * Interpreter for rules
-    */
+    // might delete as this is redunt now that componets are just rules now
     template<typename E, typename A> // switch this to accept an varidic args
     struct Interpreter {
         Interpreter(const E& type): type(type) {}
@@ -148,26 +99,70 @@ namespace Engine {
         }
 
         std::vector<component> entities;
-    };      
+    };     
+
+    struct ControlStructures
+    : ForEach, Loop, Inparallel, Parallelfor, Switch, When {
+        ForEach forEach;
+        Loop loop;
+        Inparallel inparallel;
+        Parallelfor parallelfor;
+        Switch switch;
+        When when;
+    };
+
+    struct ListOperations {
+        ListOP listOp;
+        Deal deal;
+        Discard discard;
+    };
+
+    struct Arithmetic {
+        // This type accept a pair of number i can see might need to 
+        // single values which we can easily support for now its a std::pair
+        using KindPair = std::pair<int, int>;
+        
+        Arithmetic(KindPair values, JsonDSL::Arithmetic operation)
+        : values(values),
+          operation(operation)
+          {}
+
+        Add add; // placeholder we might not need a Rulecollection for this
+        KindPair values;
+        JsonDSL::Arithmetic operation;
+        int64_t result;
+    };
+
+    struct Timing{
+        Timer timer;
+    };
+
+    struct HumanInput{};
+
+    struct Output {
+        GlobalMessage globalMessage;
+        ScoreBoard scoreboard;
+        Scores scores;
+    };
+
+    struct Rules {
+        ControlStructures controlStructures;
+        ListOperations listOperations;
+        Arithmetic arithmetic;
+        Timing timing;
+        HumanInput humanInput;
+        Output output;
+    }; 
+
+    /**
+     * Environment Types
+    */
 
     struct PlayerCount {
         int64_t min;
         int64_t max;
     };
 
-    // testing only
-    enum SetupTypes {
-        INTEGER,
-        STRING,
-        BOOLEAN,
-        Q_A,
-        M_C
-    };
-
-    // {
-    //   "kind": <<data kind>>,
-    //   "prompt": <<Description of what data the owner should provide>>
-    // }
     struct Setup {
         Components<
             GenType<SetupTypes, std::string_view>, 
@@ -186,6 +181,9 @@ namespace Engine {
         GenType perAudience;
     };
 
+    /**
+     * Main game configuration
+    */
     struct Configuration {
         std::string_view name;
         PlayerCount* playerCount;
