@@ -52,31 +52,18 @@ namespace Engine {
     struct ListOperations {};
 
     struct Arithmetic {
-        Arithmetic(const JsonDSL::Arithmetic type): type(type) {}
+        using KindPair = std::pair<int, int>;
         
-        template<typename T>
-        auto& operator()(const T& value) {
-            // switch (type) {
-            //     case upFrom:
-            //         value++;
-            //         break;
-            //     case downFrom:
-            //         value--;
-            //         break;
-            // }
-        }
+        Arithmetic(KindPair values, JsonDSL::Arithmetic operation)
+        : values(values),
+          operation(operation)
+          {}
 
-        auto& operator()(const A& value){
-            // switch (type) {
-            //     case add:
-            //         std::cout << value.first + value.second << std::endl;
-            //         return value;
-            //         break;
-            // }
-        }
-
-        E type;
+        KindPair values;
+        JsonDSL::Arithmetic operation;
+        int64_t result;
     };
+
 
     struct Timing {};
 
@@ -114,40 +101,45 @@ namespace Engine {
     template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>; 
 
     template<typename... T>
-    struct Components {
+    struct Components{
         using component = std::variant<T...>;
 
-        // These are the main types that we are going to 
-        // have and translate to from type T
-        // JsonDSL::SpecificationFields;
-        // JsonDSL::ConfigFields;
-        // JsonDSL::RuleType;
-        // JsonDSL::RuleParameters;
-        // JsonDSL::TimerModes;
-        // JsonDSL::SetupFields;
         void visit(){
             for (auto& entity : entities){
                 std::visit(overloaded {
-                    // [](JsonDSL::SpecificationFields value){
-                    //     std::cout << "SpecificationFields" << std::endl;
-                    // },
-                    // [](JsonDSL::ConfigFields value){
-                    //     std::cout << "ConfigFields" << std::endl;
-                    // },
-                    // [](JsonDSL::RuleType value){
-                    //     std::cout << "RuleType" << std::endl;
-                    // },
-                    // [](JsonDSL::RuleParameters value){
-                    //     std::cout << "RuleParameters" << std::endl;
-                    // },
-                    // [](JsonDSL::TimerModes value){
-                    //     std::cout << "TimerModes" << std::endl;
-                    // },
+                    [](int& value){value += value;},
+                    // [](ControlStructures rule){},
+                    // [](ListOperations rule){},
+                    [](Arithmetic rule){
+                        switch (rule.operation)
+                        {
+                        case ADD:
+                            rule.result = rule.values.first + rule.values.second;
+                            std::cout << rule.result << std::endl;
+                            break;
+                        case SUBTRACT:
+                            rule.result = rule.values.first - rule.values.second;
+                            std::cout << rule.result << std::endl;
+                            break;
+                        case MULTIPLY:
+                            rule.result = rule.values.first * rule.values.second;
+                            std::cout << rule.result << std::endl;
+                            break;
+                        case DIVIDE:
+                            rule.result = rule.values.first / rule.values.second;
+                            std::cout << rule.result << std::endl;
+                            break;
+                        default:
+                            break;
+                        }
+                    },
+                    // [](Timing rule){},
+                    // [](HumanInput rule){},
+                    // [](Output rule){}
                 }, entity);
             }
         }
-
-        // overlaoded function to take a cutom visitor i.e struct interpreter
+        
         template <typename V>
         void visit(V&& visitor){
             for (auto& entity : entities){
@@ -155,9 +147,8 @@ namespace Engine {
             }
         }
 
-        // Create a vector of variants
         std::vector<component> entities;
-    };
+    };      
 
     struct PlayerCount {
         int64_t min;
@@ -216,7 +207,6 @@ namespace Engine {
         public:
             EngineImpl (const T& input);
             GenType<std::string_view, Game> getGameConfig() const;
-
             GenType<std::string_view, Game> initalizeEngine();
 
         private:
@@ -236,7 +226,6 @@ namespace Engine {
             GenType<std::string_view, Game> buildGame();
             void mapKeyToValue(const T& key, const T& value);
             T mapValueToFuntion(const T& value);
-
 
             // Game related methods
             void findAndExecute(/* find a specific function and execute dynamically*/);
