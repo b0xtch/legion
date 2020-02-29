@@ -117,11 +117,11 @@ std::vector<Message> SessionManager::processMessage(const Message& message){
         std::unordered_map<ConnectionId, Connection>& connections = s.getAllClients();
         return constructMessage(message.text, connections);
 
-    } else if(type == ParsedMessage::Type::ListGames){
-        return;
-
     } else if(type == ParsedMessage::Type::LeaveSession){
-
+        Session session = getSessionForConnection(message.connection);
+        session.removeConnection(message.connection);
+        std::unordered_map<ConnectionId, Connection>& connections = session.getAllClients();
+        return constructMessage("Player Left", connections);
     } 
 }  
 
