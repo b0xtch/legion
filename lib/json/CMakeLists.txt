@@ -22,7 +22,7 @@ add_library (ruleValidator ./src/ruleValidator.cpp ./include/fieldValidators.h)
 target_include_directories(ruleValidator
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PUBLIC $<INSTALL_INTERFACE:include>)
-target_link_libraries(ruleValidator nlohmann_json jsonDSL)
+target_link_libraries(ruleValidator nlohmann_json jsonDSL ruleStructure)
 
 add_library (configValidator ./src/configValidator.cpp ./include/fieldValidators.h)
 target_include_directories(configValidator
