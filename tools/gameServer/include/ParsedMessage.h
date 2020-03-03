@@ -25,6 +25,7 @@ public:
         CreateSession,
         JoinSession,
         LeaveServer,
+        LeaveSession,
         Chat,
         Whisper,
         ListGames

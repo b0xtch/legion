@@ -6,7 +6,7 @@
 /**
  * Construct with session id
  * **/
-Session::Session(): sessionId: {Utils::generateSessionId(6)}{};
+Session::Session(): sessionId{Utils::generateSessionId(6)}{};
 
 
 /**
@@ -44,7 +44,7 @@ void Session::addClient(const Connection& connection){
  * Simple getter for getting sesion id
  * **/
 std::string Session::getSessionId(){
-    return sessionId.id;
+    return sessionId;
 };
 
 
@@ -58,8 +58,8 @@ bool Session::isClient(const Connection& connection){
 /**
  * Method for removing connection from session
  * **/
-void removeConnection(const Connection &connection){
-    if(clients.find(connections) != clients.end()){
-        clients.erase(connection);
+void Session::removeConnection(const Connection &connection){
+    if(clients.find(connection.id) != clients.end()){
+        clients.erase(connection.id);
     }
 }
