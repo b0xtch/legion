@@ -1,4 +1,5 @@
 #include "SessionManager.h"
+#include "ParsedMessage.h"
 #include <algorithm>
 #include <iostream>
 #include "json.hpp"
@@ -27,7 +28,7 @@ Session SessionManager::createNewSession(){
  * Get max session 
  * **/
 int SessionManager::getMaxSessions(){
-    return MAX_SESSION_PER_SERVER;
+    return MAX_SESSIONS_PER_SERVER;
 }
 
 /**
@@ -48,8 +49,7 @@ void SessionManager::removeConnection(const Connection& connection){
     );
     if(connectionIter == unassignedConnections.end()){
         unassignedConnections.erase(connectionIter);
-    } else if ()
-
+    }
 }
 
 /**
@@ -113,22 +113,26 @@ std::vector<Message> SessionManager::constructMessage(const std::string& message
  * Message struct which will be used by server to forward messages 
  * **/
 std::vector<Message> SessionManager::processMessage(const Message& message){
-    auto [type, data] = ParsedMessage::interpret(message.text);
+    ParsedMessage parsedMessage = ParsedMessage::interpret(message.text);
+
+    ParsedMessage::Type type = parsedMessage.getType();
+    std::string msg = parsedMessage.getData();
+
     if(type == ParsedMessage::Type::CreateSession){
         Session session = createNewSession();
         session.addClient(message.connection);
-        std::unordered_map<ConnectionId, Connection>& connections = session.getAllClients();
+        std::unordered_map<ConnectionId, Connection> connections = session.getAllClients();
         return constructMessage("New Player Joined", connections);
    
     } else if(type == ParsedMessage::Type::Chat){
         Session session = getSessionForConnection(message.connection);
-        std::unordered_map<ConnectionId, Connection>& connections = s.getAllClients();
+        std::unordered_map<ConnectionId, Connection> connections = session.getAllClients();
         return constructMessage(message.text, connections);
 
     } else if(type == ParsedMessage::Type::LeaveSession){
         Session session = getSessionForConnection(message.connection);
         session.removeConnection(message.connection);
-        std::unordered_map<ConnectionId, Connection>& connections = session.getAllClients();
+        std::unordered_map<ConnectionId, Connection> connections = session.getAllClients();
         return constructMessage("Player Left", connections);
     } 
 }  
