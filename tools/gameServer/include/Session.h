@@ -14,7 +14,7 @@ using ConnectionId = uintptr_t;
  * A custom struct used for session id 
  * **/
 struct SessionId{
-    std::string_view id;
+    std::string id;
 };
 
 
@@ -43,7 +43,8 @@ private:
     
     std::unordered_map<ConnectionId, Connection> clients;
     
-    SessionId sessionId;
+    /* SessionId sessionId; */
+    std::string sessionId;
     
     int MAX_SESSION_SIZE;
 };
