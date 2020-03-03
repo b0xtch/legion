@@ -6,7 +6,7 @@ JsonDSL dsl;
 
 using Rule = ruleValidationHelper::Rule;
 
-Rule::Rule(JsonDSL::RuleType name, std::vector<JsonDSL::RuleParameters> parameter, bool hasCases, bool hasSetOfRules)
+Rule::Rule(JsonDSL::RuleType name, std::vector<JsonDSL::RuleParameters> parameters, bool hasCases, bool hasSetOfRules)
     : name(name), parameters(parameters), hasCases(hasCases), hasSetOfRules(hasSetOfRules) {}
 
 int Rule::getParameterCount() const {
