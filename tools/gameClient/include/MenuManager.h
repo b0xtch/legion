@@ -33,6 +33,7 @@ private:
     WINDOW *mainWindow;
     WINDOW *formWindow;
     WINDOW *menuWindow;
+    WINDOW *chatWindow;
 
     std::map<MenuPage::MenuName, MenuPage *> menuPages;
     MenuPage *currentPage;

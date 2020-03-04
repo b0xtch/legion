@@ -18,12 +18,13 @@ MenuManager::MenuManager() : selectedIndex(0), isOnMenu(true) {
 
 void MenuManager::addPage( MenuPage *page ) {
 
-    const int marginLeft = 20;
+    const int marginLeft = 3;
     const int marginTop = 2;
 
     // Initialize forms
     if ( page->hasForm() ) {
-        const int marginLeftField = 5;
+        const int marginLeftField = 3;
+        const int maxFieldLength = 15;
         int fieldIndex = 0;
 
         for ( int i = 0; i < page->getFieldNames().size() * 2; i++ ) {
@@ -31,7 +32,7 @@ void MenuManager::addPage( MenuPage *page ) {
 
             if ( isFieldName ) {
                 // Add field name to form
-                page->addField( new_field( 1, 20, marginTop + fieldIndex * 2, 
+                page->addField( new_field( 1, maxFieldLength, marginTop + fieldIndex * 2, 
                                                marginLeftField, 0, 0 ) );
                 field_opts_off( page->getFieldList()->at( i ), O_ACTIVE );
                 field_opts_off( page->getFieldList()->at( i ), O_EDIT );
@@ -41,8 +42,8 @@ void MenuManager::addPage( MenuPage *page ) {
             } 
             else {
                 // Add field entry to form
-                page->addField( new_field( 1, 20, marginTop + i - 1, 
-                                          marginLeft, 0, 0 ) );
+                page->addField( new_field( 1, maxFieldLength, marginTop + i - 1, 
+                                          marginLeft + maxFieldLength, 0, 0 ) );
                 field_opts_on( page->getFieldList()->at( i ), O_ACTIVE );
                 field_opts_on( page->getFieldList()->at( i ), O_EDIT );
                 set_field_back( page->getFieldList()->at( i ), A_UNDERLINE ); 
@@ -94,14 +95,19 @@ void MenuManager::initializeWindows() {
     const int mainWindowLeft = 0;
 
     const int formWindowRows = mainWindowRows - 10;
-    const int formWindowCols = mainWindowCols - 2;
+    const int formWindowCols = (mainWindowCols / 2) - 2;
     const int formWindowTop  = 1;
     const int formWindowLeft = 1;
 
     const int menuWindowRows = mainWindowRows - formWindowRows - 2;
-    const int menuWindowCols = mainWindowCols - 2;
+    const int menuWindowCols = (mainWindowCols / 2) - 2;
     const int menuWindowTop  = formWindowTop + formWindowRows;
     const int menuWindowLeft = 1;
+
+    const int chatWindowRows = mainWindowRows - 2;
+    const int chatWindowCols = (mainWindowCols / 2) - 2;
+    const int chatWindowTop  = 1;
+    const int chatWindowLeft = menuWindowCols + 2;
 
     mainWindow = newwin( mainWindowRows, mainWindowCols, 
                           mainWindowLeft, mainWindowTop );
@@ -114,6 +120,10 @@ void MenuManager::initializeWindows() {
                           menuWindowRows, menuWindowCols, 
                           menuWindowTop, menuWindowLeft );
 	box( menuWindow, 0, 0 );
+    chatWindow = derwin( mainWindow, 
+                         chatWindowRows, chatWindowCols, 
+                         chatWindowTop, chatWindowLeft );
+	box( chatWindow, 0, 0 );
 }
 
 void MenuManager::setCurrentPage( MenuPage *page ) {
@@ -133,9 +143,11 @@ void MenuManager::switchPage( MenuPage::MenuName &nextPageName ) {
     wclear( mainWindow );
     wclear( formWindow );
     wclear( menuWindow );
+    wclear( chatWindow );
     box( mainWindow, 0, 0 );
     box( formWindow, 0, 0 );
     box( menuWindow, 0, 0 );
+    box( chatWindow, 0, 0 );
 
     menu_driver( currentPage->getMenu(), REQ_FIRST_ITEM );
     selectedIndex = 0;
