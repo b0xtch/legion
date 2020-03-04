@@ -6,15 +6,16 @@
 #include <map>
 #include <menu.h>
 #include <form.h>
+#include "ChatWindow.h"
 
 
 class MenuManager {
 
 public:
 
-    MenuManager();
+    MenuManager(std::function<void(std::string)> onTextEntry);
 
-    void initializeWindows();
+    void initializeWindows(std::function<void(std::string)> onTextEntry);
     void initializeStartingPage();
     void addPage( MenuPage *page );
     void setCurrentPage( MenuPage *page );
@@ -33,12 +34,13 @@ private:
     WINDOW *mainWindow;
     WINDOW *formWindow;
     WINDOW *menuWindow;
-    WINDOW *chatWindow;
 
     std::map<MenuPage::MenuName, MenuPage *> menuPages;
     MenuPage *currentPage;
     int selectedIndex;
     bool isOnMenu;
+
+    ChatWindow *chatWindow;
 
 };
 

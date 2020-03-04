@@ -22,15 +22,10 @@ using json = nlohmann::json;
 
 
 void initializeMenuPages( MenuManager &menuManager, bool &done,
-                            networking::Client &client, ChatWindow *chatWindow, 
-                            auto &onTextEntry );
+                            networking::Client &client );
 
 // Make json message for server
 std::string makeServerMessage(string input);
-
-// Controls which window is active
-enum menuMode { mainMenu, chatMenu };
-menuMode currentMode;
 
 int main(int argc, char* argv[]) {
 
@@ -40,7 +35,6 @@ int main(int argc, char* argv[]) {
     }
 
     bool done = false;
-    currentMode = mainMenu;
     networking::Client client{argv[1], argv[2]};
 
     // Start Chat Window
@@ -51,11 +45,10 @@ int main(int argc, char* argv[]) {
             client.send( makeServerMessage(text) );
         }
     };
-    ChatWindow *chatWindow = nullptr;
 
-    MenuManager menuManager;
+    MenuManager menuManager( onTextEntry );
     
-    initializeMenuPages( menuManager, done, client, chatWindow, onTextEntry );
+    initializeMenuPages( menuManager, done, client );
 
 
     // Start menu
@@ -71,29 +64,25 @@ int main(int argc, char* argv[]) {
             done = true;
         }
 
-        if (currentMode == mainMenu) {
+        //if (currentMode == mainMenu) {
 
             menuManager.update();
 
-        } else if (currentMode == chatMenu) {
+        // } else if (currentMode == chatMenu) {
 
-            auto response = client.receive();
-            if (!response.empty()) {
-                chatWindow->displayText(response);
-            }
-            chatWindow->update();
+        //     auto response = client.receive();
+        //     if (!response.empty()) {
+        //         chatWindow->displayText(response);
+        //     }
+        //     chatWindow->update();
 
-        } else {
+        // } else {
 
-            printf("Incorrect Mode.");
-            done = true;
+        //     printf("Incorrect Mode.");
+        //     done = true;
 
-        }
+        // }
 
-    }
-
-    if ( chatWindow != nullptr ) {
-        delete chatWindow;
     }
 
     menuManager.cleanup();
@@ -143,11 +132,10 @@ string makeServerMessage(string input) {
 
 
 void initializeMenuPages( MenuManager &menuManager, bool &done,
-                            networking::Client &client, ChatWindow *chatWindow, 
-                            auto &onTextEntry ) {
+                            networking::Client &client ) {
 
     // Main menu
-    MenuPage::NameList mainMenuGields = {};
+    MenuPage::NameList mainMenuFields = {};
 
     MenuPage::NameList mainMenuItems = { "Join lobby", "Create lobby", "Exit" };
 
@@ -184,7 +172,7 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
 
         // Create the "Creat lobby" menu page with the given games
 
-        MenuPage::NameList createLobbyGields = {};
+        MenuPage::NameList createLobbyFields = {};
 
         MenuPage::NameList createLobbyItems = {};
 
@@ -208,7 +196,7 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
 
         MenuPage::MenuName createLobbyName = "Create lobby";
         MenuPage *createLobbyPage = new MenuPage( createLobbyName,
-                                                    createLobbyGields, 
+                                                    createLobbyFields, 
                                                     createLobbyItems, 
                                                     createLobbyItemResults );  
         menuManager.addPage( createLobbyPage ); 
@@ -229,7 +217,7 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
 
     MenuPage::MenuName mainMenuName = "Main menu";
     MenuPage *mainMenuPage = new MenuPage( mainMenuName,
-                                             mainMenuGields, 
+                                             mainMenuFields, 
                                              mainMenuItems, 
                                              mainMenuItemResults );
     menuManager.addPage( mainMenuPage );
@@ -237,7 +225,7 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
 
 
     // Join lobby menu
-    const MenuPage::NameList joinLobbyGields = {"Lobby code:"};
+    const MenuPage::NameList joinLobbyFields = {"Lobby code:"};
 
     const MenuPage::NameList joinLobbyItems = {"Join", "Back"};
         
@@ -248,24 +236,20 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
         menuManager.switchPage( nextPage );
     };
 
-    auto joinLobby = [&done, &client, &chatWindow, &onTextEntry, &menuManager] () {
+    auto joinLobby = [&done, &client, &menuManager] () {
         std::string commadType =  "!joinsession ";
 
         MenuPage *joinPage = menuManager.getCurrentPage();
-        MenuPage::FieldList *connectGields = joinPage->getFieldList();
+        MenuPage::FieldList *connectFields = joinPage->getFieldList();
 
         const int lobbyCodeInputIndex = 1;
         const char *lobbyCode = 
-            field_buffer( connectGields->at( lobbyCodeInputIndex ), 0 );
+            field_buffer( connectFields->at( lobbyCodeInputIndex ), 0 );
         std::string lobbyCodeString(lobbyCode);
 
         std::string command = commadType + lobbyCodeString;
         std::string serverMessage = makeServerMessage( command );
         client.send( serverMessage );
-
-        currentMode = chatMenu;
-        menuManager.cleanup();
-        chatWindow = new ChatWindow(onTextEntry);
     };
 
     const MenuPage::FunctionList joinLobbyItemResults
@@ -273,7 +257,7 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
 
     MenuPage::MenuName joinLobbyName = "Join lobby";
     MenuPage *joinLobbyPage = new MenuPage( joinLobbyName,
-                                              joinLobbyGields,
+                                              joinLobbyFields,
                                               joinLobbyItems, 
                                               joinLobbyItemResults );
     menuManager.addPage( joinLobbyPage );

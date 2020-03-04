@@ -1,10 +1,13 @@
 #include "MenuPage.h"
+#include "ChatWindow.h"
 #include "MenuManager.h"
 
 #include <string_view>
 #include <assert.h>
 
-MenuManager::MenuManager() : selectedIndex(0), isOnMenu(true) {
+#include <iostream>
+
+MenuManager::MenuManager(std::function<void(std::string)> onTextEntry) : selectedIndex(0), isOnMenu(true) {
 
     // Initialize ncurses
     initscr();
@@ -13,7 +16,7 @@ MenuManager::MenuManager() : selectedIndex(0), isOnMenu(true) {
 
     keypad( stdscr, TRUE );
 
-    initializeWindows();
+    initializeWindows(onTextEntry);
 }
 
 void MenuManager::addPage( MenuPage *page ) {
@@ -86,44 +89,43 @@ void MenuManager::addPage( MenuPage *page ) {
 
 }
 
-void MenuManager::initializeWindows() {
+void MenuManager::initializeWindows(std::function<void(std::string)> onTextEntry) {
 
     // Initialize windows
     const int mainWindowRows = 24;
-    const int mainWindowCols = 80;
-    const int mainWindowTop  = 0;;
+    const int mainWindowCols = 40;
+    const int mainWindowTop  = 0;
     const int mainWindowLeft = 0;
 
     const int formWindowRows = mainWindowRows - 10;
-    const int formWindowCols = (mainWindowCols / 2) - 2;
+    const int formWindowCols = mainWindowCols - 2;
     const int formWindowTop  = 1;
     const int formWindowLeft = 1;
 
     const int menuWindowRows = mainWindowRows - formWindowRows - 2;
-    const int menuWindowCols = (mainWindowCols / 2) - 2;
+    const int menuWindowCols = mainWindowCols - 2;
     const int menuWindowTop  = formWindowTop + formWindowRows;
     const int menuWindowLeft = 1;
 
     const int chatWindowRows = mainWindowRows - 2;
-    const int chatWindowCols = (mainWindowCols / 2) - 2;
+    const int chatWindowCols = mainWindowCols - 2;
     const int chatWindowTop  = 1;
     const int chatWindowLeft = menuWindowCols + 2;
 
     mainWindow = newwin( mainWindowRows, mainWindowCols, 
-                          mainWindowLeft, mainWindowTop );
+                         mainWindowLeft, mainWindowTop );
     box( mainWindow, 0, 0 );
     formWindow = derwin( mainWindow, 
-                          formWindowRows, formWindowCols, 
-                        formWindowTop, formWindowLeft );
+                         formWindowRows, formWindowCols, 
+                         formWindowTop, formWindowLeft );
 	box( formWindow, 0, 0 );
     menuWindow = derwin( mainWindow, 
-                          menuWindowRows, menuWindowCols, 
-                          menuWindowTop, menuWindowLeft );
+                         menuWindowRows, menuWindowCols, 
+                         menuWindowTop, menuWindowLeft );
 	box( menuWindow, 0, 0 );
-    chatWindow = derwin( mainWindow, 
-                         chatWindowRows, chatWindowCols, 
-                         chatWindowTop, chatWindowLeft );
-	box( chatWindow, 0, 0 );
+
+    // TEMP
+    chatWindow = new ChatWindow(onTextEntry);
 }
 
 void MenuManager::setCurrentPage( MenuPage *page ) {
@@ -143,13 +145,11 @@ void MenuManager::switchPage( MenuPage::MenuName &nextPageName ) {
     wclear( mainWindow );
     wclear( formWindow );
     wclear( menuWindow );
-    wclear( chatWindow );
     box( mainWindow, 0, 0 );
     box( formWindow, 0, 0 );
     box( menuWindow, 0, 0 );
-    box( chatWindow, 0, 0 );
 
-    menu_driver( currentPage->getMenu(), REQ_FIRST_ITEM );
+    //menu_driver( currentPage->getMenu(), REQ_FIRST_ITEM );
     selectedIndex = 0;
 
     if ( currentPage->hasForm() ) {
@@ -271,9 +271,10 @@ void MenuManager::refreshWindows() {
 }
 
 void MenuManager::update() {
-  refreshWindows();
-  processInput();
-  refreshWindows();
+  //refreshWindows();
+  //processInput();
+  //refreshWindows();
+  chatWindow->update();
 }
 
 void MenuManager::cleanup() {
