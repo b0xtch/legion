@@ -53,15 +53,6 @@ MenuPage::ItemList *MenuPage::getItemList() {
     return &itemList;
 }
 
-int MenuPage::getSelectedOption() {
-    return selectedOption;
-}
-
-int MenuPage::changeSelectedOptionOnInput() {
-    selectedOption = getch();
-    return selectedOption;
-}
-
 const MenuPage::FunctionList MenuPage::getItemResults() {
     return itemResults;
 }

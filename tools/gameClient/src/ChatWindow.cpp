@@ -38,14 +38,26 @@ public:
 
   void displayText(const std::string& text);
 
+  bool isActive();
+
+  void activate();
+  void deactivate();
+
+  void getInput();
+  int getKeyPress();
+
 private:
   std::function<void(std::string)> onTextEntry;
+
+  bool active = false;
 
   int positionTop  = 0;
   int positionLeft = 0;
   int rows = 0;
   int columns = 0;
   int entrySize = 3;
+
+  int keyPress;
 
   WINDOW *view     = nullptr;
   WINDOW *entry    = nullptr;
@@ -166,6 +178,25 @@ ChatWindowImpl::getFieldString() const {
   return std::string{field_buffer(entryField, 0), getFieldSize()};
 }
 
+void ChatWindowImpl::activate() {
+  active = true;
+}
+
+void ChatWindowImpl::deactivate() {
+  active = false;
+}
+
+bool ChatWindowImpl::isActive() {
+  return active;
+}
+
+void ChatWindowImpl::getInput() {
+  keyPress = getch();
+}
+
+int ChatWindowImpl::getKeyPress() {
+  return keyPress;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // ChatWindow API
@@ -182,8 +213,10 @@ ChatWindow::~ChatWindow() = default;
 
 void
 ChatWindow::update() {
-  // TODO: Add some state variable for only processing input when the chatWindow is selected
-  impl->processInput(getch());
+  if ( impl->isActive() ) {
+    impl->getInput();
+    impl->processInput(impl->getKeyPress());
+  }
   impl->refreshWindow();
 }
 
@@ -191,4 +224,19 @@ ChatWindow::update() {
 void
 ChatWindow::displayText(const std::string& text) {
   impl->displayText(text);
+}
+
+void
+ChatWindow::activate() {
+  impl->activate();
+}
+
+void
+ChatWindow::deactivate() {
+  impl->deactivate();
+}
+
+int
+ChatWindow::getKeyPress() {
+  return impl->getKeyPress();
 }

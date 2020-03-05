@@ -149,7 +149,7 @@ void MenuManager::switchPage( MenuPage::MenuName &nextPageName ) {
     box( formWindow, 0, 0 );
     box( menuWindow, 0, 0 );
 
-    //menu_driver( currentPage->getMenu(), REQ_FIRST_ITEM );
+    menu_driver( currentPage->getMenu(), REQ_FIRST_ITEM );
     selectedIndex = 0;
 
     if ( currentPage->hasForm() ) {
@@ -182,9 +182,7 @@ void MenuManager::initializeStartingPage() {
 
 void MenuManager::processInput() {
 
-    currentPage->changeSelectedOptionOnInput();
-
-    if ( isOnMenu ) {
+    if ( cursorPosition == CursorPosition::menu ) {
         processMenuInput();
     } else {
         processFormInput();
@@ -192,7 +190,7 @@ void MenuManager::processInput() {
 }
 
 void MenuManager::processMenuInput() {
-    switch ( currentPage->getSelectedOption() ) {
+    switch ( keyPress ) {
         case KEY_DOWN:
             if ( selectedIndex < currentPage->getItemNames().size() - 1 ) {
                 menu_driver( currentPage->getMenu(), REQ_DOWN_ITEM );
@@ -206,11 +204,7 @@ void MenuManager::processMenuInput() {
                 menu_driver( currentPage->getMenu(), REQ_UP_ITEM );
             } 
             else if ( currentPage->hasForm() ) {
-                // Switch up to form
-                selectedIndex = currentPage->getFieldNames().size() - 1;
-                isOnMenu = false;
-                set_menu_fore( currentPage->getMenu(), A_NORMAL );
-                form_driver( currentPage->getForm(), REQ_LAST_FIELD );
+                switchCursorPosition( CursorPosition::form );
             }
             break;
 
@@ -223,18 +217,14 @@ void MenuManager::processMenuInput() {
 }
 
 void MenuManager::processFormInput() {
-    switch ( currentPage->getSelectedOption() ) {
+    switch ( keyPress ) {
         case KEY_DOWN:
             if ( selectedIndex < currentPage->getFieldNames().size() - 1 ) {
                 form_driver( currentPage->getForm(), REQ_NEXT_FIELD );
                 selectedIndex++;
             }
             else {
-                // Switch down to menu
-                selectedIndex = 0;
-                isOnMenu = true;
-                menu_driver( currentPage->getMenu(), REQ_FIRST_ITEM );
-                set_menu_fore( currentPage->getMenu(), A_REVERSE );
+                switchCursorPosition( CursorPosition::menu );
             }
             break;
 
@@ -259,7 +249,48 @@ void MenuManager::processFormInput() {
 
         default:
             form_driver( currentPage->getForm(), 
-                         currentPage->getSelectedOption() );
+                         keyPress );
+            break;
+    }
+}
+
+void MenuManager::processCommonInput() {
+    switch ( keyPress ) {
+        case KEY_RIGHT:
+            if ( cursorPosition == CursorPosition::menu ||
+                 cursorPosition == CursorPosition::form ) {
+                switchCursorPosition( CursorPosition::chat );
+            }
+            break;
+
+        case KEY_LEFT:
+            if ( cursorPosition == CursorPosition::chat ) {
+                switchCursorPosition( CursorPosition::menu );
+            }
+            break;
+    }
+}
+
+void MenuManager::switchCursorPosition( CursorPosition newPosition ) {
+    switch (newPosition) {
+        case CursorPosition::menu:
+            selectedIndex = 0;
+            cursorPosition = CursorPosition::menu;
+            menu_driver( currentPage->getMenu(), REQ_FIRST_ITEM );
+            set_menu_fore( currentPage->getMenu(), A_REVERSE );
+            chatWindow->deactivate();
+            break;
+
+        case CursorPosition::form:
+            selectedIndex = currentPage->getFieldNames().size() - 1;
+            cursorPosition = CursorPosition::form;
+            set_menu_fore( currentPage->getMenu(), A_NORMAL );
+            form_driver( currentPage->getForm(), REQ_LAST_FIELD );
+            break;
+
+        case CursorPosition::chat:
+            cursorPosition = CursorPosition::chat;
+            chatWindow->activate();
             break;
     }
 }
@@ -271,10 +302,19 @@ void MenuManager::refreshWindows() {
 }
 
 void MenuManager::update() {
-  //refreshWindows();
-  //processInput();
-  //refreshWindows();
-  chatWindow->update();
+
+    if (cursorPosition == CursorPosition::chat) {
+        chatWindow->update();
+        keyPress = chatWindow->getKeyPress();
+    } else {
+        keyPress = getch();
+        refreshWindows();
+        processInput();
+        refreshWindows();
+    }
+
+    processCommonInput();
+
 }
 
 void MenuManager::cleanup() {

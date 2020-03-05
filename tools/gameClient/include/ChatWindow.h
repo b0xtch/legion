@@ -35,6 +35,11 @@ public:
 
   void displayText(const std::string& text);
 
+  void activate();
+  void deactivate();
+
+  int getKeyPress();
+
 private:
   std::unique_ptr<ChatWindowImpl> impl;
 };

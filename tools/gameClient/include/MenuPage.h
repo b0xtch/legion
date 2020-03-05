@@ -28,7 +28,6 @@ public:
 
     void cleanup();
 
-    int getSelectedOption();
     int changeSelectedOptionOnInput();
 
     std::vector<ItemName> getFieldNames();
@@ -52,7 +51,6 @@ private:
     MenuPage();
 
     MenuName menuName;
-    int selectedOption;
 
     // Menu components
     FORM *form;
