@@ -52,6 +52,8 @@ public:
     std::string_view getHtmlFile() const;
     
 private:
+    networking::Message generateGameListResponse(networking::Connection recipient);
+    
     bool keepRunning;
     unsigned short port;
     std::string_view htmlFile;

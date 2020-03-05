@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include <iostream>
+#include <sstream>
 
 #include "ParsedMessage.h"
 #include "json.hpp"
@@ -103,12 +104,14 @@ void GameServer::receive() {
         switch (pMsg.getType()) {
             case ParsedMessage::Type::ListGames:
                 // WIP loop through all files from gameServerConfig's gameDir and format it into a message to send back.
+                toSend.push_back(generateGameListResponse(msg.connection));
                 break;
             case ParsedMessage::Type::ServerStop:
                 keepRunning = false;
                 break;
             default:
-                toSend = sessionManager.processMessage(msg);
+                auto sessMgrMsgs = sessionManager.processMessage(msg);
+                toSend.insert(toSend.end(), sessMgrMsgs.begin(), sessMgrMsgs.end());
                 break;
         }
         
@@ -128,4 +131,35 @@ bool GameServer::getKeepRunning() const {
 
 std::string_view GameServer::getHtmlFile() const {
     return htmlFile;
+}
+
+networking::Message GameServer::generateGameListResponse(networking::Connection recipient) {
+    networking::Message msg;
+    msg.connection = recipient;
+    
+    std::stringstream msgContent;
+    msgContent << "{\"" << PMConstants::KEY_COMMAND << "\":\"" << PMConstants::TYPE_LIST_GAMES << "\",";
+    msgContent << "\"" << PMConstants::KEY_DATA << "\":" << "[";
+    
+    auto files = Utils::listFiles(gameServerConfig.getGameConfigDir());
+    for (auto& filename : files) {
+        try {
+            std::string gameName = Utils::getGameName(filename);
+            // Append gameName and comma unless it's the last one.
+            if (filename != *files.begin()) {
+                msgContent << gameName << ",";
+            }
+            else {
+                msgContent << gameName;
+            }
+        }
+        catch (std::runtime_error& e) {
+            std::cerr << "File \"" + filename + "\" does not appear to be a valid game file." << std::endl;
+        }
+    }
+    
+    msgContent << "]}";
+    msg.text = msgContent.str();
+    
+    return msg;
 }
