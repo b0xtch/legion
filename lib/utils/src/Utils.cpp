@@ -40,8 +40,10 @@ namespace Utils {
     std::vector<std::string> listFiles(const std::string& directory) {
         // https://gist.github.com/vivithemage/9517678#gistcomment-2316153
         std::vector<std::string> files{};
-        for (const auto& file : boost::filesystem::directory_iterator(directory)) {
-            files.push_back(file.path().generic_string());
+        if (boost::filesystem::exists(directory)) {
+            for (const auto& file : boost::filesystem::directory_iterator(directory)) {
+                files.push_back(file.path().generic_string());
+            }
         }
         return files;
     }
@@ -57,7 +59,7 @@ namespace Utils {
         try {
             jsonObj = json::parse(filedata);
             configuration = jsonObj["configuration"];
-            gameName = jsonObj["name"].get<std::string>();
+            gameName = configuration["name"].get<std::string>();
         }
         catch (json::parse_error& e) {
             throw std::runtime_error("JSON Parse error");

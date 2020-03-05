@@ -100,22 +100,20 @@ void GameServer::receive() {
         
         // If message about requesting the list of games or server shutdown, deal with it. Direct the rest to sessionManager.
         ParsedMessage pMsg = ParsedMessage::interpret(msg.text);
-        std::vector<networking::Message> toSend{};
+        
         switch (pMsg.getType()) {
             case ParsedMessage::Type::ListGames:
                 // WIP loop through all files from gameServerConfig's gameDir and format it into a message to send back.
-                toSend.push_back(generateGameListResponse(msg.connection));
+                batchToSend.push_back(generateGameListResponse(msg.connection));
                 break;
             case ParsedMessage::Type::ServerStop:
                 keepRunning = false;
                 break;
             default:
                 auto sessMgrMsgs = sessionManager.processMessage(msg);
-                toSend.insert(toSend.end(), sessMgrMsgs.begin(), sessMgrMsgs.end());
+                batchToSend.insert(batchToSend.end(), sessMgrMsgs.begin(), sessMgrMsgs.end());
                 break;
         }
-        
-        batchToSend.insert(batchToSend.end(), toSend.begin(), toSend.end());
     }
     
     send(batchToSend);
@@ -141,16 +139,16 @@ networking::Message GameServer::generateGameListResponse(networking::Connection 
     msgContent << "{\"" << PMConstants::KEY_COMMAND << "\":\"" << PMConstants::TYPE_LIST_GAMES << "\",";
     msgContent << "\"" << PMConstants::KEY_DATA << "\":" << "[";
     
-    auto files = Utils::listFiles(gameServerConfig.getGameConfigDir());
+    std::vector<std::string> files = Utils::listFiles(gameServerConfig.getGameConfigDir());
     for (auto& filename : files) {
         try {
             std::string gameName = Utils::getGameName(filename);
-            // Append gameName and comma unless it's the last one.
-            if (filename != *files.begin()) {
-                msgContent << gameName << ",";
+            // Append comma and game name unless it's the first one.
+            if (filename == *files.begin()) {
+                msgContent << gameName;
             }
             else {
-                msgContent << gameName;
+                msgContent << "," << gameName;
             }
         }
         catch (std::runtime_error& e) {

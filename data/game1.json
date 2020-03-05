@@ -1,0 +1,13 @@
+{
+  "configuration": {
+    "name": "Rock Paper Scissors",
+    "player count": {"min": 0, "max": 0},
+    "audience": false,
+    "setup": { }
+  },
+  "constants": {},
+  "variables": {},
+  "per-player": {},
+  "per-audience": {},
+  "rules": {}
+}
