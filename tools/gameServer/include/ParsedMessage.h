@@ -2,6 +2,8 @@
 #define PARSED_MESSAGE_H
 
 #include <string>
+#include <vector>
+#include <utility>
 
 namespace PMConstants {
     const std::string KEY_COMMAND = "command";
@@ -43,6 +45,14 @@ private:
     
     Type type;
     std::string data;
+    
+    /** Used to make sure we don't initialize the pairs more than once. */
+    static bool initialized;
+    
+    /** Stores pairs of the command string and the enum they represent. */
+    static std::vector<std::pair<std::string, Type>> commandAndTypePairs;
+    
+    static void initializePairs();
 };
 
 #endif
