@@ -57,6 +57,7 @@ JsonDSL::JsonDSL(){
     mapStringToRuleParameters.insert({"choices", JsonDSL::Choices});
     mapStringToRuleParameters.insert({"score", JsonDSL::Score});
     mapStringToRuleParameters.insert({"ascending", JsonDSL::Ascending});
+    mapStringToRuleParameters.insert({"rule", JsonDSL::Rule});
 
     mapStringToTimerModes.insert({"exact", JsonDSL::TimerExact});
     mapStringToTimerModes.insert({"at most", JsonDSL::TimerAtMost});
