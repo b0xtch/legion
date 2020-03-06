@@ -140,10 +140,10 @@ networking::Message GameServer::generateGameListResponse(networking::Connection 
     // The type of "name" is std::pair<std::string gameName, std::string gamePath>
     for (auto& name : gameNameToPathMap) {
         if (name == *gameNameToPathMap.begin()) {
-            msgContent << name.first;
+            msgContent << "\"" << name.first << "\"";
         }
         else {
-            msgContent << "," << name.first;
+            msgContent << "," << "\"" << name.first << "\"";
         }
     }
     
