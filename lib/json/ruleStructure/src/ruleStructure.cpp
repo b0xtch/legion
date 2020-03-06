@@ -19,6 +19,16 @@ bool Rule::hasParameter(JsonDSL::RuleParameters parameter) const {
     return it != parameters.end();
 }
 
+using vecIterator = std::vector<JsonDSL::RuleParameters>::iterator;
+vecIterator Rule::getParametersBegin(){
+    return parameters.begin();
+}
+
+vecIterator Rule::getParametersEnd(){
+    return parameters.end();
+}
+
+
 RuleMap ruleValidationHelper::getRuleMap(){
     bool containsCases = true;
     bool containsOtherRules = true;
