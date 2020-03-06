@@ -50,8 +50,6 @@ int GameServerConfig::getMaxConnections() const {
     return maxConnections;
 }
 
-// PUBLIC
-
 GameServer::GameServer(GameServerConfig gameServerConfig, unsigned short port, const std::string& htmlFile) :
     gameServerConfig{gameServerConfig},
     keepRunning{true},
@@ -66,7 +64,7 @@ GameServer::GameServer(GameServerConfig gameServerConfig, unsigned short port, c
         }},
     sessionManager{3}
 {
-    
+    fillGameFilesMap();
 }
 
 GameServer::GameServer(GameServerConfig gameServerConfig, networking::Server& server, SessionManager& sessionManager) :
@@ -96,7 +94,7 @@ void GameServer::receive() {
     std::deque<networking::Message> batchToSend{};
     
     for (auto& msg : incomingMessages) {
-        std::cout << "[GameServer] " << msg.connection.id << ": \"" << msg.text << "\"" << std::endl;
+        std::cout << "[GameServer] " << msg.connection.id << ": " << msg.text << std::endl;
         
         // If message about requesting the list of games or server shutdown, deal with it. Direct the rest to sessionManager.
         ParsedMessage pMsg = ParsedMessage::interpret(msg.text);
@@ -139,20 +137,13 @@ networking::Message GameServer::generateGameListResponse(networking::Connection 
     msgContent << "{\"" << PMConstants::KEY_COMMAND << "\":\"" << PMConstants::TYPE_LIST_GAMES << "\",";
     msgContent << "\"" << PMConstants::KEY_DATA << "\":" << "[";
     
-    std::vector<std::string> files = Utils::listFiles(gameServerConfig.getGameConfigDir());
-    for (auto& filename : files) {
-        try {
-            std::string gameName = Utils::getGameName(filename);
-            // Append comma and game name unless it's the first one.
-            if (filename == *files.begin()) {
-                msgContent << gameName;
-            }
-            else {
-                msgContent << "," << gameName;
-            }
+    // The type of "name" is std::pair<std::string gameName, std::string gamePath>
+    for (auto& name : gameNameToPathMap) {
+        if (name == *gameNameToPathMap.begin()) {
+            msgContent << name.first;
         }
-        catch (std::runtime_error& e) {
-            std::cerr << "File \"" + filename + "\" does not appear to be a valid game file." << std::endl;
+        else {
+            msgContent << "," << name.first;
         }
     }
     
@@ -160,4 +151,23 @@ networking::Message GameServer::generateGameListResponse(networking::Connection 
     msg.text = msgContent.str();
     
     return msg;
+}
+
+void GameServer::fillGameFilesMap() {
+    std::vector<std::string> files = Utils::listFiles(gameServerConfig.getGameConfigDir());
+    for (auto& filename : files) {
+        try {
+            std::string name = Utils::getGameName(filename);
+            // Only add a gamename-to-file mapping if the gamename doesn't already appear in the map.
+            if (gameNameToPathMap.count(name) == 0) {
+                gameNameToPathMap[name] = filename;
+            }
+            else {
+                std::cerr << "Game with name \"" + name + "\" already appears in the game list. Cannot add game in \"" << filename << "\"." << std::endl;
+            }
+        }
+        catch (std::runtime_error& e) {
+            std::cerr << "File \"" + filename + "\" does not appear to be a valid game file." << std::endl;
+        }
+    }
 }

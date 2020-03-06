@@ -2,6 +2,7 @@
 #define GAME_SERVER_H
 
 #include <string>
+#include <map>
 
 #include "SessionManager.h"
 #include "Server.h"
@@ -53,6 +54,7 @@ public:
     
 private:
     networking::Message generateGameListResponse(networking::Connection recipient);
+    void fillGameFilesMap();
     
     bool keepRunning;
     unsigned short port;
@@ -60,6 +62,7 @@ private:
     networking::Server server;
     SessionManager sessionManager;
     GameServerConfig gameServerConfig;
+    std::map<std::string, std::string> gameNameToPathMap;
 };
 
 #endif
