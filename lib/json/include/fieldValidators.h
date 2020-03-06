@@ -10,20 +10,20 @@ public:
     void validateVariableUsage(const nlohmann::json& j_object);
 private:
     VariableValidator();
-    friend class RuleValidator;
+    friend class RulesValidator;
 };
 
-class RuleValidator{
+class RulesValidator{
 public:
-    VariableValidator validateRules(const nlohmann::json& j_object, JsonDSL::RuleType rule);
+    VariableValidator validateRules(const nlohmann::json& j_object);
 private:
-    RuleValidator();
+    RulesValidator();
     friend class ConfigValidator;
 };
 
 class ConfigValidator{
 public:
-    RuleValidator validateConfig(const nlohmann::json& j_object);
+    RulesValidator validateConfig(const nlohmann::json& j_object);
 private:
     ConfigValidator();
     friend class SpecificationValidator;

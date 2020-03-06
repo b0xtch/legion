@@ -16,3 +16,5 @@ JsonDSL::VariableDataType checkForDataType(const nlohmann::json& j_object){
         throw std::invalid_argument("Invalid data type being used in json");
     }
 }
+
+VariableValidator::VariableValidator(){}

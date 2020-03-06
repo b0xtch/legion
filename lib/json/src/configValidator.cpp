@@ -73,11 +73,11 @@ static void validateNumPlayersRestrictionValid(const json& j_object){
     }
 }
 
-RuleValidator ConfigValidator::validateConfig(const json& j_object){
+RulesValidator ConfigValidator::validateConfig(const json& j_object){
     validateAllFieldsAreValid(j_object);
     validateAllNecessaryFieldsPresent(j_object);
     validateNumPlayersRestrictionValid(j_object);
-    return RuleValidator();
+    return RulesValidator();
 }
 
 ConfigValidator::ConfigValidator(){}
