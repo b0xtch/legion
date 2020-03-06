@@ -21,7 +21,10 @@
 
 class ChatWindowImpl {
 public:
-  ChatWindowImpl(std::function<void(std::string)> onTextEntry, int updateDelay);
+  ChatWindowImpl( std::function<void(std::string)> onTextEntry, 
+                  ChatWindowInfo::Position position,
+                  ChatWindowInfo::Dimensions dimensions,
+                  int updateDelay);
   ~ChatWindowImpl();
   ChatWindowImpl(ChatWindowImpl&) = delete;
   ChatWindowImpl(ChatWindowImpl&&) = delete;
@@ -46,13 +49,15 @@ public:
   void getInput();
   int getKeyPress();
 
+  void moveAndScale(ChatWindowInfo::Position position, ChatWindowInfo::Dimensions dimensions);
+
 private:
   std::function<void(std::string)> onTextEntry;
 
   bool active = false;
 
-  int positionTop  = 0;
   int positionLeft = 0;
+  int positionTop  = 0;
   int rows = 0;
   int columns = 0;
   int entrySize = 3;
@@ -70,17 +75,19 @@ private:
 };
 
 
-ChatWindowImpl::ChatWindowImpl(std::function<void(std::string)> onTextEntry, int updateDelay)
+ChatWindowImpl::ChatWindowImpl( std::function<void(std::string)> onTextEntry, 
+                                ChatWindowInfo::Position position,
+                                ChatWindowInfo::Dimensions dimensions, 
+                                int updateDelay)
   : onTextEntry{std::move(onTextEntry)} {
-
+  initscr();
+  noecho();
   halfdelay(updateDelay);
 
-  // TEMP hardcoded values
-  const int positionTop = 1;
-  const int positionLeft = 40 + 1;
-  //getmaxyx(view, positionTop, positionLeft);
-  const int rows = 24 - 2;
-  const int columns = (80 / 2) - 2;
+  positionLeft = position.x;
+  positionTop = position.y;
+  rows = dimensions.rows;
+  columns = dimensions.columns;
 
   view = newwin(rows - entrySize, columns, positionTop, positionLeft);
 
@@ -198,13 +205,36 @@ int ChatWindowImpl::getKeyPress() {
   return keyPress;
 }
 
+void 
+ChatWindowImpl::moveAndScale(ChatWindowInfo::Position position,
+                           ChatWindowInfo::Dimensions dimensions) {
+  positionLeft = position.x;
+  positionTop = position.y;
+  rows = dimensions.rows;
+  columns = dimensions.columns;
+
+  assert(mvwin(view, positionTop, positionLeft) == OK);
+  assert(mvwin(entry, positionTop + rows - entrySize, positionLeft) == OK);
+
+  assert(wresize(view, rows - entrySize, columns) == OK);
+  assert(wresize(entry, entrySize, columns) == OK);
+  
+  wclear(stdscr);
+  wborder(entry, ' ', ' ', '-', ' ', '+', '+', ' ', ' ');
+  
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 // ChatWindow API
 ////////////////////////////////////////////////////////////////////////////////
 
 
-ChatWindow::ChatWindow(std::function<void(std::string)> onTextEntry, int updateDelay)
-  : impl{std::make_unique<ChatWindowImpl>(std::move(onTextEntry), updateDelay)}
+ChatWindow::ChatWindow( std::function<void(std::string)> onTextEntry, 
+                        ChatWindowInfo::Position position,
+                        ChatWindowInfo::Dimensions dimensions,
+                        int updateDelay)
+  : impl{std::make_unique<ChatWindowImpl>(std::move(onTextEntry), position, dimensions, updateDelay)}
     { }
 
 
@@ -213,6 +243,7 @@ ChatWindow::~ChatWindow() = default;
 
 void
 ChatWindow::update() {
+  impl->refreshWindow();
   if ( impl->isActive() ) {
     impl->getInput();
     impl->processInput(impl->getKeyPress());
@@ -239,4 +270,10 @@ ChatWindow::deactivate() {
 int
 ChatWindow::getKeyPress() {
   return impl->getKeyPress();
+}
+
+void 
+ChatWindow::moveAndScale(ChatWindowInfo::Position position, 
+                         ChatWindowInfo::Dimensions dimensions) {
+  impl->moveAndScale(position, dimensions);
 }

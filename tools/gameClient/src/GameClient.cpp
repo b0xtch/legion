@@ -46,7 +46,13 @@ int main(int argc, char* argv[]) {
         }
     };
 
-    MenuManager menuManager( onTextEntry );
+    // Dimensions and position initially set to temp values to be resized 
+        // relative to other windows later
+    ChatWindow chatWindow( onTextEntry, 
+                           ChatWindowInfo::Position{5, 5}, 
+                           ChatWindowInfo::Dimensions{5, 38} );
+
+    MenuManager menuManager( &chatWindow );
     
     initializeMenuPages( menuManager, done, client );
 
@@ -54,7 +60,7 @@ int main(int argc, char* argv[]) {
     // Start menu
 
     menuManager.initializeStartingPage();
-
+int test = 0;
     while (!done && !client.isDisconnected()) {
 
         try {
@@ -64,25 +70,13 @@ int main(int argc, char* argv[]) {
             done = true;
         }
 
-        //if (currentMode == mainMenu) {
+        auto response = client.receive();
+        if (!response.empty()) {
+            menuManager.displayChatText(response);
+        }
 
-            menuManager.update();
-
-        // } else if (currentMode == chatMenu) {
-
-        //     auto response = client.receive();
-        //     if (!response.empty()) {
-        //         chatWindow->displayText(response);
-        //     }
-        //     chatWindow->update();
-
-        // } else {
-
-        //     printf("Incorrect Mode.");
-        //     done = true;
-
-        // }
-
+        menuManager.update();
+        
     }
 
     menuManager.cleanup();

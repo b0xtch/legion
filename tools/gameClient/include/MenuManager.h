@@ -19,9 +19,9 @@ public:
         chat
     };
 
-    MenuManager(std::function<void(std::string)> onTextEntry);
+    MenuManager(ChatWindow *chatWindow);
 
-    void initializeWindows(std::function<void(std::string)> onTextEntry);
+    void initializeWindows();
     void initializeStartingPage();
     void addPage( MenuPage *page );
     void setCurrentPage( MenuPage *page );
@@ -35,6 +35,7 @@ public:
     void processCommonInput();
     void refreshWindows();
     void update();
+    void displayChatText(const std::string& text);
     void cleanup();
 
 private:
@@ -47,7 +48,6 @@ private:
     MenuPage *currentPage;
     CursorPosition cursorPosition = CursorPosition::menu;
     int selectedIndex;
-    bool isOnMenu;
 
     ChatWindow *chatWindow;
 

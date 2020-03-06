@@ -5,9 +5,8 @@
 #include <string_view>
 #include <assert.h>
 
-#include <iostream>
-
-MenuManager::MenuManager(std::function<void(std::string)> onTextEntry) : selectedIndex(0), isOnMenu(true) {
+MenuManager::MenuManager(ChatWindow *chatWindow) 
+    : chatWindow(chatWindow), selectedIndex(0) {
 
     // Initialize ncurses
     initscr();
@@ -16,7 +15,7 @@ MenuManager::MenuManager(std::function<void(std::string)> onTextEntry) : selecte
 
     keypad( stdscr, TRUE );
 
-    initializeWindows(onTextEntry);
+    initializeWindows();
 }
 
 void MenuManager::addPage( MenuPage *page ) {
@@ -89,7 +88,7 @@ void MenuManager::addPage( MenuPage *page ) {
 
 }
 
-void MenuManager::initializeWindows(std::function<void(std::string)> onTextEntry) {
+void MenuManager::initializeWindows() {
 
     // Initialize windows
     const int mainWindowRows = 24;
@@ -110,7 +109,7 @@ void MenuManager::initializeWindows(std::function<void(std::string)> onTextEntry
     const int chatWindowRows = mainWindowRows - 2;
     const int chatWindowCols = mainWindowCols - 2;
     const int chatWindowTop  = 1;
-    const int chatWindowLeft = menuWindowCols + 2;
+    const int chatWindowLeft = mainWindowCols + 2;
 
     mainWindow = newwin( mainWindowRows, mainWindowCols, 
                          mainWindowLeft, mainWindowTop );
@@ -124,8 +123,9 @@ void MenuManager::initializeWindows(std::function<void(std::string)> onTextEntry
                          menuWindowTop, menuWindowLeft );
 	box( menuWindow, 0, 0 );
 
-    // TEMP
-    chatWindow = new ChatWindow(onTextEntry);
+    chatWindow->moveAndScale( ChatWindowInfo::Position{chatWindowLeft, chatWindowTop}, 
+                              ChatWindowInfo::Dimensions{chatWindowRows, chatWindowCols} );
+
 }
 
 void MenuManager::setCurrentPage( MenuPage *page ) {
@@ -274,25 +274,32 @@ void MenuManager::processCommonInput() {
 void MenuManager::switchCursorPosition( CursorPosition newPosition ) {
     switch (newPosition) {
         case CursorPosition::menu:
-            selectedIndex = 0;
             cursorPosition = CursorPosition::menu;
-            menu_driver( currentPage->getMenu(), REQ_FIRST_ITEM );
+            selectedIndex = 0;
             set_menu_fore( currentPage->getMenu(), A_REVERSE );
+            menu_driver( currentPage->getMenu(), REQ_FIRST_ITEM );
             chatWindow->deactivate();
+            refreshWindows();
             break;
 
         case CursorPosition::form:
-            selectedIndex = currentPage->getFieldNames().size() - 1;
             cursorPosition = CursorPosition::form;
+            selectedIndex = currentPage->getFieldNames().size() - 1;
             set_menu_fore( currentPage->getMenu(), A_NORMAL );
             form_driver( currentPage->getForm(), REQ_LAST_FIELD );
+            refreshWindows();
             break;
 
         case CursorPosition::chat:
             cursorPosition = CursorPosition::chat;
+            set_menu_fore( currentPage->getMenu(), A_NORMAL );
+            refreshWindows();
             chatWindow->activate();
+            chatWindow->update();
             break;
     }
+
+    
 }
 
 void MenuManager::refreshWindows() {
@@ -301,14 +308,18 @@ void MenuManager::refreshWindows() {
     wrefresh(menuWindow);
 }
 
+void MenuManager::displayChatText(const std::string& text) {
+    chatWindow->displayText(text);
+}
+
 void MenuManager::update() {
+    refreshWindows();
 
     if (cursorPosition == CursorPosition::chat) {
         chatWindow->update();
         keyPress = chatWindow->getKeyPress();
     } else {
         keyPress = getch();
-        refreshWindows();
         processInput();
         refreshWindows();
     }
