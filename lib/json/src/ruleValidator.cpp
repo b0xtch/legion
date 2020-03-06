@@ -8,7 +8,7 @@ using json = nlohmann::json;
 using Rule = ruleValidationHelper::Rule;
 
 static JsonDSL dsl;
-static std::map<JsonDSL::RuleType, Rule> ruleMap = ruleValidationHelper::getRuleMap();
+static std::map<std::string, Rule> ruleMap = ruleValidationHelper::getRuleMap();
 
 static void validateNecessaryParametersPresent(const json& ruleJson, const Rule& ruleDefinition){
 
@@ -19,7 +19,7 @@ static void validateAllParametersAreValid(const json& ruleJson, const Rule& rule
 }
 
 static void validateSingleRule(const json& ruleJson){
-    std::string ruleString = dsl.getStringOfRuleParameterCommand(JsonDSL::Rule);
+    std::string ruleString = dsl.getRuleParameterString(JsonDSL::Rule);
     
     if(!ruleJson.contains(ruleString)){
         throw std::invalid_argument("One of the rules are missing the rule field.");
@@ -39,7 +39,7 @@ static void validateRulesStructure(const json& rulesJson){
 }
 
 VariableValidator RulesValidator::validateRules(const json& j_object){
-    std::string rulesString = dsl.getStringOfSpecificationCommand(JsonDSL::Rules);
+    std::string rulesString = dsl.getSpecString(JsonDSL::Rules);
     json rules = j_object[rulesString];
     validateRulesStructure(rules);
     return VariableValidator();

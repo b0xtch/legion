@@ -36,7 +36,7 @@ public:
         Score, Ascending, Rule
     };
 
-    enum TimerModes{
+    enum TimerMode{
         TimerExact, TimerAtMost, TimerTrack
     };
 
@@ -62,7 +62,7 @@ public:
     typedef boost::bimap<std::string, ConfigFields> configMap;
     typedef boost::bimap<std::string, RuleType> ruleMap;
     typedef boost::bimap<std::string, RuleParameters> ruleParameterMap;
-    typedef boost::bimap<std::string, TimerModes> timerModeMap;
+    typedef boost::bimap<std::string, TimerMode> timerModeMap;
     typedef boost::bimap<std::string, SetupFields> setupMap;
 
     bool isValidSpecificationField(const std::string&);
@@ -92,13 +92,13 @@ public:
                 setupMap::left_const_iterator>getSetupBeginEndIterators();
 
 
-    std::string getStringOfSpecificationCommand(SpecificationFields specification);
-    std::string getStringOfConfigCommand(ConfigFields config);
-    std::string getStringOfPlayerRestrictionCommand(PlayerRestriction restriction);
-    std::string getStringOfRuleCommand(RuleType rule);
-    std::string getStringOfRuleParameterCommand(RuleParameters paramter);
-    std::string getStringOfTimerModesCommand(TimerModes timerMode);
-    std::string getStringOfSetupCommand(SetupFields setup);
+    std::string getSpecString(SpecificationFields specification);
+    std::string getConfigString(ConfigFields config);
+    std::string getPlayerRestrictionString(PlayerRestriction restriction);
+    std::string getRuleString(RuleType rule);
+    std::string getRuleParameterString(RuleParameters paramter);
+    std::string getTimerModeString(TimerMode timerMode);
+    std::string getSetupString(SetupFields setup);
 
 private:
     specificationMap mapStringToSpecification;

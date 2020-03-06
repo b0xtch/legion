@@ -194,8 +194,9 @@ TEST_F(ValidatorTests, detectValidConfig){
 }
 
 TEST(RuleStructureTests, parameterMethodsWork){
+    JsonDSL dsl;
     auto map = ruleValidationHelper::getRuleMap();
-    auto addObj = (*map.find(JsonDSL::Add)).second;
+    auto addObj = (*map.find(dsl.getRuleString(JsonDSL::Add))).second;
     EXPECT_EQ(addObj.getParameterCount(), 2);
     EXPECT_TRUE(addObj.hasParameter(JsonDSL::To));
     EXPECT_TRUE(addObj.hasParameter(JsonDSL::Value));

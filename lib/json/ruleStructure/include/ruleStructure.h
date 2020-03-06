@@ -9,7 +9,7 @@
 
 namespace ruleValidationHelper{
     struct Rule;
-    using RuleMap = std::map<JsonDSL::RuleType, Rule>;
+    using RuleMap = std::map<std::string, Rule>;
     RuleMap getRuleMap();
 }
 

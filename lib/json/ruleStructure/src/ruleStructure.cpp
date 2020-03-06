@@ -1,6 +1,6 @@
 #include "ruleStructure.h"
 
-using RuleMap = std::map<JsonDSL::RuleType, ruleValidationHelper::Rule>;
+using RuleMap = std::map<std::string, ruleValidationHelper::Rule>;
 
 JsonDSL dsl;
 
@@ -48,7 +48,7 @@ RuleMap ruleValidationHelper::getRuleMap(){
     };
 
     RuleMap map;
-    map.insert(std::make_pair(Add.name, Add));
-    map.insert(std::make_pair(Parallelfor.name, Parallelfor));
+    map.insert(std::make_pair(dsl.getRuleString(Add.name), Add));
+    map.insert(std::make_pair(dsl.getRuleString(Parallelfor.name), Parallelfor));
     return map;
 }
