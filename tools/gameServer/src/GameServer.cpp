@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include <iostream>
+#include <sstream>
 
 #include "ParsedMessage.h"
 #include "json.hpp"
@@ -49,8 +50,6 @@ int GameServerConfig::getMaxConnections() const {
     return maxConnections;
 }
 
-// PUBLIC
-
 GameServer::GameServer(GameServerConfig gameServerConfig, unsigned short port, const std::string& htmlFile) :
     gameServerConfig{gameServerConfig},
     keepRunning{true},
@@ -65,7 +64,7 @@ GameServer::GameServer(GameServerConfig gameServerConfig, unsigned short port, c
         }},
     sessionManager{3}
 {
-    
+    fillGameFilesMap();
 }
 
 GameServer::GameServer(GameServerConfig gameServerConfig, networking::Server& server, SessionManager& sessionManager) :
@@ -95,24 +94,24 @@ void GameServer::receive() {
     std::deque<networking::Message> batchToSend{};
     
     for (auto& msg : incomingMessages) {
-        std::cout << "[GameServer] " << msg.connection.id << ": \"" << msg.text << "\"" << std::endl;
+        std::cout << "[GameServer] " << msg.connection.id << ": " << msg.text << std::endl;
         
         // If message about requesting the list of games or server shutdown, deal with it. Direct the rest to sessionManager.
         ParsedMessage pMsg = ParsedMessage::interpret(msg.text);
-        std::vector<networking::Message> toSend{};
+        
         switch (pMsg.getType()) {
             case ParsedMessage::Type::ListGames:
                 // WIP loop through all files from gameServerConfig's gameDir and format it into a message to send back.
+                batchToSend.push_back(generateGameListResponse(msg.connection));
                 break;
             case ParsedMessage::Type::ServerStop:
                 keepRunning = false;
                 break;
             default:
-                toSend = sessionManager.processMessage(msg);
+                auto sessMgrMsgs = sessionManager.processMessage(msg);
+                batchToSend.insert(batchToSend.end(), sessMgrMsgs.begin(), sessMgrMsgs.end());
                 break;
         }
-        
-        batchToSend.insert(batchToSend.end(), toSend.begin(), toSend.end());
     }
     
     send(batchToSend);
@@ -128,4 +127,47 @@ bool GameServer::getKeepRunning() const {
 
 std::string_view GameServer::getHtmlFile() const {
     return htmlFile;
+}
+
+networking::Message GameServer::generateGameListResponse(networking::Connection recipient) {
+    networking::Message msg;
+    msg.connection = recipient;
+    
+    std::stringstream msgContent;
+    msgContent << "{\"" << PMConstants::KEY_COMMAND << "\":\"" << PMConstants::TYPE_LIST_GAMES << "\",";
+    msgContent << "\"" << PMConstants::KEY_DATA << "\":" << "[";
+    
+    // The type of "name" is std::pair<std::string gameName, std::string gamePath>
+    for (auto& name : gameNameToPathMap) {
+        if (name == *gameNameToPathMap.begin()) {
+            msgContent << "\"" << name.first << "\"";
+        }
+        else {
+            msgContent << "," << "\"" << name.first << "\"";
+        }
+    }
+    
+    msgContent << "]}";
+    msg.text = msgContent.str();
+    
+    return msg;
+}
+
+void GameServer::fillGameFilesMap() {
+    std::vector<std::string> files = Utils::listFiles(gameServerConfig.getGameConfigDir());
+    for (auto& filename : files) {
+        try {
+            std::string name = Utils::getGameName(filename);
+            // Only add a gamename-to-file mapping if the gamename doesn't already appear in the map.
+            if (gameNameToPathMap.count(name) == 0) {
+                gameNameToPathMap[name] = filename;
+            }
+            else {
+                std::cerr << "Game with name \"" + name + "\" already appears in the game list. Cannot add game in \"" << filename << "\"." << std::endl;
+            }
+        }
+        catch (std::runtime_error& e) {
+            std::cerr << "File \"" + filename + "\" does not appear to be a valid game file." << std::endl;
+        }
+    }
 }
