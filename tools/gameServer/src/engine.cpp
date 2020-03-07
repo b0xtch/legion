@@ -11,6 +11,7 @@
 
 using json = nlohmann::json;
 using Engine::GenType;
+using Engine::Value;
 
 namespace Engine {
     
@@ -21,24 +22,6 @@ namespace Engine {
     template <typename T> 
     GenType<std::string, Game> EngineImpl<T>::initalizeEngine() { 
         std::cout << "Engine Initalizing!" << endl;
-        const json j1 = {
-            {"configuration", {
-                {"name", "Botch"},
-                {"player count", {{"min", 1}, {"max", 4}}},
-                {"audience", false},
-                {"setup", {{"Rounds", 10}}}
-            }},
-            {"constants", {}},
-            {"variables", {
-            {"winners", {1, 0, 2}}
-            }},
-            {"per-player", {
-            {"wins", 0}
-            }}, 
-            {"per-audience", {}},
-            {"rules", {}}
-        };
-
         if(this->validGameConfig(input)){
             for (auto& [key, value] : this->input.items()){
                 this->mapKeyToValue(key, value); 
@@ -64,7 +47,10 @@ namespace Engine {
         std::cout << "Building new game from the following configs..." << endl;
         std::cout << this->input << endl;
 
-        std::map<std::string, std::function<void(const json& in)> > Game{
+        // For testing TODO: Remove
+        json data = readJsonFromFile("../../src/data.json");
+
+        std::map<std::string, std::function<Value(const json& in)> > Game{
             {"configuration", [](const json& in){ return setConfiguration(in); }},
             {"constants", [](const json& in){ return setConstants(in); }},
             {"variables", [](const json& in){ return setVariables(in); }},
@@ -73,6 +59,7 @@ namespace Engine {
             {"rules", [](const json& in){ return setRules(in); }}
         };
 
+        // Passed on the key in the shallow level of the config call the appropriate fucntion and pass only that object
         for (const auto &[key, value] : data.items()) {
             Game[key](value);
         }
@@ -80,7 +67,7 @@ namespace Engine {
         return this->gameConfig;
     }
 
-    // Just for testing now
+    // Just for testing now TODO: Remove
     json readJsonFromFile(const std::string& file_path) {
         std::ifstream input(file_path);
 
@@ -137,8 +124,7 @@ namespace Engine {
         };
         configuration.audience = in["configuration"]["audience"];
 
-
-        return configuration;
+        return (Value) configuration;
     }
 
     template <typename T> 
