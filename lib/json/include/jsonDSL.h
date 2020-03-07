@@ -52,9 +52,10 @@ public:
 
     // TODO:: get it to kevs standard
     enum Arithmetic {
-        upFrom,
-        downFrom,
-        add
+        ADD,
+        SUBTRACT,
+        MULTIPLY,
+        DIVIDE
     };
 
     typedef boost::bimap<std::string, SpecificationFields> specificationMap;

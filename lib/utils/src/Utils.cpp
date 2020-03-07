@@ -6,6 +6,8 @@
 #include <stdexcept>
 #include <boost/filesystem.hpp>
 
+#include "json.hpp"
+
 namespace Utils {
     
     std::string generateSessionId (std::size_t length) {
@@ -27,7 +29,7 @@ namespace Utils {
         fileStream.open(filename);
         
         if (!fileStream.good()) {
-            throw std::runtime_error("File stream for " + filename + "has encountered an error!");
+            throw std::runtime_error("File stream for " + filename + " has encountered an error!");
         }
     
         std::stringstream contents{};
@@ -42,6 +44,29 @@ namespace Utils {
             files.push_back(file.path().generic_string());
         }
         return files;
+    }
+    
+    std::string getGameName(const std::string& filename) {
+        std::string filedata = loadFile(filename);
+        
+        using json = nlohmann::json;
+    
+        json jsonObj;
+        json configuration;
+        std::string gameName;
+        try {
+            jsonObj = json::parse(filedata);
+            configuration = jsonObj["configuration"];
+            gameName = jsonObj["name"].get<std::string>();
+        }
+        catch (json::parse_error& e) {
+            throw std::runtime_error("JSON Parse error");
+        }
+        catch (json::type_error& e) {
+            throw std::runtime_error("JSON Type error");
+        }
+        
+        return gameName;
     }
 }
 

@@ -8,11 +8,12 @@ namespace PMConstants {
     const std::string KEY_DATA = "data";
     
     const std::string TYPE_SERVER_STOP = "serverstop";
-    const std::string TYPE_CREATE_SESSION = "create";
-    const std::string TYPE_JOIN_SESSION = "join";
-    const std::string TYPE_LEAVE_SERVER = "leave";
-    const std::string TYPE_CHAT = "chat";
-    const std::string TYPE_LIST_GAMES = "listgames";
+    const std::string TYPE_CREATE_SESSION = "!createsession";
+    const std::string TYPE_JOIN_SESSION = "!joinsession";
+    const std::string TYPE_LEAVE_SERVER = "!leavesession";
+    const std::string TYPE_CHAT = "!chat";
+    const std::string TYPE_WHISPER = "!whisper";
+    const std::string TYPE_LIST_GAMES = "!requestgames";
 };
 
 class ParsedMessage {
@@ -24,7 +25,9 @@ public:
         CreateSession,
         JoinSession,
         LeaveServer,
+        LeaveSession,
         Chat,
+        Whisper,
         ListGames
     };
     

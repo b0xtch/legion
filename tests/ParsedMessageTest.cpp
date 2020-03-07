@@ -27,6 +27,10 @@ TEST(ParsedMessageTests, interpret) {
     EXPECT_EQ(ParsedMessage::Type::Chat, pm.getType());
     EXPECT_EQ("{\"msg\":\"can u start already?? i have to study soon\"}", pm.getData());
     
+    pm = ParsedMessage::interpret(makeMessageString(PMConstants::TYPE_WHISPER, "{\\\"msg\\\":\\\"we are updating our privacy policy\\\"}"));
+    EXPECT_EQ(ParsedMessage::Type::Whisper, pm.getType());
+    EXPECT_EQ("{\"msg\":\"we are updating our privacy policy\"}", pm.getData());
+    
     pm = ParsedMessage::interpret(makeMessageString(PMConstants::TYPE_LIST_GAMES, ""));
     EXPECT_EQ(ParsedMessage::Type::ListGames, pm.getType());
     EXPECT_EQ("", pm.getData());
