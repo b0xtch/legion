@@ -9,7 +9,7 @@
 #include "json.hpp"
 
 namespace Utils {
-    
+
     std::string generateSessionId (std::size_t length) {
         // Random string generator of size length
         // https://inversepalindrome.com/blog/how-to-create-a-random-string-in-cpp
@@ -27,37 +27,39 @@ namespace Utils {
     std::string loadFile(const std::string& filename) {
         std::ifstream fileStream;
         fileStream.open(filename);
-        
+
         if (!fileStream.good()) {
             throw std::runtime_error("File stream for " + filename + " has encountered an error!");
         }
-    
+
         std::stringstream contents{};
         contents << fileStream.rdbuf();
         return contents.str();
     }
-    
+
     std::vector<std::string> listFiles(const std::string& directory) {
         // https://gist.github.com/vivithemage/9517678#gistcomment-2316153
         std::vector<std::string> files{};
-        for (const auto& file : boost::filesystem::directory_iterator(directory)) {
-            files.push_back(file.path().generic_string());
+        if (boost::filesystem::exists(directory)) {
+            for (const auto& file : boost::filesystem::directory_iterator(directory)) {
+                files.push_back(file.path().generic_string());
+            }
         }
         return files;
     }
-    
+
     std::string getGameName(const std::string& filename) {
         std::string filedata = loadFile(filename);
-        
+
         using json = nlohmann::json;
-    
+
         json jsonObj;
         json configuration;
         std::string gameName;
         try {
             jsonObj = json::parse(filedata);
             configuration = jsonObj["configuration"];
-            gameName = jsonObj["name"].get<std::string>();
+            gameName = configuration["name"].get<std::string>();
         }
         catch (json::parse_error& e) {
             throw std::runtime_error("JSON Parse error");
@@ -65,8 +67,39 @@ namespace Utils {
         catch (json::type_error& e) {
             throw std::runtime_error("JSON Type error");
         }
-        
+
         return gameName;
     }
-}
 
+    json makeJsonCommand(const std::string& input) {
+        std::vector<std::string> possibleCommands;
+        possibleCommands.push_back("!createsession");
+        possibleCommands.push_back("!joinsession");
+        possibleCommands.push_back("!leavesession");
+        possibleCommands.push_back("!gameinput");
+        possibleCommands.push_back("!whisper");
+        possibleCommands.push_back("!requestgames");
+        possibleCommands.push_back("!chat");
+
+        std::stringstream commandStream;
+        commandStream << "{ \"command\": \""; // Start the json object and declare the command field
+
+        size_t endOfCommand = input.find(" ");
+        std::string firstWord = input.substr(0,endOfCommand);
+        if ( std::find(possibleCommands.begin(), possibleCommands.end(), firstWord) != possibleCommands.end() ) {
+            commandStream << firstWord;
+        } else {
+            commandStream << "!chat";
+            endOfCommand = 0;
+        }
+
+        commandStream << "\", \"data\": \""; // Declare the data field
+        commandStream << input.substr(endOfCommand, string::npos); // Get the data value
+        commandStream << "\" }"; // End of the json object
+
+        json message = json::parse( commandStream.str() );
+
+        return message;
+    }
+
+}

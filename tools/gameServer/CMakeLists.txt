@@ -12,7 +12,7 @@ target_link_libraries(GameServer SessionManager User networking Utils nlohmann_j
 target_include_directories(ParsedMessage
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PUBLIC $<INSTALL_INTERFACE:include>)
-target_link_libraries(ParsedMessage nlohmann_json)
+target_link_libraries(ParsedMessage nlohmann_json networking)
 
 target_include_directories(SessionManager
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

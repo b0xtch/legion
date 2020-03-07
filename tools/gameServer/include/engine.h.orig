@@ -87,8 +87,20 @@ namespace Engine {
         void visit(){
             for (auto& entity : entities){
                 std::visit(overloaded {
+<<<<<<< HEAD
+                    [](int& value){value += value;},
+                    // [](ControlStructures rule){
+                    //     switch(rule){
+                    //         case ControlStructures.parallelfor
+                    //     }
+                    // },
+||||||| c54a295
+                    [](int& value){value += value;},
+                    // [](ControlStructures rule){},
+=======
                     [](Integer& value){value += value;},
                     // [](ControlStructures rule){},
+>>>>>>> 1e91329d96cd812f9b7990d9b2ccb0b1ffbb3fcc
                     // [](ListOperations rule){},
                     [](Arithmetic rule){
                         switch (rule.operation) {
