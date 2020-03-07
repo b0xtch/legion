@@ -59,7 +59,11 @@ namespace Engine {
             for (auto& entity : entities){
                 std::visit(overloaded {
                     [](int& value){value += value;},
-                    // [](ControlStructures rule){},
+                    [](ControlStructures rule){
+                        switch(rule){
+                            case ControlStructures.parallelfor
+                        }
+                    },
                     // [](ListOperations rule){},
                     [](Arithmetic rule){
                         switch (rule.operation) {

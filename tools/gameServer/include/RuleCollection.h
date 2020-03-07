@@ -42,6 +42,16 @@ struct GenRule{
 
 using RulesList = vector<GenRule>;
 
+//Visitor struct to support variant visit
+template<typename ...Ts>
+struct Visitor : Ts...{
+	Visitor(const Ts&... args) : Ts(args)... {}
+};
+
+template<typename ...Ts>
+auto make_visitor(Ts... lambdas){
+	return Visitor<Ts...>(lambdas...);
+}
 /*************************************
 *
 *			Control Structures	
@@ -104,6 +114,22 @@ struct Parallelfor : GenRule{
 	vector<GenRule> rules_to_run;
 };
 
+//Create a function to find the correct type of a rule if passed a JSON array of rules
+
+template<class... Ts> struct overloaded : Ts... {using Ts::operator()...;};
+template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+
+template<typename... T>
+struct Components{
+	using component = std::variant<T...>;
+	void visit(){
+		for(auto& entity : entities){
+			std::visit(overloaded {
+				//TODO
+			})
+		}
+	}
+};
 template <typename T> 
 struct Switch : GenRule {
 	Switch() {};
