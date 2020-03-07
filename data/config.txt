@@ -1,0 +1,5 @@
+{
+	"games":"data/",
+	"maxSessions":10,
+	"maxConnections":50
+}
