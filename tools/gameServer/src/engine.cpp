@@ -71,6 +71,17 @@ namespace Engine {
         return this->gameConfig;
     }
 
+    // Just for testing now
+    json readJsonFromFile(const std::string& file_path) {
+        std::ifstream input(file_path);
+
+        if(input.fail()) {
+            throw std::runtime_error("Unable to open file " + file_path);
+        }
+
+        return json::parse(input);
+    }
+
     template <typename T> 
     void EngineImpl<T>::mapKeyToValue(const T& key, const T& value){
         std::cout << key << " " << this->mapValueToFuntion(value) << std::endl;
@@ -89,17 +100,32 @@ namespace Engine {
     /////////////////////////////////////////////////////////////////////////////
     // Main Parser from Type T to DSL
     /////////////////////////////////////////////////////////////////////////////
-    std::unordered_map<std::string, std::any> getKeyToValueMapping(const json& j_object){
-        std::unordered_map<std::string, std::any> mapKeyVal;
-        for(auto jsonItem : j_object.items()){
-            mapKeyVal[jsonItem.key()] = jsonItem.value()
+    Object mapConfig(const json& json, Object& map) {
+        if (json.is_object() || json.is_array()) {
+            for (auto &[key, value] : json.items()) {
+                if(value.is_string()){
+                    map[key] = (String) json;
+                }else if(value.is_number()){
+                    map[key] = (Integer) json;
+                }else if(value.is_boolean()){
+                    map[key] = (Boolean) json;
+                }else if (value.is_object()) {
+                    mapConfig(value, map);
+                }else if(value.is_array()){
+                    mapConfig(value, map);
+                }else{}
+            }
         }
-        return mapKeyVal;
     }
     
     template <typename T> 
     Configuration& EngineImpl<T>::setConfiguration(const T& in) {
         Configuration configuration = Configuration();
+        configuration.name = in["configuration"]["name"];
+        configuration.playerCount = {
+            in["configuration"]["player count"]["min"],
+            in["configuration"]["player count"]["max"]
+        };
 
         // this->gameConfig["configuration"] = configuration;
         return configuration;

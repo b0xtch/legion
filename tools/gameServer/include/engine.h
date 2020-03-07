@@ -8,6 +8,43 @@
 #include "jsonDSL.h"
 #include "RuleCollection.h"
 
+// for convenience
+using json = nlohmann::json;
+using String = std::string;
+using Integer = int;
+using Boolean = bool;
+using Key = std::string;
+using Object = std::map<std::string, std::variant<Integer, String, Boolean>>;
+using Array = std::vector<std::variant<Integer, String, Boolean>>;
+
+template<typename... T>
+using Type = std::variant<T...>;
+using Value = Type<
+  Integer,
+  String, 
+  Boolean,
+  Object,
+  Array
+>;
+
+// ATTEMPT A RECURSIVE W/O boost
+// template<typename... T>
+// using Type = std::variant<T...>;
+// struct RecursiveVariant;
+// using Value = Type<
+//   Integer,
+//   String, 
+//   Boolean,
+//   std::vector<RecursiveVariant>,
+//   std::unique_ptr<RecursiveVariant>,
+//   std::unordered_map<Key, std::unique_ptr<RecursiveVariant>>
+// >;
+// struct RecursiveVariant {
+//   Value values;
+// };
+// using Object = std::unordered_map<Key, Value>;
+// using Array = std::vector<Value>;
+
 namespace Engine {
 
     /**
@@ -149,7 +186,7 @@ namespace Engine {
     };
 
     struct CVPA
-        : GenType<std::string_view, Components<std::string_view, int64_t, bool> > {
+        : GenType<std::string, Components<std::string, int64_t, bool> > {
         // constants, variables, perPlayer, perAudience are the same
         GenType constants;
         GenType variables;
@@ -162,16 +199,11 @@ namespace Engine {
     */
 
     struct Setup {
-        Components<
-            GenType<SetupTypes, std::string_view>, 
-            int, 
-            std::string_view, 
-            bool
-        > setup;
+
     };
 
     struct Configuration {
-        std::string_view name;
+        std::string name;
         PlayerCount playerCount;
         bool audience;
         Setup setup;
@@ -190,12 +222,12 @@ namespace Engine {
     class EngineImpl { 
         public:
             EngineImpl (const T& input);
-            GenType<std::string_view, Game> getGameConfig() const noexcept;
-            GenType<std::string_view, Game> initalizeEngine();
+            GenType<std::string, Game> getGameConfig() const noexcept;
+            GenType<std::string, Game> initalizeEngine();
 
         private:
             T input;
-            GenType<std::string_view, Game> gameConfig;
+            GenType<std::string, Game> gameConfig;
 
             // Domain level set functions, these should never throw if we do our validation correctly
             Configuration& setConfiguration(const T& configuration) const noexcept;
@@ -207,7 +239,7 @@ namespace Engine {
 
             // Parser Related methods
             bool validGameConfig(const T& input);
-            GenType<std::string_view, Game> buildGame();
+            GenType<std::string, Game> buildGame();
             void mapKeyToValue(const T& key, const T& value);
             T mapValueToFuntion(const T& value);
 
