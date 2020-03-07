@@ -4,6 +4,11 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
+#include <iostream>
+#include <fstream>
+#include <json.hpp>
+
+using json = nlohmann::json;
 
 // TODO
 /**
@@ -133,8 +138,34 @@ struct Configuration{
     };
 }config;
 
+struct Variable {
+    std::string name;
+    Components<int, std::string, bool, Components<int, std::string, bool>, std::unordered_map<std::string, std::variant<>>> values;
+};
+
+Variable assign(const json& json){
+    if (json.is_object() || json.is_array()) {
+        for (auto &it : json.items()) {
+            if (it.value().is_object() || it.value().is_array())
+            assign(it.value());
+        }
+    }
+}
+
+json readJsonFromFile(const std::string& file_path) {
+    std::ifstream input(file_path);
+
+    if(input.fail()) {
+        throw std::runtime_error("Unable to open file " + file_path);
+    }
+
+    return json::parse(input);
+}
+
 int main()
 {    
+    json data = readJsonFromFile("data.json");
+
     tes3<std::string, Configuration> w {{
         {"config", config}
     }};
