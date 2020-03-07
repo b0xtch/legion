@@ -8,6 +8,43 @@
 #include "jsonDSL.h"
 #include "RuleCollection.h"
 
+// for convenience
+using json = nlohmann::json;
+using String = String;
+using Integer = int;
+using Boolean = bool;
+using Key = String;
+using Object = std::map<String, std::variant<Integer, String, Boolean>>;
+using Array = std::vector<std::variant<Integer, String, Boolean>>;
+
+template<typename... T>
+using Type = std::variant<T...>;
+using Value = Type<
+  Integer,
+  String, 
+  Boolean,
+  Object,
+  Array
+>;
+
+// ATTEMPT A RECURSIVE W/O boost
+// template<typename... T>
+// using Type = std::variant<T...>;
+// struct RecursiveVariant;
+// using Value = Type<
+//   Integer,
+//   String, 
+//   Boolean,
+//   std::vector<RecursiveVariant>,
+//   std::unique_ptr<RecursiveVariant>,
+//   std::unordered_map<Key, std::unique_ptr<RecursiveVariant>>
+// >;
+// struct RecursiveVariant {
+//   Value values;
+// };
+// using Object = std::unordered_map<Key, Value>;
+// using Array = std::vector<Value>;
+
 namespace Engine {
 
     /**
@@ -35,8 +72,8 @@ namespace Engine {
 
     // might delete as this is redunt now that componets are just rules now
     template<typename E, typename A> // switch this to accept an varidic args
-    struct Interpreter {
-        Interpreter(const E& type): type(type) {}
+    struct Integererpreter {
+        Integererpreter(const E& type): type(type) {}
 
         // template <typename T>
         // auto operator()(T&& value){
@@ -58,7 +95,7 @@ namespace Engine {
         void visit(){
             for (auto& entity : entities){
                 std::visit(overloaded {
-                    [](int& value){value += value;},
+                    [](Integer& value){value += value;},
                     // [](ControlStructures rule){},
                     // [](ListOperations rule){},
                     [](Arithmetic rule){
@@ -105,7 +142,7 @@ namespace Engine {
     struct Arithmetic {
         // This type accept a pair of number i can see might need to 
         // single values which we can easily support for now its a std::pair
-        using KindPair = std::pair<int, int>;
+        using KindPair = std::pair<Integer, Integer>;
         
         Arithmetic(KindPair values, JsonDSL::Arithmetic operation)
         : values(values),
@@ -115,7 +152,7 @@ namespace Engine {
         Add add; // placeholder we might not need a Rulecollection for this
         KindPair values;
         JsonDSL::Arithmetic operation;
-        int64_t result;
+        Integer result;
     };
 
     struct Timing{
@@ -144,12 +181,12 @@ namespace Engine {
     */
 
     struct PlayerCount {
-        int64_t min;
-        int64_t max;
+        Integer min;
+        Integer max;
     };
 
     struct CVPA
-        : GenType<std::string_view, Components<std::string_view, int64_t, bool> > {
+        : GenType<String, Components<String, Integer, bool> > {
         // constants, variables, perPlayer, perAudience are the same
         GenType constants;
         GenType variables;
@@ -162,16 +199,11 @@ namespace Engine {
     */
 
     struct Setup {
-        Components<
-            GenType<SetupTypes, std::string_view>, 
-            int, 
-            std::string_view, 
-            bool
-        > setup;
+
     };
 
     struct Configuration {
-        std::string_view name;
+        String name;
         PlayerCount playerCount;
         bool audience;
         Setup setup;
@@ -190,24 +222,24 @@ namespace Engine {
     class EngineImpl { 
         public:
             EngineImpl (const T& input);
-            GenType<std::string_view, Game> getGameConfig() const noexcept;
-            GenType<std::string_view, Game> initalizeEngine();
+            GenType<String, Game> getGameConfig() const noexcept;
+            GenType<String, Game> initalizeEngine();
 
         private:
             T input;
-            GenType<std::string_view, Game> gameConfig;
+            GenType<String, Game> gameConfig;
 
             // Domain level set functions, these should never throw if we do our validation correctly
-            Configuration& setConfiguration(const T& configuration) const noexcept;
-            CVPA& setConstants(const T& constants) const noexcept;
-            CVPA& setVariables(const T& variables) const noexcept;
-            CVPA& setPerPlayer(const T& perPlayer) const noexcept;
-            CVPA& setPerAudience(const T& perAudience) const noexcept;
-            Rules& setRules(const T& rules) const noexcept;
+            Value setConfiguration(const T& configuration) const noexcept;
+            Value setConstants(const T& constants) const noexcept;
+            Value setVariables(const T& variables) const noexcept;
+            Value setPerPlayer(const T& perPlayer) const noexcept;
+            Value setPerAudience(const T& perAudience) const noexcept;
+            Value setRules(const T& rules) const noexcept;
 
             // Parser Related methods
             bool validGameConfig(const T& input);
-            GenType<std::string_view, Game> buildGame();
+            GenType<String, Game> buildGame();
             void mapKeyToValue(const T& key, const T& value);
             T mapValueToFuntion(const T& value);
 
