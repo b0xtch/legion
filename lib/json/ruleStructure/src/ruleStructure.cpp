@@ -43,7 +43,6 @@ vecIterator Rule::getParametersEnd(){
 
 
 RuleMap ruleValidationHelper::getRuleMap(){
-    bool containsCases = true;
     bool containsOtherRules = true;
 
     ruleValidationHelper::Rule Add = {

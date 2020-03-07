@@ -33,7 +33,7 @@ public:
         List, Element, Until, While, Value, Cases, 
         Case, Target, Key, From, To, Count, Duration, 
         Mode, Flag, Timeout, RulePrompt, Result, Choices,
-        Score, Ascending, Rule
+        Score, Ascending, Rule, Condition
     };
 
     enum TimerMode{

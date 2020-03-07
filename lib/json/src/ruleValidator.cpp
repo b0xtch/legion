@@ -10,8 +10,51 @@ using Rule = ruleValidationHelper::Rule;
 static JsonDSL dsl;
 static std::map<std::string, Rule> ruleMap = ruleValidationHelper::getRuleMap();
 
-static void validateNecessaryParametersPresent(const json& ruleJson, const Rule& ruleDefinition){
+static void validateNecessaryParametersPresent(const json& ruleJson, Rule& ruleDefinition){
+    auto paramItBegin = ruleDefinition.getParametersBegin();
+    auto paramItEnd = ruleDefinition.getParametersEnd();
 
+    auto findResult = std::find_if(paramItBegin, paramItEnd, 
+        [&ruleJson](JsonDSL::RuleParameters dslEnum){
+            std::string stringToCheck = dsl.getRuleParameterString(dslEnum);
+            return !ruleJson.contains(stringToCheck);
+        }
+    );
+
+    std::string ruleName = ruleJson[dsl.getRuleParameterString(JsonDSL::Rule)];
+
+    if(findResult != paramItEnd){
+        std::stringstream errorMsg;
+        errorMsg << "Rule " << ruleName << " is missing parameter " << dsl.getRuleParameterString(*findResult) << ".";
+        throw std::invalid_argument(errorMsg.str());
+    }
+
+    if(ruleDefinition.hasCases()){
+        json cases = ruleJson[dsl.getRuleParameterString(JsonDSL::Cases)];
+        
+        std::string caseStr = dsl.getRuleParameterString(JsonDSL::Case);
+        std::string conditionStr = dsl.getRuleParameterString(JsonDSL::Condition);
+
+        std::string paramUsed = ruleDefinition.hasParameter(caseStr) ? caseStr : conditionStr;
+
+        for(auto caseObj : cases){
+            bool hasCaseField = caseObj.contains(paramUsed);
+            bool hasNestedRules = caseObj.contains(dsl.getSpecString(JsonDSL::Rules));
+
+            if(!hasCaseField || !hasNestedRules){
+                std::stringstream errorMsg;
+                errorMsg << ruleName << " has a cases field and each case much have a case/condition field and a rules field.";
+                throw std::invalid_argument (errorMsg.str());
+            }
+        }
+
+    }else if(ruleDefinition.hasSetOfRules){
+        if(!ruleJson.contains(dsl.getSpecString(JsonDSL::Rules))){
+            std::stringstream errorMsg;
+            errorMsg << ruleName << " requires a rules field.";
+            throw std::invalid_argument (errorMsg.str());
+        }
+    }
 }
 
 //call this function after validateNecessaryParametersPresent
