@@ -72,7 +72,7 @@ namespace Utils {
     }
 
     json makeJsonCommand(const std::string& input) {
-        vector<std::string> possibleCommands;
+        std::vector<std::string> possibleCommands;
         possibleCommands.push_back("!createsession");
         possibleCommands.push_back("!joinsession");
         possibleCommands.push_back("!leavesession");
