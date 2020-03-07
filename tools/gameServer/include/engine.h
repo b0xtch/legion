@@ -7,6 +7,7 @@
 #include <variant>
 #include "jsonDSL.h"
 #include "RuleCollection.h"
+#include "absl/strings"
 
 // for convenience
 using json = nlohmann::json;
@@ -70,19 +71,10 @@ namespace Engine {
      * Rules
      */
 
-    // might delete as this is redunt now that componets are just rules now
+    // Will be used in conjunction with tokenizer to understand string expressionsS
     template<typename E, typename A> // switch this to accept an varidic args
-    struct Integererpreter {
-        Integererpreter(const E& type): type(type) {}
-
-        // template <typename T>
-        // auto operator()(T&& value){
-        //     component.entities.emplace_back(value);
-        //     component.visit(arithmetic<E, T>{type});
-        // }
-
-        // Components<A> component;
-        E type;
+    struct Interpreter {
+        Interpreter (const E& type): type(type) {}
     };
 
     template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
@@ -198,9 +190,7 @@ namespace Engine {
      * Main game configuration
     */
 
-    struct Setup {
-
-    };
+    struct Setup {};
 
     struct Configuration {
         String name;
