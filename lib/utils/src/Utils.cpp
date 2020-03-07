@@ -79,7 +79,7 @@ namespace Utils {
         possibleCommands.push_back("!gameinput");
         possibleCommands.push_back("!whisper");
         possibleCommands.push_back("!requestgames");
-        ossibleCommands.push_back("!chat");
+        possibleCommands.push_back("!chat");
 
         std::stringstream commandStream;
         commandStream << "{ \"command\": \""; // Start the json object and declare the command field
