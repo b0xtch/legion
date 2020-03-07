@@ -14,10 +14,25 @@ static void validateNecessaryParametersPresent(const json& ruleJson, const Rule&
 
 }
 
+//call this function after validateNecessaryParametersPresent
+//this function assumes that the cases parameter is defined 
+//and that its contents contain valid data in the correct format
 static void validateAllParametersAreValid(const json& ruleJson, const Rule& ruleDefinition){
     for(auto parameter : ruleJson.items()){
-        if(!dsl.isValidRuleParameter(parameter.key())){
+        if(!ruleDefinition.hasParameter(parameter.key())){
             throw std::invalid_argument("An illegal key was found inside one of the rules.");
+        }
+    }
+
+    if(ruleDefinition.hasCases()){
+        //A case is only valid if it holds 2 fields, if the two valid fields are present
+        //then there must be an illegal key if the number of fields is greater than 2
+        json cases = ruleJson[dsl.getRuleParameterString(JsonDSL::Cases)];
+        int numberOfFieldsInsideCase = 2;
+        for(auto caseObj : cases){
+            if(caseObj.size() != numberOfFieldsInsideCase){
+                throw std::invalid_argument("The case objects must contain only two fields, case/condition and rules.");
+            }
         }
     }
 }

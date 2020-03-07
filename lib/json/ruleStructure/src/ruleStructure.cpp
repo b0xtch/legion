@@ -14,13 +14,22 @@ int Rule::getParameterCount() const {
     return parameters.size() + nestedRules;
 }
 
-bool Rule::hasParameter(JsonDSL::RuleParameters parameter) const {
-    auto it = std::find(parameters.begin(), parameters.end(), parameter);
+bool Rule::hasParameter(const std::string& parameter) const {
+
+    if(hasSetOfRules && parameter == dsl.getSpecString(JsonDSL::Rules)){
+        return true;
+    }
+
+    auto it = std::find_if(parameters.begin(), parameters.end(), 
+        [parameter](JsonDSL::RuleParameters dslEnum){
+            return parameter == dsl.getRuleParameterString(dslEnum);
+        }
+    );
     return it != parameters.end();
 }
 
 bool Rule::hasCases() const{
-    return hasParameter(JsonDSL::Cases);
+    return hasParameter(dsl.getRuleParameterString(JsonDSL::Cases));
 }
 
 using vecIterator = std::vector<JsonDSL::RuleParameters>::iterator;

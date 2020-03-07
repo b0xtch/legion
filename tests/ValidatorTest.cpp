@@ -198,8 +198,8 @@ TEST(RuleStructureTests, parameterMethodsWork){
     auto map = ruleValidationHelper::getRuleMap();
     auto addObj = (*map.find(dsl.getRuleString(JsonDSL::Add))).second;
     EXPECT_EQ(addObj.getParameterCount(), 2);
-    EXPECT_TRUE(addObj.hasParameter(JsonDSL::To));
-    EXPECT_TRUE(addObj.hasParameter(JsonDSL::Value));
-    EXPECT_FALSE(addObj.hasParameter(JsonDSL::RulePrompt));
+    EXPECT_TRUE(addObj.hasParameter(dsl.getRuleParameterString(JsonDSL::To)));
+    EXPECT_TRUE(addObj.hasParameter(dsl.getRuleParameterString(JsonDSL::Value)));
+    EXPECT_FALSE(addObj.hasParameter(dsl.getRuleParameterString(JsonDSL::RulePrompt)));
 
 }
