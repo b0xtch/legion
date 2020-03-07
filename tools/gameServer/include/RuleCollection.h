@@ -56,7 +56,7 @@ namespace RuleCollection {
 		type{type},
 		rules_to_run{r}	
 		{};
-<<<<<<< HEAD
+
 		
 		condition condition;
 		LoopType type;
@@ -345,7 +345,6 @@ namespace RuleCollection {
 	};
 
 }
-=======
 	GenRule() {};
 
 	string rule_name;
