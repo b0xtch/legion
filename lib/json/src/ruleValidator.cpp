@@ -15,11 +15,15 @@ static void validateNecessaryParametersPresent(const json& ruleJson, const Rule&
 }
 
 static void validateAllParametersAreValid(const json& ruleJson, const Rule& ruleDefinition){
-
+    for(auto parameter : ruleJson.items()){
+        if(!dsl.isValidRuleParameter(parameter.key())){
+            throw std::invalid_argument("An illegal key was found inside one of the rules.");
+        }
+    }
 }
 
-//function declaration for validateSingleRule to use as both functions
-//call each other in a recursive fashion
+//forward declaration of function for validateSingleRule to use
+//necessary because both functions call each other in a recursive fashion
 static void validateRulesStructure(const json& rulesJson);
 
 static void validateSingleRule(const json& ruleJson){
@@ -43,7 +47,7 @@ static void validateSingleRule(const json& ruleJson){
     validateNecessaryParametersPresent(ruleJson, ruleDefiniton);
     validateAllParametersAreValid(ruleJson, ruleDefiniton);
 
-    if(ruleDefiniton.hasCases){
+    if(ruleDefiniton.hasCases()){
         json cases = ruleJson[dsl.getRuleParameterString(JsonDSL::Cases)];
         for(auto caseJson : cases){
             auto nestedRules = caseJson[dsl.getSpecString(JsonDSL::Rules)];

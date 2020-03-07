@@ -15,7 +15,7 @@ namespace ruleValidationHelper{
 
 struct ruleValidationHelper::Rule{
 public:
-    Rule(JsonDSL::RuleType name, std::vector<JsonDSL::RuleParameters> parameters, bool hasCases, bool hasSetOfRules);
+    Rule(JsonDSL::RuleType name, std::vector<JsonDSL::RuleParameters> parameters, bool hasSetOfRules);
     int getParameterCount() const;
     bool hasParameter(JsonDSL::RuleParameters) const;
 
@@ -24,7 +24,7 @@ public:
     vecIterator getParametersEnd();
 
     const JsonDSL::RuleType name;
-    const bool hasCases;
+    bool hasCases() const;
     const bool hasSetOfRules;
 private:
     std::vector<JsonDSL::RuleParameters> parameters;
