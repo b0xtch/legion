@@ -43,15 +43,47 @@ struct GenRule{
 using RulesList = vector<GenRule>;
 
 //Visitor struct to support variant visit
+template<class... Ts> struct overloaded : Ts... {using Ts::operator()...;};
+template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+
+//Visitors struct is based off of Mahmoud's (Botch's) work in engine.h
 template<typename ...Ts>
-struct Visitor : Ts...{
-	Visitor(const Ts&... args) : Ts(args)... {}
+struct Visitors : Ts...{
+	Visitors(const Ts&... args) : Ts(args)... {}
+	using Visitor = std::variant<T...>;
+
+	void visit(){
+		for(auto& entity : entities){
+			std::visit(overloaded{
+				[](Parallelfor rule){
+					rule.parallel;
+				}
+				[](Foreach rule){}
+				[](Loop rule){}
+				[](Inparallel rule){}
+				[](Switch rule){}
+				[](When rule){}
+				//... TODO: Add on more rules and their features
+			}, entity);
+		}
+	}
+
+	template<typename V>
+	void visit(V&& visitor){
+		for(auto& entity : entities){
+			std::visit(visitor, entity);
+		}
+	}
+
+	std::vector<Visitor> entities;
 };
 
 template<typename ...Ts>
 auto make_visitor(Ts... lambdas){
-	return Visitor<Ts...>(lambdas...);
+	return Visitors<Ts...>(lambdas...);
 }
+
+
 /*************************************
 *
 *			Control Structures	
@@ -108,28 +140,19 @@ struct Parallelfor : GenRule{
 		rules_to_run{r}
 		{};
 	
-
+	void parallel(){
+		for(GenRule rule : rules_to_run){
+			for(element : list){
+				Visitors(rule);
+				//TODO
+			}
+		}
+	}
 	vector<T> list;
 	T element;
 	vector<GenRule> rules_to_run;
 };
 
-//Create a function to find the correct type of a rule if passed a JSON array of rules
-
-template<class... Ts> struct overloaded : Ts... {using Ts::operator()...;};
-template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
-
-template<typename... T>
-struct Components{
-	using component = std::variant<T...>;
-	void visit(){
-		for(auto& entity : entities){
-			std::visit(overloaded {
-				//TODO
-			})
-		}
-	}
-};
 template <typename T> 
 struct Switch : GenRule {
 	Switch() {};
