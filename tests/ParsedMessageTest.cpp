@@ -77,5 +77,8 @@ TEST(ParsedMessageTests, makeMsg_enumBad) {
 }
 
 TEST(ParsedMessageTests, makeMsg_string) {
-    // WIP
+    std::string text = ParsedMessage::makeMsgText("this is a custom command!", "stop! hammer time!");
+    auto [command, data] = msgTextToPair(text);
+    EXPECT_EQ("this is a custom command!", command);
+    EXPECT_EQ("stop! hammer time!", data);
 }
