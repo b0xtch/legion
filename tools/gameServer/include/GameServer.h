@@ -2,6 +2,7 @@
 #define GAME_SERVER_H
 
 #include <string>
+#include <map>
 
 #include "SessionManager.h"
 #include "Server.h"
@@ -28,7 +29,7 @@ private:
 class GameServer {
 public:
 
-    GameServer(GameServerConfig gameServerConfig, int port, const std::string& htmlFile);
+    GameServer(GameServerConfig gameServerConfig, unsigned short port, const std::string& htmlFile);
     
     /** Useful for testing the GameServer. Perfroms an std::move on the server. */
     GameServer(GameServerConfig gameServerConfig, networking::Server& server, SessionManager& sessionManager);
@@ -43,7 +44,7 @@ public:
     void receive();
     
     /** Returns the port that the server was initialized with. */
-    int getPort() const;
+    unsigned short getPort() const;
     
     /** Returns if the server should keep running. */
     bool getKeepRunning() const;
@@ -52,12 +53,16 @@ public:
     std::string_view getHtmlFile() const;
     
 private:
+    networking::Message generateGameListResponse(networking::Connection recipient);
+    void fillGameFilesMap();
+    
     bool keepRunning;
-    int port;
+    unsigned short port;
     std::string_view htmlFile;
     networking::Server server;
     SessionManager sessionManager;
     GameServerConfig gameServerConfig;
+    std::map<std::string, std::string> gameNameToPathMap;
 };
 
 #endif
