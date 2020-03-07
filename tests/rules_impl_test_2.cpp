@@ -5,6 +5,7 @@
 #include <map>
 #include <unordered_map>
 
+//Using std::variants and std::visit
 
 typedef struct Arithmetic Arithmetic;
 // typedef struct ForEach ForEach;
