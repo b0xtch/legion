@@ -14,8 +14,6 @@ JsonDSL::JsonDSL(){
     mapStringToConfigFields.insert({"player count", JsonDSL::PlayerCount});
     mapStringToConfigFields.insert({"audience", JsonDSL::AllowAudience});
     mapStringToConfigFields.insert({"setup", JsonDSL::Setup});
-    mapStringToConfigFields.insert({"min", JsonDSL::MinPlayers});
-    mapStringToConfigFields.insert({"max", JsonDSL::MaxPlayers});
 
     mapStringToRule.insert({"foreach", JsonDSL::Foreach});
     mapStringToRule.insert({"loop", JsonDSL::Loop});
@@ -72,6 +70,8 @@ JsonDSL::JsonDSL(){
     mapStringToSetup.insert({"question-answer", JsonDSL::KindQuestionAnswer});
     mapStringToSetup.insert({"multiple-choice", JsonDSL::KindMultipleChoice});
 
+    minPlayerString = "min";
+    maxPlayerString = "max";
 }
 
 bool JsonDSL::isValidSpecificationField(const std::string& strSpecificationFIeld){
@@ -80,6 +80,10 @@ bool JsonDSL::isValidSpecificationField(const std::string& strSpecificationFIeld
 
 bool JsonDSL::isValidConfigField(const std::string& strConfigField){
     return mapStringToConfigFields.left.count(strConfigField) == 1;
+}
+
+bool JsonDSL::isValidPlayerRestrictionField(const std::string& strRestrictionField){
+    return minPlayerString.compare(strRestrictionField) || maxPlayerString.compare(strRestrictionField);
 }
 
 bool JsonDSL::isValidRule(const std::string& strRule){
@@ -99,32 +103,32 @@ bool JsonDSL::isValidSetupKind(const std::string& strSetupKind){
 }
 
 std::pair<JsonDSL::specificationMap::left_const_iterator, 
-            JsonDSL::specificationMap::left_const_iterator> JsonDSL::getSpecificationIterator(){
+            JsonDSL::specificationMap::left_const_iterator> JsonDSL::getSpecBeginEndIterators(){
     return std::make_pair(mapStringToSpecification.left.begin(), mapStringToSpecification.left.end());
 }
 
 std::pair<JsonDSL::configMap::left_const_iterator, 
-            JsonDSL::configMap::left_const_iterator> JsonDSL::getConfigIterator(){
+            JsonDSL::configMap::left_const_iterator> JsonDSL::getConfigBeginEndIterators(){
     return std::make_pair(mapStringToConfigFields.left.begin(), mapStringToConfigFields.left.end());
 }
 
 std::pair<JsonDSL::ruleMap::left_const_iterator, 
-            JsonDSL::ruleMap::left_const_iterator> JsonDSL::getRuleIterator(){
+            JsonDSL::ruleMap::left_const_iterator> JsonDSL::getRuleBeginEndIterators(){
     return std::make_pair(mapStringToRule.left.begin(), mapStringToRule.left.end());
 }
 
 std::pair<JsonDSL::ruleParameterMap::left_const_iterator, 
-            JsonDSL::ruleParameterMap::left_const_iterator> JsonDSL::getRuleParameterIterator(){
+            JsonDSL::ruleParameterMap::left_const_iterator> JsonDSL::getRuleParameterBeginEndIterators(){
     return std::make_pair(mapStringToRuleParameters.left.begin(), mapStringToRuleParameters.left.end());
 }
 
 std::pair<JsonDSL::timerModeMap::left_const_iterator, 
-            JsonDSL::timerModeMap::left_const_iterator> JsonDSL::getTimerModeIterator(){
+            JsonDSL::timerModeMap::left_const_iterator> JsonDSL::getTimerModeBeginEndIterators(){
     return std::make_pair(mapStringToTimerModes.left.begin(), mapStringToTimerModes.left.end());
 }
 
 std::pair<JsonDSL::setupMap::left_const_iterator, 
-            JsonDSL::setupMap::left_const_iterator> JsonDSL::getSetupIterator(){
+            JsonDSL::setupMap::left_const_iterator> JsonDSL::getSetupBeginEndIterators(){
     return std::make_pair(mapStringToSetup.left.begin(), mapStringToSetup.left.end());
 }
 
@@ -134,6 +138,14 @@ std::string JsonDSL::getStringOfSpecificationCommand(JsonDSL::SpecificationField
 
 std::string JsonDSL::getStringOfConfigCommand(JsonDSL::ConfigFields config){
     return mapStringToConfigFields.right.find(config)->second;
+}
+
+std::string JsonDSL::getStringOfPlayerRestrictionCommand(JsonDSL::PlayerRestriction restriction){
+    if(restriction == JsonDSL::MinPlayers){
+        return minPlayerString;
+    } else{
+        return maxPlayerString;
+    }
 }
 
 std::string JsonDSL::getStringOfRuleCommand(JsonDSL::RuleType rule){

@@ -5,11 +5,14 @@
 // #include "session.h"
 #include "player.h"
 #include "engine.h"
+#include <json.hpp>
 
-class Game: public Engine{
+class Game: Engine{
 public:
   Game(const stringVar&, const int& , const stringVar&); // general constructor to support additional games, will add more parameterss
   Game(const stringVar&);
+
+  bool startGame();
   void addPlayer(const Player&);
   void removePlayer(const variable&);
   int getNumPlayers(); //interpreted from json config
@@ -18,6 +21,7 @@ public:
   std::vector<stringVar> getAllPlayersInputs();
   std::vector<Player> getAllPlayers();
   friend bool operator== (const Game&, const Game&);
+
 private:
   int numPlayers; //interpreted from json config
   int numPlayersMax; //interpreted from json config

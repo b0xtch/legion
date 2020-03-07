@@ -4,44 +4,54 @@
 
 #include <iostream>
 
-#include "MessageType.h"
+#include "ParsedMessage.h"
 #include "json.hpp"
 #include "Utils.h"
 
 GameServerConfig::GameServerConfig() :
-    GameServerConfig{"./configuration.txt"}
+    gameDir{"games/"}, maxSessions{10}, maxConnections{100}
 {
     
 }
 
-GameServerConfig::GameServerConfig(const std::string& configLocation) :
-    configLocation{configLocation}
-{
+void GameServerConfig::parse(const std::string& configText) {
     using json = nlohmann::json;
     
-    json j;
     try {
-        j = json::parse(Utils::loadFile(configLocation));
-        gameDir = j[CFGKEY_GAME_DIR];
+        json j = json::parse(configText);
+        gameDir = j[CFGKEY_GAME_DIR].get<std::string>();
+        maxSessions = j[CFGKEY_MAX_SESSIONS].get<int>();
+        maxConnections = j[CFGKEY_MAX_CONNECTIONS].get<int>();
+        
+        // NOTE: Be careful when using "." or ".." as the value for "games" in the configuration file.
+        // Those will refer to the working directory of the program rather than the location of the config file.
     }
     catch (const json::parse_error& e) {
-        std::cerr << "There was a problem reading the configuration file." << std::endl;
+        throw std::runtime_error("There was a problem reading the configuration data.");
     }
     catch (const json::type_error& e) {
-        std::cerr << "There are missing configurations in the file." << std::endl;
+        throw std::runtime_error("There are missing configurations.");
     }
     catch (const std::runtime_error& e) {
-        std::cerr << "There was an error opening the configuration file." << std::endl;
+        throw std::runtime_error("There was an error opening the configuration file.");
     }
 }
 
-std::string_view GameServerConfig::getGameConfigDir() const {
+std::string GameServerConfig::getGameConfigDir() const {
     return gameDir;
+}
+
+int GameServerConfig::getMaxSessions() const {
+    return maxSessions;
+}
+
+int GameServerConfig::getMaxConnections() const {
+    return maxConnections;
 }
 
 // PUBLIC
 
-GameServer::GameServer(GameServerConfig gameServerConfig, int port, const std::string& htmlFile) :
+GameServer::GameServer(GameServerConfig gameServerConfig, unsigned short port, const std::string& htmlFile) :
     gameServerConfig{gameServerConfig},
     keepRunning{true},
     port{port},
@@ -53,7 +63,7 @@ GameServer::GameServer(GameServerConfig gameServerConfig, int port, const std::s
         [this] (networking::Connection c) {
             //this->sessionManager.removeConnection(c); Currently no implementation
         }},
-    sessionManager{}
+    sessionManager{3}
 {
     
 }
@@ -62,7 +72,7 @@ GameServer::GameServer(GameServerConfig gameServerConfig, networking::Server& se
     gameServerConfig{gameServerConfig},
     server{std::move(server)},
     sessionManager{sessionManager},
-    keepRunning{true}, port{-1}, htmlFile{""}
+    keepRunning{true}, port{0}, htmlFile{""}
 {
     
 }
@@ -78,17 +88,37 @@ void GameServer::update() {
 void GameServer::receive() {
     auto incomingMessages = server.receive();
     
+    // Check and deal with messages about requesting the list of games.
+    
+    
     // Check and deal with messages about creating/joining rooms or server shutdowns.
     std::deque<networking::Message> batchToSend{};
+    
     for (auto& msg : incomingMessages) {
-        std::vector<networking::Message> toSend = sessionManager.processMessage(msg);
+        std::cout << "[GameServer] " << msg.connection.id << ": \"" << msg.text << "\"" << std::endl;
+        
+        // If message about requesting the list of games or server shutdown, deal with it. Direct the rest to sessionManager.
+        ParsedMessage pMsg = ParsedMessage::interpret(msg.text);
+        std::vector<networking::Message> toSend{};
+        switch (pMsg.getType()) {
+            case ParsedMessage::Type::ListGames:
+                // WIP loop through all files from gameServerConfig's gameDir and format it into a message to send back.
+                break;
+            case ParsedMessage::Type::ServerStop:
+                keepRunning = false;
+                break;
+            default:
+                toSend = sessionManager.processMessage(msg);
+                break;
+        }
+        
         batchToSend.insert(batchToSend.end(), toSend.begin(), toSend.end());
     }
     
     send(batchToSend);
 }
 
-int GameServer::getPort() const {
+unsigned short GameServer::getPort() const {
     return port;
 }
 

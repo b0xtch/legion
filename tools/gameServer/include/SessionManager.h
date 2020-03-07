@@ -2,7 +2,13 @@
 #define SESSION_MANAGER_H
 
 #include <vector>
-#include <networking>
+#include <unordered_map>
+#include "Server.h" 
+#include "Session.h"
+
+using networking::Server;
+using networking::Connection;
+using networking::Message;
 
 /**
  * This class is responsible for managing multiple sessionss
@@ -11,25 +17,29 @@ class SessionManager {
 
 public:
   SessionManager(int maxSessions);
+  
+  int getMaxSessions();
 
-  void createNewSession();
+  Session createNewSession();
   
-  void addToSession(const networking::Connection& connectionToAdd, std::string sessionId);
+  void addToSession(const Connection& connectionToAdd, std::string& sessionId);
 
-  vector<networking::Message> update(const networking::Message& message);
+  std::vector<Message> processMessage(const Message& message);
   
-  vector<networking::Message> constructMessage(const std::string& message, std::vector<networking::Connection>& connections);
+  std::vector<Message> constructMessage(const std::string& message, std::unordered_map<ConnectionId, Connection>& connections);
   
-  void addConnection(const networking::Connection& connection);
+  void addConnection(const Connection& connection);
+
+  void removeConnection(const Connection& connection);
   
-  void sendMessage(const networking::Connection& connection);
+  void sendMessage(const Connection& connection);
   
-  Session getSessionForConnection(const networking::Connection& connection);
+  Session& getSessionForConnection(const Connection& connection);
 
 private:
-  std::vector<Session> sessions;
+  std::unordered_map<std::string, Session> sessions;
   
-  std::vector<networking::Connection> unassignedConnections;
+  std::vector<Connection> unassignedConnections;
   
   int MAX_SESSIONS_PER_SERVER;
 };

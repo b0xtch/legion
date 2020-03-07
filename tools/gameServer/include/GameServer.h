@@ -10,21 +10,25 @@
 class GameServerConfig {
 public:
     GameServerConfig();
-    GameServerConfig(const std::string& configLocation);
+    void parse(const std::string& configData);
     
-    std::string_view getGameConfigDir() const;
-    
+    std::string getGameConfigDir() const;
+    int getMaxSessions() const;
+    int getMaxConnections() const;
 private:
-    std::string_view configLocation;
     std::string gameDir;
+    int maxSessions;
+    int maxConnections;
     
     const std::string CFGKEY_GAME_DIR = "games";
+    const std::string CFGKEY_MAX_SESSIONS = "maxSessions";
+    const std::string CFGKEY_MAX_CONNECTIONS = "maxConnections";
 };
 
 class GameServer {
 public:
 
-    GameServer(GameServerConfig gameServerConfig, int port, const std::string& htmlFile);
+    GameServer(GameServerConfig gameServerConfig, unsigned short port, const std::string& htmlFile);
     
     /** Useful for testing the GameServer. Perfroms an std::move on the server. */
     GameServer(GameServerConfig gameServerConfig, networking::Server& server, SessionManager& sessionManager);
@@ -39,7 +43,7 @@ public:
     void receive();
     
     /** Returns the port that the server was initialized with. */
-    int getPort() const;
+    unsigned short getPort() const;
     
     /** Returns if the server should keep running. */
     bool getKeepRunning() const;
@@ -49,7 +53,7 @@ public:
     
 private:
     bool keepRunning;
-    int port;
+    unsigned short port;
     std::string_view htmlFile;
     networking::Server server;
     SessionManager sessionManager;

@@ -6,6 +6,7 @@
 #include <algorithm>
 #include "engine.h"
 #include <json.hpp>
+#include <any>
 // #include "jsonvalidator.h"
 
 using json = nlohmann::json;
@@ -88,6 +89,14 @@ namespace Engine {
     /////////////////////////////////////////////////////////////////////////////
     // Main Parser from Type T to DSL
     /////////////////////////////////////////////////////////////////////////////
+    std::unordered_map<std::string, std::any> getKeyToValueMapping(const json& j_object){
+        std::unordered_map<std::string, std::any> mapKeyVal;
+        for(auto jsonItem : j_object.items()){
+            mapKeyVal[jsonItem.key()] = jsonItem.value()
+        }
+        return mapKeyVal;
+    }
+    
     template <typename T> 
     Configuration& EngineImpl<T>::setConfiguration(const T& in) {
         Configuration configuration = Configuration();
@@ -99,16 +108,16 @@ namespace Engine {
     template <typename T> 
     CVPA& EngineImpl<T>::setConstants(const T& in){
         CVPA constants;
-
-        // this->gameConfig["constants"] = constants;
+        json constantsJson = this->gameConfig["constants"];
+        constants.constants.map = getKeyToValueMapping(constantsJson);
         return constants;
     }
 
     template <typename T> 
     CVPA& EngineImpl<T>::setVariables(const T& in){
         CVPA variables;
-
-        // this->gameConfig["variables"] = variables;
+        json variablesJson = this->gameConfig["variables"];
+        variables.variables.map = getKeyToValueMapping(variablesJson);
         return variables;
     }
 
@@ -128,13 +137,13 @@ namespace Engine {
         return perAudience;
     }
 
-    // template <typename T> 
-    // Rules& EngineImpl<T>::setRules(const T& in){
-    //     Rules rules;
+    template <typename T> 
+    Rules& EngineImpl<T>::setRules(const T& in){
+        Rules rules;
 
-    //     this->gameConfig["rules"] = rules;
-    //     return rules;
-    // }
+        this->gameConfig["rules"] = rules;
+        return rules;
+    }
 
     /////////////////////////////////////////////////////////////////////////////
     // Control Structures

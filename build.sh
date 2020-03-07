@@ -1,3 +1,3 @@
-if [ -d "build" ]; then rm -Rf build; fi
-mkdir build && cd build
+if ! [ -d "build" ]; then mkdir build; fi
+cd build
 cmake .. && make

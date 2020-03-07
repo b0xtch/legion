@@ -3,11 +3,19 @@
 
 #include <string>
 #include <vector>
+#include <assert.h>
+#include <map>
+
+// #include "player.h"
 
 using namespace std; 
 
 typedef bool condition;
-
+typedef int destination;
+typedef int source;
+typedef int seconds;
+typedef string mode;
+typedef string message;
 
 // enum RuleType{
 //     ForEach, Loop, InParallel, Parallelfor,
@@ -24,20 +32,25 @@ typedef bool condition;
 //     Score, Ascending
 
 struct GenRule{
-	GenRule() {};
 	GenRule(const string &name) : 
 		rule_name{name} 
 		{};
+	GenRule() {};
 
 	string rule_name;
 };
 
-using RulesList = const vector<GenRule>;
+using RulesList = vector<GenRule>;
+
+/*************************************
+*
+*			Control Structures	
+*
+**************************************/
 
 template <typename T> 
 struct ForEach : GenRule{
-	ForEach() {};
-	ForEach(const vector<T> &v, const T &el, RulesList r) : 
+	ForEach(vector<T> v, T el, RulesList r) : 
 		GenRule{"ForEach"}, //passing it as is?
 		list{v},
 		element{el},
@@ -53,7 +66,7 @@ struct Loop : GenRule {
 	//will figure out way to only accpet 1 of until or while
 	// passing in empty arguments?
 	Loop() {};
-	Loop(const condition &untilCondition, const condition &whileCondition, RulesList r) :
+	Loop(const condition &untilCondition, const condition &whileCondition, RulesList &r) :
 	GenRule{"Loop"},
 	untilCondition{untilCondition},
 	whileCondition{whileCondition},
@@ -78,7 +91,7 @@ struct Inparallel : GenRule {
 template <typename T> 
 struct Parallelfor : GenRule{
 	Parallelfor() {};
-	Parallelfor(const vector<T> &v, const T &el, RulesList r) : 
+	Parallelfor(const vector<T> &v, const T &el, RulesList &r) : 
 		GenRule{"Parallelfor"}, 
 		list{v},
 		element{el},
@@ -91,114 +104,237 @@ struct Parallelfor : GenRule{
 	vector<GenRule> rules_to_run;
 };
 
-template <typename T>
-struct Switch : GenRule{
+template <typename T> 
+struct Switch : GenRule {
 	Switch() {};
-	Switch(const T& val1, const vector<T>& v, const vector<T>& c, const T& val2, RulesList r):
+	Switch(T &value, const vector<T> v, RulesList &cases) :
 		GenRule{"Switch"},
-		value{val1},
+		value{value},
 		list{v},
-		cases{c},
-		case{val2},
-		rules_to_run{r}
+		cases{cases}
 		{};
 
-	vector<T> cases;
 	T value;
 	vector<T> list;
-	T case;
-	vector<GenRule> rules_to_run;
+	vector<GenRule> cases;
 };
 
-template <typename T>
-struct When : GenRule{
-	When(){};
-	When(const vector<T> &v, const T &cond, RulesList r):
+struct When : GenRule {
+	When() {};
+	When(const condition &c, RulesList &r) :
 		GenRule{"When"},
-		cases{v},
-		condition{cond},
+		runCondition{c},
 		rules_to_run{r}
 		{};
-	
-	vector<T> cases;
-	T condition;
+
+	condition runCondition;
 	vector<GenRule> rules_to_run;
 };
 
-template<typename T>
-struct Extend : GenRule{
-	Extend(){};
-	Extend(const T& targ, const vector<T> &v):
-		GenRule{"Extend"},
-		list{v},
-		target{targ}
-		{};
-	
-	vector<T> list;
+/*************************************
+*
+*				Lists	
+*
+**************************************/
+
+// List operations
+// for extend, reverse, shuffle, sort
+template <typename T> 
+struct ListOP : GenRule{
+	ListOP() {};
+	ListOP(string name, const T *target, vector<T> &list) : 
+		GenRule {name},
+		target {target},
+		list {list}
+		{
+			//only extend utilizes a target
+			if(name != "Extend"){
+				assert(target == nullptr);
+			}
+		};
+
 	T target;
-};
-
-template<typename T>
-struct Reverse : GenRule{
-	Reverse(){};
-	Reverse(const vector<T>& v):
-		GenRule{"Reverse"},
-		list{v}
-		{};
-
 	vector<T> list;
 };
 
-template<typename T>
-struct Shuffle : GenRule{
-	Shuffle(){};
-	Shuffe(const vector<T>& v):
-		GenRule{"Shuffle"},
-		list{v}
-		{};
-
-	vector<T> list;
-};
-
-template<typename T>
-struct Sort : GenRule{
-	Sort(){};
-	Sort(const vector<T>& v):
-		GenRule("Sort"),
-		list{v}
-		{};
-	
-	vector<T> list;
-};
-
-template<typename T>
+template <typename T> 
 struct Deal : GenRule{
-	Deal(){};
-	Deal(const T& f, const T& t, const int& c):
-		GenRule("Deal"),
-		from{f},
-		to{t},
-		count{c}
+	Deal() {};
+	Deal(vector<T> &from, vector<T> &to, int count) :
+		GenRule{"Deal"},
+		from{from},
+		to{to},
+		count{count}
 		{};
-	
-	T from;
-	T to;
+
+	vector<T> from, to;
 	int count;
 };
 
-template<typename T>
+template <typename T> 
 struct Discard : GenRule{
-	Discard(){};
-	Discard(const T& f, const int& c):
-		GenRule("Discard"),
-		from{f},
-		count{c}
+	Discard() {};
+	Discard(vector<T> &from, int count) :
+		GenRule{"Discard"},
+		from{from},
+		count{count}
 		{};
-	
-	T from;
+
+	vector<T> from;
 	int count;
 };
-// TO DO: add rest of rules
 
+// list attributes
+// struct ListAttribute {
+// 	//WIP
+// }
+
+
+/*************************************
+*
+*		Arithmatic Operation	
+*
+**************************************/
+
+struct Add : GenRule{
+	Add() {};
+	Add(destination &to, source &from) :
+		GenRule{"Add"},
+		to{to},
+		from{from}
+		{};
+
+	destination to;
+	source from;
+};
+
+/*************************************
+*
+*				Timing	
+*
+**************************************/
+
+struct Timer : GenRule {
+	Timer() {};
+	Timer(seconds &s, mode &mode, RulesList &r, condition *flag) :
+		GenRule{"Timer"},
+		seconds{s},
+		mode{mode},
+		rules_to_run{r},
+		flag{flag}
+		{
+			// if(mode != "track"){
+			// 	assert flag == nullptr;
+			// }
+		};
+
+	seconds seconds;
+	mode mode;
+	vector<GenRule> rules_to_run;
+	condition flag;
+};
+
+
+/*************************************
+*
+*			Human Input	
+*
+**************************************/
+
+// template <typename T> 
+// struct InputText : GenRule {
+// 	InputText() {};
+// 	//change to from type Player to type accepting both audience and player
+// 	InputText(Player *to, const message &prompt, T &ret, seconds &timeout) :
+// 		GenRule{"InputText"},
+// 		to{to},
+// 		prompt{prompt};
+// 		ret{ret},
+// 		timeout{timeout}
+// 		{};
+
+// 	Player *to;
+// 	message prompt;
+// 	T ret;
+// 	seconds timeout;
+// };
+
+// template <typename T, typename Y> 
+// struct InputVote : GenRule {
+// 	InputVote() {};
+// 	//change to from type Player to type accepting both audience and player
+// 	InputVote(
+// 		const vector<Player> &to, 
+// 		const message &prompt, 
+// 		const vector<T> &choices, 
+// 		Y &ret,
+// 		seconds &timeout) :
+
+// 		GenRule{"InputVote"},
+// 		to{to},
+// 		prompt{prompt};
+// 		ret{ret},
+// 		timeout{timeout}
+// 		{};
+
+// 	vector<Player> to;
+// 	message prompt;
+// 	vector<T> choices;
+// 	Y ret;
+// 	seconds timeout;
+// };
+
+/*************************************
+*
+*			Output	
+*
+**************************************/
+
+// struct Message : GenRule {
+// 	Message() {};
+// 	//need to support python style () later
+// 	Message(const vector<Player> &to, const message &value) :
+// 		GenRule{"Message"},
+// 		to{to},
+// 		value{value}
+// 		{};
+
+// 	vector<Player> to;
+// 	message value;
+// };
+
+struct GlobalMessage : GenRule {
+	GlobalMessage() {};
+	//need to support python style () later
+	GlobalMessage(const message &value) :
+		GenRule{"GlobalMessage"},
+		value{value}
+		{};
+
+	message value;
+};
+
+//WIP
+class ScoreBoard {
+public:
+	// addScore();
+	// getScore();
+	ScoreBoard();
+
+private:
+	// map<Player, int> scoreboard;
+};
+
+struct Scores : GenRule {
+	Scores() {};
+	Scores(ScoreBoard &s, const condition &asc) :
+		GenRule{"Scores"},
+		scoreboard{s},
+		ascending{asc} // false -> desc
+		{};
+
+	ScoreBoard scoreboard;
+	condition ascending;
+};
 
 #endif
