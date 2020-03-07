@@ -11,16 +11,16 @@
 // for convenience
 using json = nlohmann::json;
 using String = String;
-using Integereger = Integer;
+using Integer = int;
 using Boolean = bool;
 using Key = String;
-using Object = std::map<String, std::variant<Integereger, String, Boolean>>;
-using Array = std::vector<std::variant<Integereger, String, Boolean>>;
+using Object = std::map<String, std::variant<Integer, String, Boolean>>;
+using Array = std::vector<std::variant<Integer, String, Boolean>>;
 
 template<typename... T>
 using Type = std::variant<T...>;
 using Value = Type<
-  Integereger,
+  Integer,
   String, 
   Boolean,
   Object,
@@ -32,7 +32,7 @@ using Value = Type<
 // using Type = std::variant<T...>;
 // struct RecursiveVariant;
 // using Value = Type<
-//   Integereger,
+//   Integer,
 //   String, 
 //   Boolean,
 //   std::vector<RecursiveVariant>,
@@ -181,12 +181,12 @@ namespace Engine {
     */
 
     struct PlayerCount {
-        Integereger min;
-        Integereger max;
+        Integer min;
+        Integer max;
     };
 
     struct CVPA
-        : GenType<String, Components<String, Integereger, bool> > {
+        : GenType<String, Components<String, Integer, bool> > {
         // constants, variables, perPlayer, perAudience are the same
         GenType constants;
         GenType variables;
