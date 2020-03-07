@@ -230,12 +230,12 @@ namespace Engine {
             GenType<String, Game> gameConfig;
 
             // Domain level set functions, these should never throw if we do our validation correctly
-            Configuration& setConfiguration(const T& configuration) const noexcept;
-            CVPA& setConstants(const T& constants) const noexcept;
-            CVPA& setVariables(const T& variables) const noexcept;
-            CVPA& setPerPlayer(const T& perPlayer) const noexcept;
-            CVPA& setPerAudience(const T& perAudience) const noexcept;
-            Rules& setRules(const T& rules) const noexcept;
+            Value setConfiguration(const T& configuration) const noexcept;
+            Value setConstants(const T& constants) const noexcept;
+            Value setVariables(const T& variables) const noexcept;
+            Value setPerPlayer(const T& perPlayer) const noexcept;
+            Value setPerAudience(const T& perAudience) const noexcept;
+            Value setRules(const T& rules) const noexcept;
 
             // Parser Related methods
             bool validGameConfig(const T& input);

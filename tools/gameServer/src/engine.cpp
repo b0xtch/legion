@@ -64,9 +64,18 @@ namespace Engine {
         std::cout << "Building new game from the following configs..." << endl;
         std::cout << this->input << endl;
 
-        // merge all the config variables together
-        // This one of the last methods that will be called to construct
-        // a game with all the game specification
+        std::map<std::string, std::function<void(const json& in)> > Game{
+            {"configuration", [](const json& in){ return setConfiguration(in); }},
+            {"constants", [](const json& in){ return setConstants(in); }},
+            {"variables", [](const json& in){ return setVariables(in); }},
+            {"per-player", [](const json& in){ return setPerPlayer(in); }},
+            {"per-audience", [](const json& in){ return setPerAudience(in); }},
+            {"rules", [](const json& in){ return setRules(in); }}
+        };
+
+        for (const auto &[key, value] : data.items()) {
+            Game[key](value);
+        }
 
         return this->gameConfig;
     }
@@ -119,20 +128,21 @@ namespace Engine {
     }
     
     template <typename T> 
-    Configuration& EngineImpl<T>::setConfiguration(const T& in) {
-        Configuration configuration = Configuration();
+    Value EngineImpl<T>::setConfiguration(const T& in) {
+        Configuration configuration;
         configuration.name = in["configuration"]["name"];
         configuration.playerCount = {
             in["configuration"]["player count"]["min"],
             in["configuration"]["player count"]["max"]
         };
+        configuration.audience = in["configuration"]["audience"];
 
-        // this->gameConfig["configuration"] = configuration;
+
         return configuration;
     }
 
     template <typename T> 
-    CVPA& EngineImpl<T>::setConstants(const T& in){
+    Value EngineImpl<T>::setConstants(const T& in){
         CVPA constants;
         json constantsJson = this->gameConfig["constants"];
         constants.constants.map = getKeyToValueMapping(constantsJson);
@@ -140,7 +150,7 @@ namespace Engine {
     }
 
     template <typename T> 
-    CVPA& EngineImpl<T>::setVariables(const T& in){
+    Value EngineImpl<T>::setVariables(const T& in){
         CVPA variables;
         json variablesJson = this->gameConfig["variables"];
         variables.variables.map = getKeyToValueMapping(variablesJson);
@@ -148,23 +158,21 @@ namespace Engine {
     }
 
     template <typename T> 
-    CVPA& EngineImpl<T>::setPerPlayer(const T& in){
+    Value EngineImpl<T>::setPerPlayer(const T& in){
         CVPA perPlayer;
 
-        // this->gameConfig["perPlayer"] = perPlayer;
         return perPlayer;
     }
 
     template <typename T> 
-    CVPA& EngineImpl<T>::setPerAudience(const T& in){
+    Value EngineImpl<T>::setPerAudience(const T& in){
         CVPA perAudience;
 
-        // this->gameConfig["perAudience"] = perAudience;
         return perAudience;
     }
 
     template <typename T> 
-    Rules& EngineImpl<T>::setRules(const T& in){
+    Value EngineImpl<T>::setRules(const T& in){
         Rules rules;
 
         this->gameConfig["rules"] = rules;
