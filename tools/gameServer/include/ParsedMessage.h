@@ -5,6 +5,8 @@
 #include <vector>
 #include <utility>
 
+#include "json.hpp"
+
 namespace PMConstants {
     const std::string KEY_COMMAND = "command";
     const std::string KEY_DATA = "data";
@@ -38,6 +40,14 @@ public:
     
     /** Determines the type of message received from a client. */
     static ParsedMessage interpret(const std::string& text);
+    
+    /** Builds a string that should be used as the message.text of a networking::Message.
+     * Throws a runtime exception if msgCommand does not match any Type enumeration OR if it matches "Invalid" or "Other". */
+    static std::string makeMsgText(Type msgCommand, const std::string& msgData);
+    
+    /** Builds a string that should be used as the message.text of a networking::Message. */
+    static std::string makeMsgText(const std::string& msgCommand, const std::string& msgData);
+    
     
 private:
     ParsedMessage();

@@ -1,9 +1,20 @@
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "ParsedMessage.h"
+#include "json.hpp"
 
 std::string makeMessageString(const std::string& command, const std::string& data) {
     return "{\"command\":\"" + command + "\", \"data\":\"" + data + "\"}";
+}
+
+std::pair<std::string, std::string> msgTextToPair(const std::string& msgText) {
+    using json = nlohmann::json;
+    
+    json jsonObj = json::parse(msgText);
+    
+    return {jsonObj["command"].get<std::string>(), jsonObj["data"].get<std::string>()};
 }
 
 TEST(ParsedMessageTests, interpret) {
@@ -48,4 +59,23 @@ TEST(ParsedMessageTests, interpretBadJson) {
 TEST(ParsedMessageTests, interpretBadKeys) {
     ParsedMessage pm = ParsedMessage::interpret("{\"cmd\":\"some other command\",\"data\":\"\"}");
     ASSERT_EQ(ParsedMessage::Type::Invalid, pm.getType());
+}
+
+TEST(ParsedMessageTests, makeMsg_enum) {
+    std::string text = ParsedMessage::makeMsgText(ParsedMessage::Type::ServerStop, "stop! hammer time!");
+    auto [command, data] = msgTextToPair(text);
+    EXPECT_EQ(PMConstants::TYPE_SERVER_STOP, command);
+    EXPECT_EQ("stop! hammer time!", data);
+    
+    // WIP
+}
+
+TEST(ParsedMessageTests, makeMsg_enumBad) {
+    EXPECT_THROW(ParsedMessage::makeMsgText(ParsedMessage::Type::Invalid, "some data"), std::runtime_error);
+    EXPECT_THROW(ParsedMessage::makeMsgText(ParsedMessage::Type::Other, "some data"), std::runtime_error);
+    EXPECT_THROW(ParsedMessage::makeMsgText(static_cast<ParsedMessage::Type>(-1), "some data"), std::runtime_error);
+}
+
+TEST(ParsedMessageTests, makeMsg_string) {
+    // WIP
 }

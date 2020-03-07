@@ -45,6 +45,33 @@ ParsedMessage ParsedMessage::interpret(const std::string& text) {
     return {msgType, msgDataString};
 }
 
+std::string ParsedMessage::makeMsgText(Type msgCommand, const std::string& msgData) {
+    initializePairs();
+    
+    auto itr = std::find_if(commandAndTypePairs.begin(), commandAndTypePairs.end(), 
+        [&msgCommand] (const std::pair<std::string, Type>& pair) {
+            return msgCommand == pair.second;
+        }
+    );
+    if (itr == commandAndTypePairs.end()) {
+        throw std::runtime_error("Passed in ParsedMessage::Type does not have a command string representation.");
+    }
+    return makeMsgText(itr->first, msgData);
+}
+
+std::string ParsedMessage::makeMsgText(const std::string& msgCommand, const std::string& msgData) {
+    initializePairs();
+    
+    using json = nlohmann::json;
+    
+    json jsonObj = {
+        {PMConstants::KEY_COMMAND, msgCommand},
+        {PMConstants::KEY_DATA, msgData}
+    };
+    
+    return jsonObj.dump();
+}
+
 // ^^^ PUBLIC
 // vvv PRIVATE
 
