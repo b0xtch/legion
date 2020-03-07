@@ -5,6 +5,7 @@
 #include <string>
 #include "json.hpp"
 #include "fieldValidators.h"
+#include "ruleStructure.h"
 #include <exception>
 
 using json = nlohmann::json;
@@ -190,4 +191,15 @@ TEST_F(ValidatorTests, detectValidConfig){
     )###";
     jsonText = jsonText + emptySuffix;
     runValidatorWithoutThrow(jsonText, config);
+}
+
+TEST(RuleStructureTests, parameterMethodsWork){
+    JsonDSL dsl;
+    auto map = ruleValidationHelper::getRuleMap();
+    auto addObj = (*map.find(dsl.getRuleString(JsonDSL::Add))).second;
+    EXPECT_EQ(addObj.getParameterCount(), 2);
+    EXPECT_TRUE(addObj.hasParameter(dsl.getRuleParameterString(JsonDSL::To)));
+    EXPECT_TRUE(addObj.hasParameter(dsl.getRuleParameterString(JsonDSL::Value)));
+    EXPECT_FALSE(addObj.hasParameter(dsl.getRuleParameterString(JsonDSL::RulePrompt)));
+
 }

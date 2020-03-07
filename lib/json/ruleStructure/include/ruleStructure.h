@@ -9,20 +9,25 @@
 
 namespace ruleValidationHelper{
     struct Rule;
-    using RuleMap = std::map<JsonDSL::RuleType, Rule>;
+    using RuleMap = std::map<std::string, Rule>;
     RuleMap getRuleMap();
 }
 
 struct ruleValidationHelper::Rule{
 public:
-    Rule(JsonDSL::RuleType name, std::vector<JsonDSL::RuleParameters> parameters, bool hasCases, bool hasSetOfRules);
+    Rule(JsonDSL::RuleType name, std::vector<JsonDSL::RuleParameters> parameters, bool hasSetOfRules);
     int getParameterCount() const;
-    bool hasParameter(JsonDSL::RuleParameters) const;
+    bool hasParameter(const std::string&) const;
+
+    using vecIterator = std::vector<JsonDSL::RuleParameters>::iterator;
+    vecIterator getParametersBegin();
+    vecIterator getParametersEnd();
+
     const JsonDSL::RuleType name;
-    const bool hasCases;
+    bool hasCases() const;
     const bool hasSetOfRules;
 private:
-    const std::vector<JsonDSL::RuleParameters> parameters;
+    std::vector<JsonDSL::RuleParameters> parameters;
 
 };
 
