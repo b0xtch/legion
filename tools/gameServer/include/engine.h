@@ -10,17 +10,17 @@
 
 // for convenience
 using json = nlohmann::json;
-using String = std::string;
-using Integer = int;
+using String = String;
+using Integereger = Integer;
 using Boolean = bool;
-using Key = std::string;
-using Object = std::map<std::string, std::variant<Integer, String, Boolean>>;
-using Array = std::vector<std::variant<Integer, String, Boolean>>;
+using Key = String;
+using Object = std::map<String, std::variant<Integereger, String, Boolean>>;
+using Array = std::vector<std::variant<Integereger, String, Boolean>>;
 
 template<typename... T>
 using Type = std::variant<T...>;
 using Value = Type<
-  Integer,
+  Integereger,
   String, 
   Boolean,
   Object,
@@ -32,7 +32,7 @@ using Value = Type<
 // using Type = std::variant<T...>;
 // struct RecursiveVariant;
 // using Value = Type<
-//   Integer,
+//   Integereger,
 //   String, 
 //   Boolean,
 //   std::vector<RecursiveVariant>,
@@ -72,8 +72,8 @@ namespace Engine {
 
     // might delete as this is redunt now that componets are just rules now
     template<typename E, typename A> // switch this to accept an varidic args
-    struct Interpreter {
-        Interpreter(const E& type): type(type) {}
+    struct Integererpreter {
+        Integererpreter(const E& type): type(type) {}
 
         // template <typename T>
         // auto operator()(T&& value){
@@ -95,7 +95,7 @@ namespace Engine {
         void visit(){
             for (auto& entity : entities){
                 std::visit(overloaded {
-                    [](int& value){value += value;},
+                    [](Integer& value){value += value;},
                     // [](ControlStructures rule){},
                     // [](ListOperations rule){},
                     [](Arithmetic rule){
@@ -142,7 +142,7 @@ namespace Engine {
     struct Arithmetic {
         // This type accept a pair of number i can see might need to 
         // single values which we can easily support for now its a std::pair
-        using KindPair = std::pair<int, int>;
+        using KindPair = std::pair<Integer, Integer>;
         
         Arithmetic(KindPair values, JsonDSL::Arithmetic operation)
         : values(values),
@@ -152,7 +152,7 @@ namespace Engine {
         Add add; // placeholder we might not need a Rulecollection for this
         KindPair values;
         JsonDSL::Arithmetic operation;
-        int64_t result;
+        Integer result;
     };
 
     struct Timing{
@@ -181,12 +181,12 @@ namespace Engine {
     */
 
     struct PlayerCount {
-        int64_t min;
-        int64_t max;
+        Integereger min;
+        Integereger max;
     };
 
     struct CVPA
-        : GenType<std::string, Components<std::string, int64_t, bool> > {
+        : GenType<String, Components<String, Integereger, bool> > {
         // constants, variables, perPlayer, perAudience are the same
         GenType constants;
         GenType variables;
@@ -203,7 +203,7 @@ namespace Engine {
     };
 
     struct Configuration {
-        std::string name;
+        String name;
         PlayerCount playerCount;
         bool audience;
         Setup setup;
@@ -222,12 +222,12 @@ namespace Engine {
     class EngineImpl { 
         public:
             EngineImpl (const T& input);
-            GenType<std::string, Game> getGameConfig() const noexcept;
-            GenType<std::string, Game> initalizeEngine();
+            GenType<String, Game> getGameConfig() const noexcept;
+            GenType<String, Game> initalizeEngine();
 
         private:
             T input;
-            GenType<std::string, Game> gameConfig;
+            GenType<String, Game> gameConfig;
 
             // Domain level set functions, these should never throw if we do our validation correctly
             Configuration& setConfiguration(const T& configuration) const noexcept;
@@ -239,7 +239,7 @@ namespace Engine {
 
             // Parser Related methods
             bool validGameConfig(const T& input);
-            GenType<std::string, Game> buildGame();
+            GenType<String, Game> buildGame();
             void mapKeyToValue(const T& key, const T& value);
             T mapValueToFuntion(const T& value);
 
