@@ -11,7 +11,7 @@ namespace Utils {
     /** Loads the contents of a file into a string_view */
     std::string loadFile(const std::string& filename);
     
-    /** Lists the files inside of a directory non-recursively. */
+    /** Lists the files inside of a directory non-recursively. An empty vector is returned if no such directory exists. */
     std::vector<std::string> listFiles(const std::string& directory);
     
     /** Retrieves the name of a game from a file that defines one. */
