@@ -31,15 +31,15 @@ engine_arith:
 	$(CC) $(CFLAGS) $(ENGINE_ARITH_CPP) -o $(word 1, $(TARGET)) 
 
 rules_impl:
-# 	$(CC) $(CFLAGS) $(RULES_IMPL_CPP) $(foreach h, $(RULE_INCLUDE), -I$h) -o $(word 5, $(TARGET))
+	$(CC) $(CFLAGS) $(RULES_IMPL_CPP) $(foreach h, $(RULE_INCLUDE), -I$h) -o $(word 5, $(TARGET))
 
-engine:
+# engine:
 # 	$(CC) $(CFLAGS) $(ENGINE_CPP) $(foreach h, $(ENGINE_INCLUDE), -I$h) -o $(word 2, $(TARGET)) 
 
-json: 
+# json: 
 # 	$(CC) $(CFLAGS) $(JSON_CPP) $(foreach h, $(ALL_INCLUDE), -I$h) -o $(word 3, $(TARGET))
 
-rules:
+# rules:
 # 	$(CC) $(CFLAGS) $(RULE_STRUCT_CPP) $(foreach h, $(RULE_INCLUDE), -I$h) -o $(word 4, $(TARGET))
 
 clean:
