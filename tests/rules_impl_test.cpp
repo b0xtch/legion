@@ -30,9 +30,9 @@ int main()
     r.push_back(&mathobj4);
 
     int a = 100;
-    RuleCollection::Condition end_condition {b, a, RuleCollection::ConditionType::GREATER};
+    RuleCollection::Condition<int> end_condition {b, a, RuleCollection::ConditionType::GREATER};
 
-    RuleCollection::Loop loopobj(end_condition, RuleCollection::LoopType::UNTIL, r);
+    RuleCollection::Loop<int> loopobj(end_condition, RuleCollection::LoopType::UNTIL, r);
 
     loopobj.func();
 

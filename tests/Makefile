@@ -1,7 +1,7 @@
 
 CC := g++
 CFLAGS := -std=c++17 -w
-TARGET := engine_arith engine_test json_convert_test rules_struct_test rules_impl
+TARGET := engine_arith engine_test json_convert_test rules_struct_test rules_impl rules_impl2
 
 ENGINE_CPP := engine_test.cpp ../tools/gameServer/src/engine.cpp
 ENGINE_INCLUDE := ../tools/gameServer/include/ ../lib/nlohmann_json/include/ ../lib/json/include/
@@ -16,6 +16,8 @@ ENGINE_ARITH_CPP := engine_arith.cpp
 
 RULES_IMPL_CPP := rules_impl_test.cpp
 
+RULES_IMPL_2_CPP := rules_impl_test_2.cpp
+
 # all dir for headers, might not work if there are duplicate header file names
 # use if lazy 
 ALL_INCLUDE := ../lib/json/include/ ../lib/networking/include/ ../lib/nlohmann_json/include/ ../lib/utils/include/ ../tools/gameClient/include ../tools/gameServer/include
@@ -27,11 +29,14 @@ ALL_INCLUDE := ../lib/json/include/ ../lib/networking/include/ ../lib/nlohmann_j
 
 # all: engine json
 
-engine_arith:
-	$(CC) $(CFLAGS) $(ENGINE_ARITH_CPP) -o $(word 1, $(TARGET)) 
-
 rules_impl:
 	$(CC) $(CFLAGS) $(RULES_IMPL_CPP) $(foreach h, $(RULE_INCLUDE), -I$h) -o $(word 5, $(TARGET))
+
+rules_impl2:
+	$(CC) $(CFLAGS) $(RULES_IMPL_2_CPP) -o $(word 6, $(TARGET))
+
+# engine_arith:
+# 	$(CC) $(CFLAGS) $(ENGINE_ARITH_CPP) -o $(word 1, $(TARGET)) 
 
 # engine:
 # 	$(CC) $(CFLAGS) $(ENGINE_CPP) $(foreach h, $(ENGINE_INCLUDE), -I$h) -o $(word 2, $(TARGET)) 

@@ -14,9 +14,8 @@ namespace RuleCollection {
 		GenRule(const std::string &name) : 
 			rule_name{name} 
 			{};
-		GenRule() {};
 
-		virtual void func(){}
+		virtual void func() = 0;
 
 		std::string rule_name;
 	};
@@ -37,15 +36,17 @@ namespace RuleCollection {
 	    OR
 	};
 
+	// helper for loop
+	template <typename T>
 	struct Condition {
-	    Condition(int &v1, int &v2, ConditionType t) :
+	    Condition(T &v1, T &v2, ConditionType type) :
 	        value1{v1},
 	        value2{v2},
-	        type{t}
+	        type{type}
 	        {};
 
-	    int& value1;
-	    int& value2;
+	    T& value1;
+	    T& value2;
 	    ConditionType type;
 
 	    bool operator()() const{
@@ -71,41 +72,43 @@ namespace RuleCollection {
 		WHILE
 	};
 
+	//templated so that loop can take any condition (int, floats, etc)
+	template <typename T>
 	class Loop : public GenRule {
 	public:
-		Loop(Condition con, LoopType type, RulesList &r) :
+		Loop(Condition<T> con, LoopType type, RulesList &r) :
 		GenRule{"Loop"},
-		con{con},
+		loopCondition{con},
 		type{type},
 		rules_to_run{r}	
 		{};
 		
-		Condition con;
+		Condition<T> loopCondition;
 		LoopType type;
 		RulesList rules_to_run;
 
 
-		virtual void func() override{
+		void func() override{
 			std::cout << "Looping ..." << std::endl;
 		    switch(type)
 		    {
 		        case LoopType::UNTIL:
 		        	std::cout << "UNTIL ..." << std::endl;
-		            while(!con()){
+		            while(!loopCondition()){
 		                for(auto rule : rules_to_run){
 		                	std::cout<<rule->rule_name <<std::endl;
 		                    rule->func();
-		                    if(con()) break;
+		                    if(loopCondition()) break;
 		                }
 		            }
 		            break;
 		        case LoopType::WHILE:
 		        	std::cout << "WHILE ..." << std::endl;
-		            while(con()){
+		            while(loopCondition()){
 		                for(auto rule : rules_to_run){
 		                	std::cout << "Running rule " << rule->rule_name <<std::endl;
 		                    rule->func();
-		                    if(!con()) break;
+		                    if(!loopCondition()) break;
 
 		                }
 		            } 
@@ -132,13 +135,11 @@ namespace RuleCollection {
 	    Arithmetic(destination to, int value, MathOperation op) :
 		    GenRule{"Arithmetic"},
 				to{to},
-				// v1{v1},
 				value{value},
 				op{op}
 				{};
 
 	    destination to;
-	    // int v1;
 	    int value;
 	    MathOperation op;
 	    int result;

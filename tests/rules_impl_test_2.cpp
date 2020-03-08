@@ -70,7 +70,7 @@ enum ConditionType{
     OR
 };
 
-template <auto T>
+template <typename T>
 struct Condition {
     Condition(T &v1, T &v2, ConditionType t) :
         value1{v1},
@@ -104,14 +104,15 @@ enum LoopType{
         WHILE
 };
 
-struct Loop {
-    Loop(Condition c, LoopType type, RulesList &r) :
+template <typename T>
+struct Loop<T> {
+    Loop(Condition<T> c, LoopType type, RulesList &r) :
         loopCondition{c},
         type{type},
         rules_to_run{r} 
         {};
 
-    Condition loopCondition;
+    Condition<T> loopCondition;
     LoopType type;
     RulesList rules_to_run;
 
