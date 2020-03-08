@@ -9,8 +9,7 @@
 
 namespace RuleCollection {
 
-	class GenRule{
-	public:
+	struct GenRule{
 		GenRule(const std::string &name) : 
 			rule_name{name} 
 			{};
@@ -28,6 +27,33 @@ namespace RuleCollection {
 	*
 	**************************************/
 
+	template <typename T> 
+	struct ForEach : GenRule{
+		ForEach(vector<T> v, T el, RulesList r) : 
+			GenRule{"ForEach"},
+			list{v},
+			element{el},
+			rules_to_run{r}
+			{};
+		
+		vector<T> list;
+		T element;
+		vector<GenRule> rules_to_run;
+
+		//is this correct????
+		// example:
+		// for each round, global message broadcast the round number
+		// value to be stored in global message struct
+		void func() override{
+			std::cout << "ForEach ..." << std::endl;
+			for(auto listElement : list){
+				for(auto rule : rules_to_run){
+					rule.func();
+				}
+			}
+		}
+	};
+
 	enum ConditionType{
 	    EQUAL,
 	    GREATER,
@@ -37,6 +63,7 @@ namespace RuleCollection {
 	};
 
 	// helper for loop
+	//templated so that loop can take any condition (int, floats, etc)
 	template <typename T>
 	struct Condition {
 	    Condition(T &v1, T &v2, ConditionType type) :
@@ -74,8 +101,7 @@ namespace RuleCollection {
 
 	//templated so that loop can take any condition (int, floats, etc)
 	template <typename T>
-	class Loop : public GenRule {
-	public:
+	struct Loop : GenRule {
 		Loop(Condition<T> con, LoopType type, RulesList &r) :
 		GenRule{"Loop"},
 		loopCondition{con},
@@ -130,8 +156,7 @@ namespace RuleCollection {
 	    DIVIDE
 	};
 
-	class Arithmetic : public GenRule{
-	public:
+	struct Arithmetic : GenRule{
 	    Arithmetic(destination to, int value, MathOperation op) :
 		    GenRule{"Arithmetic"},
 				to{to},
