@@ -29,16 +29,16 @@ namespace RuleCollection {
 
 	template <typename T> 
 	struct ForEach : GenRule{
-		ForEach(vector<T> v, T el, RulesList r) : 
+		ForEach(std::vector<T> v, T el, RulesList r) : 
 			GenRule{"ForEach"},
 			list{v},
 			element{el},
 			rules_to_run{r}
 			{};
 		
-		vector<T> list;
+		std::vector<T> list;
 		T element;
-		vector<GenRule> rules_to_run;
+		RulesList rules_to_run;
 
 		//is this correct????
 		// example:
@@ -48,7 +48,7 @@ namespace RuleCollection {
 			std::cout << "ForEach ..." << std::endl;
 			for(auto listElement : list){
 				for(auto rule : rules_to_run){
-					rule.func();
+					rule->func();
 				}
 			}
 		}
