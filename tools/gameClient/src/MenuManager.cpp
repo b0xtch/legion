@@ -18,7 +18,7 @@ MenuManager::MenuManager(ChatWindow *chatWindow)
     initializeWindows();
 }
 
-void MenuManager::addPage( MenuPage *page ) {
+void MenuManager::addPage( std::shared_ptr<MenuPage> page ) {
 
     const int marginLeft = 3;
     const int marginTop = 2;
@@ -128,11 +128,11 @@ void MenuManager::initializeWindows() {
 
 }
 
-void MenuManager::setCurrentPage( MenuPage *page ) {
+void MenuManager::setCurrentPage( std::shared_ptr<MenuPage> page ) {
     currentPage = page;
 }
 
-MenuPage *MenuManager::getCurrentPage() {
+std::shared_ptr<MenuPage> MenuManager::getCurrentPage() {
     return currentPage;
 }
 

@@ -6,6 +6,7 @@
 #include <map>
 #include <menu.h>
 #include <form.h>
+#include <memory>
 #include "ChatWindow.h"
 
 
@@ -23,9 +24,9 @@ public:
 
     void initializeWindows();
     void initializeStartingPage();
-    void addPage( MenuPage *page );
-    void setCurrentPage( MenuPage *page );
-    MenuPage *getCurrentPage();
+    void addPage( std::shared_ptr<MenuPage> page );
+    void setCurrentPage( std::shared_ptr<MenuPage> page );
+    std::shared_ptr<MenuPage> getCurrentPage();
     int getSelectedIndex();
     void switchPage( MenuPage::MenuName &next_page_name );
     void switchCursorPosition( CursorPosition newPosition );
@@ -44,8 +45,8 @@ private:
     WINDOW *formWindow;
     WINDOW *menuWindow;
 
-    std::map<MenuPage::MenuName, MenuPage *> menuPages;
-    MenuPage *currentPage;
+    std::map<MenuPage::MenuName, std::shared_ptr<MenuPage>> menuPages;
+    std::shared_ptr<MenuPage> currentPage;
     CursorPosition cursorPosition = CursorPosition::menu;
     int selectedIndex;
 

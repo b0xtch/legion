@@ -2,6 +2,7 @@
 #include <menu.h>
 #include <form.h>
 #include <sstream>
+#include <memory>
 #include "json.hpp"
 
 #include "MenuPage.h"
@@ -49,11 +50,7 @@ int main(int argc, char* argv[]) {
         }
     };
 
-    // Dimensions and position initially set to temp values to be resized
-        // relative to other windows later
-    ChatWindow chatWindow( onTextEntry,
-                           ChatWindowInfo::Position{5, 5},
-                           ChatWindowInfo::Dimensions{5, 38} );
+    ChatWindow chatWindow( onTextEntry );
 
     MenuManager menuManager( &chatWindow );
 
@@ -165,7 +162,7 @@ std::string processServerMessage(const std::string& response) {
         responseData << "Choose a game: " << data;
     }
 
-    return responseData;
+    return responseData.str();
 
 }
 
@@ -233,7 +230,8 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
         createLobbyItemResults.push_back( moveBackToMainMenuPage );
 
         MenuPage::MenuName createLobbyName = "Create lobby";
-        MenuPage *createLobbyPage = new MenuPage( createLobbyName,
+        std::shared_ptr<MenuPage> createLobbyPage = std::make_shared<MenuPage>( 
+                                                    createLobbyName,
                                                     createLobbyFields,
                                                     createLobbyItems,
                                                     createLobbyItemResults );
@@ -250,11 +248,12 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
     };
 
     MenuPage::FunctionList mainMenuItemResults = { moveToJoinLobbyPage,
-                                                      moveToCreateLobbyPage,
-                                                      exitProgram };
+                                                   moveToCreateLobbyPage,
+                                                   exitProgram };
 
     MenuPage::MenuName mainMenuName = "Main menu";
-    MenuPage *mainMenuPage = new MenuPage( mainMenuName,
+    std::shared_ptr<MenuPage> mainMenuPage = std::make_shared<MenuPage>( 
+                                             mainMenuName,
                                              mainMenuFields,
                                              mainMenuItems,
                                              mainMenuItemResults );
@@ -277,7 +276,7 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
     auto joinLobby = [&done, &client, &menuManager] () {
         std::string commadType =  "!joinsession ";
 
-        MenuPage *joinPage = menuManager.getCurrentPage();
+        std::shared_ptr<MenuPage> joinPage = menuManager.getCurrentPage();
         MenuPage::FieldList *connectFields = joinPage->getFieldList();
 
         const int lobbyCodeInputIndex = 1;
@@ -293,8 +292,9 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
     const MenuPage::FunctionList joinLobbyItemResults
         = {joinLobby, moveBackToMainMenuPage};
 
-    MenuPage::MenuName joinLobbyName = "Join lobby";
-    MenuPage *joinLobbyPage = new MenuPage( joinLobbyName,
+    MenuPage::MenuName joinLobbyName = "Join lobby"; 
+    std::shared_ptr<MenuPage> joinLobbyPage = std::make_shared<MenuPage>( 
+                                              joinLobbyName,
                                               joinLobbyFields,
                                               joinLobbyItems,
                                               joinLobbyItemResults );

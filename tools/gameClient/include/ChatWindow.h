@@ -41,6 +41,14 @@ public:
     : ChatWindow{std::move(onTextEntry), position, dimensions, 1}
       { }
 
+  ChatWindow( std::function<void(std::string)> onTextEntry )
+    : ChatWindow{std::move(onTextEntry), 
+      ChatWindowInfo::Position{5, 5},
+      ChatWindowInfo::Dimensions{5, 38}, 1}
+      { }
+
+      
+
   ChatWindow( std::function<void(std::string)> onTextEntry, 
               ChatWindowInfo::Position position,
               ChatWindowInfo::Dimensions dimensions,
