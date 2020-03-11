@@ -4,23 +4,8 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
+#include "RuleCollection_TEST.h"
 
-//Using std::variants and std::visit
-
-typedef struct Arithmetic Arithmetic;
-// typedef struct ForEach ForEach;
-typedef struct Loop Loop;
-typedef struct Add Add;
-
-// typedef struct Components Components;
-
-using Rule = std::variant<
-Arithmetic,
-// ForEach,
-Add,
-Loop>;
-
-using RulesList = std::vector<Rule>;
 
 enum Arith {
     ADD,
@@ -41,7 +26,6 @@ struct Arithmetic {
     Arith operation;
     int64_t result;
 };
-
 
 
 typedef int& destination;
@@ -106,16 +90,13 @@ enum LoopType{
 
 template <typename T>
 struct Loop<T> {
-    Loop(Condition<T> c, LoopType type, RulesList &r) :
+    Loop(Condition<T> c, LoopType type) :
         loopCondition{c},
-        type{type},
-        rules_to_run{r} 
+        type{type}
         {};
 
     Condition<T> loopCondition;
     LoopType type;
-    RulesList rules_to_run;
-
 }; 
 
 struct ControlStructures {
@@ -148,27 +129,17 @@ struct Components{
                     {
                         case LoopType::UNTIL:
                             while(!rule.loopCondition()){
-                                for(auto r : rule.rules_to_run){
-                                    //do work
-                                    auto x = std::get<Add>(r);
-                                    std::cout << "a is " << x.to <<std::endl;
-                                    x.func();
-                                }
+                                //do work
+                                // how to pass in a std::vector<Components> = RuleList
                             }
                             break;
 
                         case LoopType::WHILE:
                            while(rule.loopCondition()){
-                               for(auto r : rule.rules_to_run){
-                                   //do work
-                                   auto x = std::get<Add>(r);
-                                   std::cout << "a is " << x.to <<std::endl;
-                                   x.func();
-                               }
+                                //do work
+                                // how to pass in a std::vector<Components> = RuleList
                            }
                     }
-
-
 
                 },
                 [](Arithmetic rule){
@@ -211,14 +182,32 @@ struct Components{
     std::vector<component> entities;
 };
 
+using RulesList = std::vector<Components>
+struct Rule{
+    Rule(Components &c, RulesList& r) :
+        controlStruct (c),
+        rulesToRun (r)
+        {};
+
+    Components controlStruct;
+    RulesList rulesToRun;
+
+    void func(){
+        c.visit();
+    }
+}
+
 int main() {    
     Arithmetic addition {{43, 5}, Arith::ADD};
     Components<Arithmetic> comp1 {{addition}};
     comp1.visit();
     
     int a = 0;
+    int b = 10;
 
-    Condition<int> c1 {a, 10, ConditionType::LESS}
+    Condition<int> c1 {a, b, ConditionType::LESS};
+
+    // below is irrelevant at this point
 
     Add add1 {a, 1};
     Add add2 {a, 2};
@@ -234,6 +223,8 @@ int main() {
     comp2.visit();
 
     std::cout << "a is " << a <<std::endl;
+
+    // above is ireleveant at this point
 
 
 }
