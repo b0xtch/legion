@@ -695,6 +695,5 @@ struct Scores : GenRule {
 	ScoreBoard scoreboard;
 	condition ascending;
 };
->>>>>>> develop
 
 #endif
