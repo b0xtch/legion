@@ -1,13 +1,13 @@
 #include "User.h"
 
-User::User(networking::Connection cnxn) :
-    cnxn{cnxn}, name{""}
+User::User(const networking::Connection& connection) :
+    connection{connection}, name{""}
 {
     
 }
 
-networking::Connection User::getConn() const {
-    return cnxn;
+networking::Connection User::getConnection() const {
+    return connection;
 }
 
 std::string User::getName() const {
