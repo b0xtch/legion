@@ -13,7 +13,7 @@ static JsonDSL dsl;
 static void validateNecessaryParametersPresent(const json& ruleJson, Rule& ruleDefinition){
     auto paramItBegin = ruleDefinition.getParametersBegin();
     auto paramItEnd = ruleDefinition.getParametersEnd();
-
+    
     auto findResult = std::find_if(paramItBegin, paramItEnd, 
         [&ruleJson](JsonDSL::RuleParameters dslEnum){
             std::string stringToCheck = dsl.getRuleParameterString(dslEnum);
@@ -38,6 +38,7 @@ static void validateNecessaryParametersPresent(const json& ruleJson, Rule& ruleD
         std::string paramUsed = ruleDefinition.hasParameter(caseStr) ? caseStr : conditionStr;
 
         for(auto caseObj : cases){
+
             bool hasCaseField = caseObj.contains(paramUsed);
             bool hasNestedRules = caseObj.contains(dsl.getSpecString(JsonDSL::Rules));
 
@@ -128,8 +129,9 @@ static void validateRulesStructure(const json& rulesJson, const RuleMap& ruleMap
 }
 
 VariableValidator RulesValidator::validateRules(const json& j_object){
-    //cannot make global or global static or else this will segfault
+    //cannot be outside of function or else this will segfault
     RuleMap ruleMap = ruleValidationHelper::getRuleMap();
+
     std::string rulesString = dsl.getSpecString(JsonDSL::Rules);
     json rules = j_object[rulesString];
 

@@ -75,13 +75,13 @@ RuleMap ruleValidationHelper::getRuleMap(){
 
     ruleValidationHelper::Rule Switch = {
         JsonDSL::Switch,
-        {JsonDSL::Value, JsonDSL::List, JsonDSL::Cases, JsonDSL::Case},
+        {JsonDSL::Value, JsonDSL::List, JsonDSL::Cases},
         containsOtherRules
     };
 
     ruleValidationHelper::Rule When = {
         JsonDSL::When,
-        {JsonDSL::Cases, JsonDSL::Condition},
+        {JsonDSL::Cases},
         containsOtherRules
     };
 
@@ -105,7 +105,7 @@ RuleMap ruleValidationHelper::getRuleMap(){
 
     ruleValidationHelper::Rule Sort = {
         JsonDSL::Sort,
-        {JsonDSL::List, JsonDSL::Key},
+        {JsonDSL::List},
         !containsOtherRules
     };
 
@@ -117,7 +117,7 @@ RuleMap ruleValidationHelper::getRuleMap(){
 
     ruleValidationHelper::Rule Discard = {
         JsonDSL::Discard,
-        {JsonDSL::From, JsonDSL::To, JsonDSL::Count},
+        {JsonDSL::From, JsonDSL::Count},
         !containsOtherRules
     };
 
@@ -129,25 +129,25 @@ RuleMap ruleValidationHelper::getRuleMap(){
 
     ruleValidationHelper::Rule Timer = {
         JsonDSL::Timer,
-        {JsonDSL::Duration, JsonDSL::Mode, JsonDSL::Flag},
+        {JsonDSL::Duration, JsonDSL::Mode},
         containsOtherRules
     };
 
     ruleValidationHelper::Rule InputChoice = {
         JsonDSL::InputChoice,
-        {JsonDSL::To, JsonDSL::RulePrompt, JsonDSL::Choices, JsonDSL::Result, JsonDSL::Timeout},
+        {JsonDSL::To, JsonDSL::RulePrompt, JsonDSL::Choices, JsonDSL::Result},
         !containsOtherRules
     };
 
     ruleValidationHelper::Rule InputText = {
         JsonDSL::InputText,
-        {JsonDSL::To, JsonDSL::RulePrompt, JsonDSL::Result, JsonDSL::Timeout},
+        {JsonDSL::To, JsonDSL::RulePrompt, JsonDSL::Result},
         !containsOtherRules
     };
 
     ruleValidationHelper::Rule InputVote = {
         JsonDSL::InputVote,
-        {JsonDSL::To, JsonDSL::RulePrompt, JsonDSL::Choices, JsonDSL::Result, JsonDSL::Timeout},
+        {JsonDSL::To, JsonDSL::RulePrompt, JsonDSL::Choices, JsonDSL::Result},
         !containsOtherRules
     };
 
@@ -160,7 +160,7 @@ RuleMap ruleValidationHelper::getRuleMap(){
     ruleValidationHelper::Rule GlobalMessage = {
         JsonDSL::GlobalMessage,
         {JsonDSL::Value},
-        containsOtherRules
+        !containsOtherRules
     };
 
     ruleValidationHelper::Rule Score = {
