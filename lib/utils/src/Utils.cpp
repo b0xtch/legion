@@ -94,7 +94,7 @@ namespace Utils {
         }
 
         commandStream << "\", \"data\": \""; // Declare the data field
-        commandStream << input.substr(endOfCommand, string::npos); // Get the data value
+        commandStream << input.substr(endOfCommand, std::string::npos); // Get the data value
         commandStream << "\" }"; // End of the json object
 
         json message = json::parse( commandStream.str() );

@@ -1,0 +1,36 @@
+{
+    "configuration": {
+        "name": "Zen Game",
+        "player count": {"min": 0, "max": 0},
+        "audience": false,
+        "setup": { }
+    },
+    "constants": {},
+    "variables": {},
+    "per-player": {},
+    "per-audience": {},
+    "rules": [
+        {"rule": "parallelfor",
+        "list": "list",
+        "element": "element",
+        "rules": {
+            "invalidObj1":{
+            "rule": "add",
+            "to": "randomVar1",
+            "value": 22
+            },
+            
+            "invalidObj2":{
+            "rule": "add",
+            "to": "randomVar2",
+            "value": 23
+            },
+            
+            "invalidObj3":{
+            "rule": "add",
+            "to": "randomVar3",
+            "value": 12232
+            }
+        }}
+    ]
+}
