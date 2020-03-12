@@ -92,6 +92,7 @@ void ParsedMessage::initializePairs() {
         commandAndTypePairs.push_back({PMConstants::TYPE_CREATE_SESSION, ParsedMessage::Type::CreateSession});
         commandAndTypePairs.push_back({PMConstants::TYPE_JOIN_SESSION, ParsedMessage::Type::JoinSession});
         commandAndTypePairs.push_back({PMConstants::TYPE_LEAVE_SERVER, ParsedMessage::Type::LeaveServer});
+        commandAndTypePairs.push_back({PMConstants::TYPE_LEAVE_SESSION, ParsedMessage::Type::LeaveSession});
         commandAndTypePairs.push_back({PMConstants::TYPE_CHAT, ParsedMessage::Type::Chat});
         commandAndTypePairs.push_back({PMConstants::TYPE_WHISPER, ParsedMessage::Type::Whisper});
         commandAndTypePairs.push_back({PMConstants::TYPE_LIST_GAMES, ParsedMessage::Type::ListGames});
