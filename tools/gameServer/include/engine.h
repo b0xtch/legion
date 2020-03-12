@@ -11,12 +11,28 @@
 
 // for convenience
 using json = nlohmann::json;
-using String = String;
+using String = std::string;
 using Integer = int;
 using Boolean = bool;
-using Key = String;
-using Object = std::map<String, std::variant<Integer, String, Boolean>>;
-using Array = std::vector<std::variant<Integer, String, Boolean>>;
+using Key = std::string;
+struct Object;
+struct Array;
+
+template <typename T> struct rapper {
+  rapper(T type) { 
+    entities.emplace_back(std::move(type)); 
+  }
+
+  // user-defined conversion, i think this migth be an implicit conversion
+  // An explicit conversion was tried but i am guessing because i am using templates
+  // Its implicit 
+  operator T() const { 
+    return entities.front(); 
+  }
+
+  std::vector<T> entities;
+};
+
 
 template<typename... T>
 using Type = std::variant<T...>;
@@ -24,27 +40,17 @@ using Value = Type<
   Integer,
   String, 
   Boolean,
-  Object,
-  Array
+  rapper<Array>, 
+  rapper<Object>
 >;
 
-// ATTEMPT A RECURSIVE W/O boost
-// template<typename... T>
-// using Type = std::variant<T...>;
-// struct RecursiveVariant;
-// using Value = Type<
-//   Integer,
-//   String, 
-//   Boolean,
-//   std::vector<RecursiveVariant>,
-//   std::unique_ptr<RecursiveVariant>,
-//   std::unordered_map<Key, std::unique_ptr<RecursiveVariant>>
-// >;
-// struct RecursiveVariant {
-//   Value values;
-// };
-// using Object = std::unordered_map<Key, Value>;
-// using Array = std::vector<Value>;
+struct Object {
+  std::unordered_map<Key, Value> values;
+};
+
+struct Array {
+  std::vector<Value> values;
+};
 
 namespace Engine {
 
