@@ -6,9 +6,9 @@
 
 using json = nlohmann::json;
 using Rule = ruleValidationHelper::Rule;
+using RuleMap = std::map<std::string, Rule>;
 
 static JsonDSL dsl;
-static std::map<std::string, Rule> ruleMap = ruleValidationHelper::getRuleMap();
 
 static void validateNecessaryParametersPresent(const json& ruleJson, Rule& ruleDefinition){
     auto paramItBegin = ruleDefinition.getParametersBegin();
@@ -82,9 +82,9 @@ static void validateAllParametersAreValid(const json& ruleJson, const Rule& rule
 
 //forward declaration of function for validateSingleRule to use
 //necessary because both functions call each other in a recursive fashion
-static void validateRulesStructure(const json& rulesJson);
+static void validateRulesStructure(const json& rulesJson, const RuleMap& ruleMap);
 
-static void validateSingleRule(const json& ruleJson){
+static void validateSingleRule(const json& ruleJson, const RuleMap& ruleMap){
     //check that a rule key is present in the json and has a valid value
     std::string ruleString = dsl.getRuleParameterString(JsonDSL::Rule);
     
@@ -109,28 +109,30 @@ static void validateSingleRule(const json& ruleJson){
         json cases = ruleJson[dsl.getRuleParameterString(JsonDSL::Cases)];
         for(auto caseJson : cases){
             auto nestedRules = caseJson[dsl.getSpecString(JsonDSL::Rules)];
-            validateRulesStructure(nestedRules);
+            validateRulesStructure(nestedRules, ruleMap);
         }
     } else if (ruleDefiniton.hasSetOfRules){
         json nestedRules = ruleJson[dsl.getSpecString(JsonDSL::Rules)];
-        validateRulesStructure(nestedRules);
+        validateRulesStructure(nestedRules, ruleMap);
     }
 }
 
-static void validateRulesStructure(const json& rulesJson){
+static void validateRulesStructure(const json& rulesJson, const RuleMap& ruleMap){
     if(!rulesJson.is_array()){
         throw std::invalid_argument("The rules are expected to be stored in an array.");
     }
 
     for(auto rule : rulesJson){
-        validateSingleRule(rule);
+        validateSingleRule(rule, ruleMap);
     }
 }
 
 VariableValidator RulesValidator::validateRules(const json& j_object){
+    //cannot make global or global static or else this will segfault
+    RuleMap ruleMap = ruleValidationHelper::getRuleMap();
     std::string rulesString = dsl.getSpecString(JsonDSL::Rules);
     json rules = j_object[rulesString];
-    validateRulesStructure(rules);
+    validateRulesStructure(rules, ruleMap);
     return VariableValidator();
 }
 
