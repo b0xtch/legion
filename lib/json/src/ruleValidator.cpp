@@ -132,7 +132,11 @@ VariableValidator RulesValidator::validateRules(const json& j_object){
     RuleMap ruleMap = ruleValidationHelper::getRuleMap();
     std::string rulesString = dsl.getSpecString(JsonDSL::Rules);
     json rules = j_object[rulesString];
-    validateRulesStructure(rules, ruleMap);
+
+    if(rules.size() != 0){
+        validateRulesStructure(rules, ruleMap);
+    }
+    
     return VariableValidator();
 }
 

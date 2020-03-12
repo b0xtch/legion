@@ -20,6 +20,10 @@ bool Rule::hasParameter(const std::string& parameter) const {
         return true;
     }
 
+    if(parameter == dsl.getRuleParameterString(JsonDSL::Rule)){
+        return true;
+    }
+
     auto it = std::find_if(parameters.begin(), parameters.end(), 
         [parameter](JsonDSL::RuleParameters dslEnum){
             return parameter == dsl.getRuleParameterString(dslEnum);
@@ -53,7 +57,7 @@ RuleMap ruleValidationHelper::getRuleMap(){
 
     ruleValidationHelper::Rule Parallelfor = {
         JsonDSL::Parallelfor,
-        {JsonDSL::List, JsonDSL::Element, JsonDSL::Cases},
+        {JsonDSL::List, JsonDSL::Element},
         containsOtherRules
     };
 
