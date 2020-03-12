@@ -117,13 +117,16 @@ namespace Engine {
     
     template <typename T> 
     Value EngineImpl<T>::setConfiguration(const T& in) {
-        Configuration configuration;
-        configuration.name = in["configuration"]["name"];
-        configuration.playerCount = {
-            in["configuration"]["player count"]["min"],
-            in["configuration"]["player count"]["max"]
+        Configuration configuration{
+            in["name"],
+            {
+            in["player count"]["min"], 
+            in["player count"]["max"]
+            },
+            in["audience"]
         };
-        configuration.audience = in["configuration"]["audience"];
+
+        // do setup
 
         return (Value) configuration;
     }
