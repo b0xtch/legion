@@ -42,6 +42,9 @@ protected:
             }
 
             ruleValidator.validateRules(j_object);
+            if(level == rule){
+                FAIL() << "Expected config validator to fail.";
+            }
 
         }catch(std::invalid_argument e){
             EXPECT_EQ(e.what(), expectedMessage);
@@ -128,6 +131,12 @@ TEST_F(ValidatorTests, detectInvalidFloatPlayerValues){
     runValidatorWithThrow(fileLocation, expectedMessage, config);
 }
 
+TEST_F(ValidatorTests, detectNegativePlayerCounts){
+    std::string fileLocation = directoryPrefix + "configWithNegativePlayers.json";
+    std::string expectedMessage = "Player count values are not both greater than or equal to 0";
+    runValidatorWithThrow(fileLocation, expectedMessage, config);
+}
+
 TEST_F(ValidatorTests, detectInvalidStringPlayerValues){
     std::string fileLocation = directoryPrefix + "configWithNonNumericPlayerCount.json";
     std::string expectedMessage = "The values inside the players count object are not both integers";
@@ -156,6 +165,30 @@ TEST_F(ValidatorTests, detectMissingParameterInRule){
 
 TEST_F(ValidatorTests, detectValidNestedRules){
     std::string fileLocation = directoryPrefix + "ruleNestedValid.json";
+    runValidatorWithoutThrow(fileLocation,rule);
+}
+
+TEST_F(ValidatorTests, detectMissingRuleParameter){
+    std::string fileLocation = directoryPrefix + "ruleWithoutRule.json";
+    std::string expectedMessage = "One of the rules are missing the rule field.";
+    runValidatorWithThrow(fileLocation, expectedMessage, rule);
+}
+
+TEST_F(ValidatorTests, detectWhenRulesNotInArray){
+    std::string fileLocation = directoryPrefix + "ruleStoredWithinObject.json";
+    std::string expectedMessage = "The rules are expected to be stored in an array.";
+    runValidatorWithThrow(fileLocation, expectedMessage, rule);
+}
+
+TEST_F(ValidatorTests, detectMissingNestedRules){
+    std::string fileLocation = directoryPrefix + "ruleMissingNestedRules.json";
+    std::string expectedMessage = "foreach requires a rules field.";
+    runValidatorWithThrow(fileLocation, expectedMessage, rule);
+
+}
+
+TEST_F(ValidatorTests, detectValidRockPaperScissors){
+    std::string fileLocation = directoryPrefix + "rockPaperScissors.json";
     runValidatorWithoutThrow(fileLocation,rule);
 }
 
