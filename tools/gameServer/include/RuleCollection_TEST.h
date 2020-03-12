@@ -33,12 +33,12 @@ namespace RuleCollection {
 			GenRule{"ForEach"},
 			list{v},
 			element{el},
-			rules_to_run{r}
+			rulesToRun{r}
 			{};
 		
 		std::vector<T> list;
 		T element;
-		RulesList rules_to_run;
+		RulesList rulesToRun;
 
 		//is this correct????
 		// example:
@@ -47,7 +47,7 @@ namespace RuleCollection {
 		void func() override{
 			std::cout << "ForEach ..." << std::endl;
 			for(auto listElement : list){
-				for(auto rule : rules_to_run){
+				for(auto rule : rulesToRun){
 					rule->func();
 				}
 			}
@@ -106,12 +106,12 @@ namespace RuleCollection {
 		GenRule{"Loop"},
 		loopCondition{con},
 		type{type},
-		rules_to_run{r}	
+		rulesToRun{r}	
 		{};
 		
 		Condition<T> loopCondition;
 		LoopType type;
-		RulesList rules_to_run;
+		RulesList rulesToRun;
 
 
 		void func() override{
@@ -121,7 +121,7 @@ namespace RuleCollection {
 		        case LoopType::UNTIL:
 		        	std::cout << "UNTIL ..." << std::endl;
 		            while(!loopCondition()){
-		                for(auto rule : rules_to_run){
+		                for(auto rule : rulesToRun){
 		                	std::cout<<rule->rule_name <<std::endl;
 		                    rule->func();
 		                    if(loopCondition()) break;
@@ -131,7 +131,7 @@ namespace RuleCollection {
 		        case LoopType::WHILE:
 		        	std::cout << "WHILE ..." << std::endl;
 		            while(loopCondition()){
-		                for(auto rule : rules_to_run){
+		                for(auto rule : rulesToRun){
 		                	std::cout << "Running rule " << rule->rule_name <<std::endl;
 		                    rule->func();
 		                    if(!loopCondition()) break;
@@ -196,6 +196,40 @@ namespace RuleCollection {
 	    }
 	};
 
-}
+
+	// Inparallel
+	// Parallel for
+	// Switch
+
+	//When
+	//look into boost variant
+	template <typename T>
+	struct Case : GenRule {
+		Case(Condition<T> c, RulesList r) :
+			whenCondition {c},
+			rulesToRun {r}
+			{};
+
+		Condition<T> whenCondition;
+		RulesList rulesToRun;
+
+		void func() override {
+			if(whenCondition()){
+				for(auto rules : rulesToRun){
+					rules->func();
+				}
+			}
+		}
+	};
+
+	// struct When : GenRule {
+
+	// };
+
+
+
+
+
+} // namespace RuleCollection
 
 #endif
