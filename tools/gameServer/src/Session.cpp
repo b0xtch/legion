@@ -12,31 +12,19 @@ Session::Session(): sessionId{Utils::generateSessionId(6)}{};
 /**
  * This function returns all available connections
  * **/
-std::unordered_map<ConnectionId, Connection> Session::getAllClients(){
-    return clients;
-};
-
-
-/**
- * This function returns particular connection if exists
- * **/
-Connection Session::getClient(const Connection& connection){
-    if (isClient(connection)){
-        return clients[connection.id];
-    }
-    throw;
+std::set<User> Session::getAllUsers(){
+    return users;
 };
 
 
 /**
  * This function adds new connection to session given session limit has'nt reached yet
  * **/
-void Session::addClient(const Connection& connection){
-    if(clients.size() >= MAX_SESSION_SIZE){
+void Session::addUser(const User& user){
+    if(users.size() >= MAX_SESSION_SIZE){
         throw;// SessSessionLimitExceeded();
     };
-
-    clients[connection.id] = connection;
+    users.insert(user);
 };
 
 
@@ -44,22 +32,24 @@ void Session::addClient(const Connection& connection){
  * Simple getter for getting sesion id
  * **/
 std::string Session::getSessionId(){
-    return sessionId;
+    return sessionId.id;
 };
 
 
 /**
  * Check if connection is part of this session
  * **/
-bool Session::isClient(const Connection& connection){
-    return clients.find(connection.id) != clients.end();
+bool Session::isUser(const User& user){
+    return users.find(user) != users.end();
 }
+
 
 /**
  * Method for removing connection from session
  * **/
-void Session::removeConnection(const Connection &connection){
-    if(clients.find(connection.id) != clients.end()){
-        clients.erase(connection.id);
+void Session::removeUser(const User &user){
+    if(users.find(user) != users.end()){
+        users.erase(user);
     }
 }
+

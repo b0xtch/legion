@@ -1,8 +1,9 @@
 #ifndef SESSION_H
 #define SESSION_H
 
-#include <unordered_set>
+#include <set>
 #include "Server.h"
+#include "User.h"
 
 using networking::Server;
 using networking::Connection;
@@ -27,24 +28,23 @@ public:
     
     Session();
     
-    std::unordered_map<ConnectionId, Connection> getAllClients();
+    std::set<User> getAllUsers();
     
     Connection getClient(const Connection &connection);
     
-    void addClient(const Connection &connection);
+    void addUser(const User &user);
     
-    bool isClient(const Connection &connection);
+    bool isUser(const User &user);
 
-    void removeConnection(const Connection &connection);
+    void removeUser(const User &user);
     
     std::string getSessionId();
 
 private:
     
-    std::unordered_map<ConnectionId, Connection> clients;
+    std::set<User> users;
     
-    /* SessionId sessionId; */
-    std::string sessionId;
+    SessionId sessionId;
     
     int MAX_SESSION_SIZE;
 };

@@ -1,10 +1,7 @@
 #include "User.h"
 
 User::User(const networking::Connection& connection) :
-    connection{connection}, name{""}
-{
-    
-}
+    connection{connection}, name{""} {}
 
 networking::Connection User::getConnection() const {
     return connection;
@@ -16,4 +13,8 @@ std::string User::getName() const {
 
 void User::setName(std::string& name) {
     this->name = name;
+}
+
+bool User::operator< (const User &user) const{
+    return getConnection().id < user.getConnection().id;
 }

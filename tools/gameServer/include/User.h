@@ -2,7 +2,6 @@
 #define USER_H
 
 #include <string>
-
 #include "Server.h"
 
 class User {
@@ -14,6 +13,8 @@ public:
     std::string getName() const;
 
     void setName(std::string& name);
+
+    bool operator< (const User &user) const;
 
 private:
     networking::Connection connection;
