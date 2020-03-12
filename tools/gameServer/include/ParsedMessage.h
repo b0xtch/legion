@@ -14,10 +14,11 @@ namespace PMConstants {
     const std::string TYPE_SERVER_STOP = "serverstop";
     const std::string TYPE_CREATE_SESSION = "!createsession";
     const std::string TYPE_JOIN_SESSION = "!joinsession";
-    const std::string TYPE_LEAVE_SERVER = "!leavesession";
+    const std::string TYPE_LEAVE_SERVER = "!leaveserver";
+    const std::string TYPE_LEAVE_SESSION = "!leavesession";
     const std::string TYPE_CHAT = "!chat";
     const std::string TYPE_WHISPER = "!whisper";
-    const std::string TYPE_LIST_GAMES = "!requestGames";
+    const std::string TYPE_LIST_GAMES = "!requestgames";
 };
 
 class ParsedMessage {

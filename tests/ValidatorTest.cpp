@@ -3,6 +3,7 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <fstream>
 #include "json.hpp"
 #include "fieldValidators.h"
 #include "ruleStructure.h"
@@ -10,43 +11,51 @@
 
 using json = nlohmann::json;
 
+//TEST_F(ValidatorTests, ){}
+
+//RUN TESTS WITH THE BASE social-gaming FOLDER AS THE WORKING DIRECTORY OR TESTS WILL FAIL
 enum validatorLevels {
     specification, config, rule, variable
 };
 
 class ValidatorTests : public ::testing::Test{
 protected:
-    std::string emptySuffix;
-    void SetUp() override{
-        emptySuffix = R"###(
-            "constants": {},
-            "variables": {},
-            "per-player": {},
-            "per-audience": {},
-            "rules":{}}
-        )###";
-    }
 
-    void runValidatorWithThrow(std::string& jsonText, const std::string& expectedMessage, validatorLevels level){
-        json j_object = json::parse(jsonText);
+    std::string directoryPrefix;
+    void SetUp() override{
+        directoryPrefix = "tests/testfiles/validatorJsons/";
+    }
+    void runValidatorWithThrow(std::string& fileLocation, const std::string& expectedMessage, validatorLevels level){
+        std::ifstream jsonFile (fileLocation);
+        json j_object = json::parse(jsonFile);
         SpecificationValidator specValidator;
         try{
 
             ConfigValidator confValidator = specValidator.validateSpecification(j_object);
             if(level == specification){
-                FAIL() << "Expected specification validator to fail";
+                FAIL() << "Expected specification validator to fail.";
             }
-            confValidator.validateConfig(j_object);
+
+            RulesValidator ruleValidator = confValidator.validateConfig(j_object);
+            if(level == config){
+                FAIL() << "Expected config validator to fail.";
+            }
+
+            ruleValidator.validateRules(j_object);
+            if(level == rule){
+                FAIL() << "Expected config validator to fail.";
+            }
 
         }catch(std::invalid_argument e){
             EXPECT_EQ(e.what(), expectedMessage);
         }catch(...){
-            FAIL() << "Expected invalid_argument exception";
+            FAIL() << "Expected invalid_argument exception.";
         }
     }
 
-    void runValidatorWithoutThrow(std::string& jsonText, validatorLevels level){
-        json j_object = json::parse(jsonText);
+    void runValidatorWithoutThrow(std::string& fileLocation, validatorLevels level){
+        std::ifstream jsonFile (fileLocation);
+        json j_object = json::parse(jsonFile);
         SpecificationValidator specValidator;
         try{
             
@@ -54,143 +63,133 @@ protected:
             if(level == specification){
                 return;
             }
-            confValidator.validateConfig(j_object);
+
+            RulesValidator ruleValidator = confValidator.validateConfig(j_object);
+            if(level == config){
+                return;
+            }
+
+            ruleValidator.validateRules(j_object);
 
         }catch(std::invalid_argument e){
-            FAIL() << "Invalid Argument error thrown when it shouldn't be";
+            FAIL() << "Invalid Argument error thrown when it shouldn't be: " << e.what();
         }catch(...){
             FAIL() << "Unexpected error thrown.";
         }
     }
 };
 
+TEST_F(ValidatorTests, detectSimplestValidGameSpec){
+    std::string fileLocation = directoryPrefix + "simplestGameSpec.json";
+    runValidatorWithoutThrow(fileLocation, rule);
+}
+
 TEST_F(ValidatorTests, detectMissingSpecification){
-    std::string jsonText = R"###({
-    )###";
-    jsonText = jsonText + emptySuffix;
+    std::string fileLocation = directoryPrefix + "specWithMissingField.json";
     std::string expectedMessage = "Top level specification Field: configuration not found.";
-    runValidatorWithThrow(jsonText, expectedMessage, specification);
+    runValidatorWithThrow(fileLocation, expectedMessage, specification);
 }
 
 TEST_F(ValidatorTests, detectIllegalSpecification){
-    std::string jsonText = R"###({
-    "asdasdasdasdasd":{},
-    "configuration": {
-        "name": "Zen Game",
-        "player count": {"min": 0, "max": 0},
-        "audience": {},
-        "setup": { }
-    },
-    )###";
-
-    jsonText = jsonText + emptySuffix;
+    std::string fileLocation = directoryPrefix + "specWithIllegalKey.json";
     std::string expectedMessage = "An illegal key was found on the top level specification level of the json file";
-    runValidatorWithThrow(jsonText, expectedMessage, specification);
+    runValidatorWithThrow(fileLocation, expectedMessage, specification);
 }
 
 TEST_F(ValidatorTests, detectValidSpecification){
-    std::string jsonText = R"###({
-    "configuration": {},
-    )###";
-
-    jsonText = jsonText + emptySuffix;
-    runValidatorWithoutThrow(jsonText, specification);
+    std::string fileLocation = directoryPrefix + "validSpec.json";
+    runValidatorWithoutThrow(fileLocation, specification);
 }
 
 TEST_F(ValidatorTests, detectMissingConfigFields){
-    std::string jsonText = R"###({
-    "configuration": {
-        "player count": {"min": 0, "max": 0}
-    },
-    )###";
-    jsonText = jsonText + emptySuffix;
+    std::string fileLocation = directoryPrefix + "configWithMissingField.json";
     std::string expectedMessage = "Config Field: audience not found.";
-    runValidatorWithThrow(jsonText, expectedMessage, config);
+    runValidatorWithThrow(fileLocation, expectedMessage, config);
 }
 
 TEST_F(ValidatorTests, detectIllegalConfig){
-    std::string jsonText = R"###({
-    "configuration": {
-        "name": "Zen Game",
-        "player count": {"min": 10.2, "max": 0},
-        "audience": {},
-        "setup": { },
-        "adasasdasdasdas": {}
-    },
-    )###";
-    jsonText = jsonText + emptySuffix;
+    std::string fileLocation = directoryPrefix + "configWithIllegalKey.json";
     std::string expectedMessage = "An illegal key was found in the configuration level of the json file";
-    runValidatorWithThrow(jsonText, expectedMessage, config);
+    runValidatorWithThrow(fileLocation, expectedMessage, config);
 }
 
 TEST_F(ValidatorTests, detectMissingPlayerConfigField){
-    std::string jsonText = R"###({
-    "configuration": {
-        "name": "Zen Game",
-        "player count": {"max": 0},
-        "audience": {},
-        "setup": { }
-    },
-    )###";
-
-    jsonText = jsonText + emptySuffix;
+    std::string fileLocation = directoryPrefix + "configWithPlayerFieldMissing.json";
     std::string expectedMessage = "Min player count not found";
-    runValidatorWithThrow(jsonText, expectedMessage, config);
+    runValidatorWithThrow(fileLocation, expectedMessage, config);
 }
 
 TEST_F(ValidatorTests, detectMinPlayersGreaterThanMaxPlayers){
-    std::string jsonText = R"###({
-    "configuration": {
-        "name": "Zen Game",
-        "player count": {"min": 10, "max": 0},
-        "audience": {},
-        "setup": { }
-    },
-    )###";
-    jsonText = jsonText + emptySuffix;
+    std::string fileLocation = directoryPrefix + "configWithMinGTMax.json";
     std::string expectedMessage = "The minimum number of players must be less than or equal to the number of max players";
-    runValidatorWithThrow(jsonText, expectedMessage, config);
+    runValidatorWithThrow(fileLocation, expectedMessage, config);
 }
 
 TEST_F(ValidatorTests, detectInvalidFloatPlayerValues){
-    std::string jsonText = R"###({
-    "configuration": {
-        "name": "Zen Game",
-        "player count": {"min": 10.2, "max": 0},
-        "audience": {},
-        "setup": { }
-    },
-    )###";
-    jsonText = jsonText + emptySuffix;
+    std::string fileLocation = directoryPrefix + "configWithFloatPlayerCount.json";
     std::string expectedMessage = "The values inside the players count object are not both integers";
-    runValidatorWithThrow(jsonText, expectedMessage, config);
+    runValidatorWithThrow(fileLocation, expectedMessage, config);
+}
+
+TEST_F(ValidatorTests, detectNegativePlayerCounts){
+    std::string fileLocation = directoryPrefix + "configWithNegativePlayers.json";
+    std::string expectedMessage = "Player count values are not both greater than or equal to 0";
+    runValidatorWithThrow(fileLocation, expectedMessage, config);
 }
 
 TEST_F(ValidatorTests, detectInvalidStringPlayerValues){
-    std::string jsonText = R"###({
-    "configuration": {
-        "name": "Zen Game",
-        "player count": {"min": "str", "max": 0},
-        "audience": {},
-        "setup": { }
-    },
-    )###";
-    jsonText = jsonText + emptySuffix;
+    std::string fileLocation = directoryPrefix + "configWithNonNumericPlayerCount.json";
     std::string expectedMessage = "The values inside the players count object are not both integers";
-    runValidatorWithThrow(jsonText, expectedMessage, config);
+    runValidatorWithThrow(fileLocation, expectedMessage, config);
 }
 
 TEST_F(ValidatorTests, detectValidConfig){
-    std::string jsonText = R"###({
-    "configuration": {
-        "name": "Zen Game",
-        "player count": {"min": 0, "max": 0},
-        "audience": {},
-        "setup": { }
-    },
-    )###";
-    jsonText = jsonText + emptySuffix;
-    runValidatorWithoutThrow(jsonText, config);
+    std::string fileLocation = directoryPrefix + "configValid.json";
+    runValidatorWithoutThrow(fileLocation, config);
+}
+
+TEST_F(ValidatorTests, detectValidSingleRule){
+    std::string fileLocation = directoryPrefix + "ruleSingleValid.json";
+    runValidatorWithoutThrow(fileLocation, rule);
+}
+
+TEST_F(ValidatorTests, detectInvalidRuleName){
+    std::string fileLocation = directoryPrefix + "ruleInvalidName.json";
+    runValidatorWithThrow(fileLocation, "ad is not a valid rule." ,rule);
+}
+
+TEST_F(ValidatorTests, detectMissingParameterInRule){
+    std::string fileLocation = directoryPrefix + "ruleMissingParameter.json";
+    runValidatorWithThrow(fileLocation, "Rule add is missing parameter to." ,rule);
+}
+
+TEST_F(ValidatorTests, detectValidNestedRules){
+    std::string fileLocation = directoryPrefix + "ruleNestedValid.json";
+    runValidatorWithoutThrow(fileLocation,rule);
+}
+
+TEST_F(ValidatorTests, detectMissingRuleParameter){
+    std::string fileLocation = directoryPrefix + "ruleWithoutRule.json";
+    std::string expectedMessage = "One of the rules are missing the rule field.";
+    runValidatorWithThrow(fileLocation, expectedMessage, rule);
+}
+
+TEST_F(ValidatorTests, detectWhenRulesNotInArray){
+    std::string fileLocation = directoryPrefix + "ruleStoredWithinObject.json";
+    std::string expectedMessage = "The rules are expected to be stored in an array.";
+    runValidatorWithThrow(fileLocation, expectedMessage, rule);
+}
+
+TEST_F(ValidatorTests, detectMissingNestedRules){
+    std::string fileLocation = directoryPrefix + "ruleMissingNestedRules.json";
+    std::string expectedMessage = "foreach requires a rules field.";
+    runValidatorWithThrow(fileLocation, expectedMessage, rule);
+
+}
+
+TEST_F(ValidatorTests, detectValidRockPaperScissors){
+    std::string fileLocation = directoryPrefix + "rockPaperScissors.json";
+    runValidatorWithoutThrow(fileLocation,rule);
 }
 
 TEST(RuleStructureTests, parameterMethodsWork){
