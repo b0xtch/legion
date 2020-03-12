@@ -129,6 +129,7 @@ std::string_view GameServer::getHtmlFile() const {
     return htmlFile;
 }
 
+// TODO change to use ParsedMessage::makeMsg
 networking::Message GameServer::generateGameListResponse(networking::Connection recipient) {
     networking::Message msg;
     msg.connection = recipient;
