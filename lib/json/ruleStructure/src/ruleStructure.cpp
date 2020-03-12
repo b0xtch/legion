@@ -7,7 +7,12 @@ JsonDSL dsl;
 using Rule = ruleValidationHelper::Rule;
 
 Rule::Rule(JsonDSL::RuleType name, std::vector<JsonDSL::RuleParameters> parameters, bool hasSetOfRules)
-    : name(name), parameters(parameters), hasSetOfRules(hasSetOfRules) {}
+    : name(name), parameters(parameters), hasSetOfRules(hasSetOfRules), hasOptional(false) {}
+
+Rule::Rule(JsonDSL::RuleType name, std::vector<JsonDSL::RuleParameters> parameters, 
+    bool hasSetOfRules, JsonDSL::RuleParameters optional)
+    : name(name), parameters(parameters), hasSetOfRules(hasSetOfRules), 
+    optional(optional), hasOptional(true) {}
 
 int Rule::getParameterCount() const {
     int nestedRules = hasSetOfRules ? 1 : 0;
@@ -16,11 +21,11 @@ int Rule::getParameterCount() const {
 
 bool Rule::hasParameter(const std::string& parameter) const {
 
-    if(hasSetOfRules && parameter == dsl.getSpecString(JsonDSL::Rules)){
-        return true;
-    }
+    bool isOptionalParameter = hasOptional && parameter == dsl.getRuleParameterString(optional);
+    bool isNestedRules = hasSetOfRules && parameter == dsl.getSpecString(JsonDSL::Rules);
+    bool isRuleParameter = hasSetOfRules && parameter == dsl.getRuleParameterString(JsonDSL::Rule);
 
-    if(parameter == dsl.getRuleParameterString(JsonDSL::Rule)){
+    if(isOptionalParameter || isNestedRules || isRuleParameter){
         return true;
     }
 
@@ -106,7 +111,8 @@ RuleMap ruleValidationHelper::getRuleMap(){
     ruleValidationHelper::Rule Sort = {
         JsonDSL::Sort,
         {JsonDSL::List},
-        !containsOtherRules
+        !containsOtherRules,
+        JsonDSL::Key
     };
 
     ruleValidationHelper::Rule Deal = {
@@ -130,25 +136,29 @@ RuleMap ruleValidationHelper::getRuleMap(){
     ruleValidationHelper::Rule Timer = {
         JsonDSL::Timer,
         {JsonDSL::Duration, JsonDSL::Mode},
-        containsOtherRules
+        containsOtherRules,
+        JsonDSL::Flag
     };
 
     ruleValidationHelper::Rule InputChoice = {
         JsonDSL::InputChoice,
         {JsonDSL::To, JsonDSL::RulePrompt, JsonDSL::Choices, JsonDSL::Result},
-        !containsOtherRules
+        !containsOtherRules,
+        JsonDSL::Timeout
     };
 
     ruleValidationHelper::Rule InputText = {
         JsonDSL::InputText,
         {JsonDSL::To, JsonDSL::RulePrompt, JsonDSL::Result},
-        !containsOtherRules
+        !containsOtherRules,
+        JsonDSL::Timeout
     };
 
     ruleValidationHelper::Rule InputVote = {
         JsonDSL::InputVote,
         {JsonDSL::To, JsonDSL::RulePrompt, JsonDSL::Choices, JsonDSL::Result},
-        !containsOtherRules
+        !containsOtherRules,
+        JsonDSL::Timeout
     };
 
     ruleValidationHelper::Rule Message = {

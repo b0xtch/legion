@@ -13,7 +13,7 @@ static JsonDSL dsl;
 static void validateNecessaryParametersPresent(const json& ruleJson, Rule& ruleDefinition){
     auto paramItBegin = ruleDefinition.getParametersBegin();
     auto paramItEnd = ruleDefinition.getParametersEnd();
-    
+
     auto findResult = std::find_if(paramItBegin, paramItEnd, 
         [&ruleJson](JsonDSL::RuleParameters dslEnum){
             std::string stringToCheck = dsl.getRuleParameterString(dslEnum);
@@ -62,9 +62,12 @@ static void validateNecessaryParametersPresent(const json& ruleJson, Rule& ruleD
 //this function assumes that the cases parameter is defined 
 //and that its contents contain valid data in the correct format
 static void validateAllParametersAreValid(const json& ruleJson, const Rule& ruleDefinition){
+
+    std::string ruleName = ruleJson[dsl.getRuleParameterString(JsonDSL::Rule)];
+
     for(auto parameter : ruleJson.items()){
         if(!ruleDefinition.hasParameter(parameter.key())){
-            throw std::invalid_argument("An illegal key was found inside one of the rules.");
+            throw std::invalid_argument("An illegal key was found inside the rule: " + ruleName + ".");
         }
     }
 
@@ -75,7 +78,7 @@ static void validateAllParametersAreValid(const json& ruleJson, const Rule& rule
         int numberOfFieldsInsideCase = 2;
         for(auto caseObj : cases){
             if(caseObj.size() != numberOfFieldsInsideCase){
-                throw std::invalid_argument("The case objects must contain only two fields, case/condition and rules.");
+                throw std::invalid_argument("The cases object for rule " + ruleName + " must contain only two fields, case/condition and rules.");
             }
         }
     }
