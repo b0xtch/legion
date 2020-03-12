@@ -16,7 +16,8 @@ Rule::Rule(JsonDSL::RuleType name, std::vector<JsonDSL::RuleParameters> paramete
 
 int Rule::getParameterCount() const {
     int nestedRules = hasSetOfRules ? 1 : 0;
-    return parameters.size() + nestedRules;
+    int optionalParameter = hasOptional ? 1 : 0;
+    return parameters.size() + nestedRules + hasOptional;
 }
 
 bool Rule::hasParameter(const std::string& parameter) const {
