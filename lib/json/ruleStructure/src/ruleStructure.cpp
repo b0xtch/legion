@@ -23,9 +23,9 @@ bool Rule::hasParameter(const std::string& parameter) const {
 
     bool isOptionalParameter = hasOptional && parameter == dsl.getRuleParameterString(optional);
     bool isNestedRules = hasSetOfRules && parameter == dsl.getSpecString(JsonDSL::Rules);
-    bool isRuleParameter = hasSetOfRules && parameter == dsl.getRuleParameterString(JsonDSL::Rule);
+    bool isRuleParameter = parameter == dsl.getRuleParameterString(JsonDSL::Rule);
 
-    if(isOptionalParameter || isNestedRules || isRuleParameter){
+    if(isOptionalParameter||isNestedRules||isRuleParameter){
         return true;
     }
 
