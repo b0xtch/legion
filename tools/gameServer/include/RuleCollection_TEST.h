@@ -147,7 +147,7 @@ namespace RuleCollection {
 	};
 
 	
-	typedef int& destination;
+	using destination = int&;
 
 	enum MathOperation {
 	    ADD,
@@ -206,6 +206,7 @@ namespace RuleCollection {
 	template <typename T>
 	struct Case : GenRule {
 		Case(Condition<T> c, RulesList r) :
+			GenRule{"Case"},
 			whenCondition {c},
 			rulesToRun {r}
 			{};
@@ -222,10 +223,74 @@ namespace RuleCollection {
 		}
 	};
 
-	// struct When : GenRule {
+	// template <typename T>
+	// using std::vector<Case<T>> = CasesList;
 
+	// edge case: what if none of the cases in CaseList are true?
+	template <typename T>
+	struct When : GenRule {
+		When(std::vector<Case<T>> &c) :
+			GenRule{"When"},
+			casesToCheck {c} 
+			{};
+
+			std::vector<Case<T>> casesToCheck;
+
+			void func() override {
+				for(auto currentCase : casesToCheck){
+					if(currentCase.whenCondition()){
+						std::cout << "Case valid" << std::endl;
+						currentCase.func();
+						break;
+					}
+				}
+			}
+
+	};
+
+
+	// // for convenience
+	// using json = nlohmann::json;
+	// using String = std::string;
+	// using Integer = int;
+	// using Boolean = bool;
+	// using Key = std::string;
+	// struct Object;
+	// struct Array;
+
+	// template <typename T> struct rapper {
+	//   rapper(T type) { 
+	//     entities.emplace_back(std::move(type)); 
+	//   }
+
+	//   // user-defined conversion, i think this migth be an implicit conversion
+	//   // An explicit conversion was tried but i am guessing because i am using templates
+	//   // Its implicit 
+	//   operator T() const { 
+	//     return entities.front(); 
+	//   }
+
+	//   std::vector<T> entities;
 	// };
 
+
+	// template<typename... T>
+	// using Type = std::variant<T...>;
+	// using Value = Type<
+	//   Integer,
+	//   String, 
+	//   Boolean,
+	//   rapper<Array>, 
+	//   rapper<Object>
+	// >;
+
+	// struct Object {
+	//   std::unordered_map<Key, Value> values;
+	// };
+
+	// struct Array {
+	//   std::vector<Value> values;
+	// };
 
 
 
