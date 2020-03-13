@@ -66,8 +66,12 @@ std::string ParsedMessage::makeMsgText(const std::string& msgCommand, const std:
     
     json jsonObj = {
         {PMConstants::KEY_COMMAND, msgCommand},
-        {PMConstants::KEY_DATA, msgData}
     };
+    
+    // For some reason, putting this inside the brace initialization adds an extra backslash when escaping certain characters.
+    // e.g.: if msgData contains a linefeed character (\n), the jsonObj.dump() string would have a \\n (3 chars) rather than just a \n (2 chars).
+    // Doing this instead does what is wanted.
+    jsonObj[PMConstants::KEY_DATA] = msgData;
     
     return jsonObj.dump();
 }

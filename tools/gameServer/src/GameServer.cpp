@@ -129,28 +129,24 @@ std::string_view GameServer::getHtmlFile() const {
     return htmlFile;
 }
 
-// TODO change to use ParsedMessage::makeMsg
 networking::Message GameServer::generateGameListResponse(networking::Connection recipient) {
     networking::Message msg;
     msg.connection = recipient;
     
     std::stringstream msgContent;
-    msgContent << "{\"" << PMConstants::KEY_COMMAND << "\":\"" << PMConstants::TYPE_LIST_GAMES << "\",";
-    msgContent << "\"" << PMConstants::KEY_DATA << "\":" << "[";
     
     // The type of "name" is std::pair<std::string gameName, std::string gamePath>
     for (auto& name : gameNameToPathMap) {
         if (name == *gameNameToPathMap.begin()) {
-            msgContent << "\"" << name.first << "\"";
+            msgContent << name.first;
         }
         else {
-            msgContent << "," << "\"" << name.first << "\"";
+            msgContent << "\n" << name.first;
         }
     }
-    
-    msgContent << "]}";
-    msg.text = msgContent.str();
-    
+    std::cout << msgContent.str() << std::endl;
+    msg.text = ParsedMessage::makeMsgText(ParsedMessage::Type::ListGames, msgContent.str());
+    std::cout << msg.text << std::endl;
     return msg;
 }
 
