@@ -94,7 +94,7 @@ void GameServer::receive() {
     std::deque<networking::Message> batchToSend{};
     
     for (auto& msg : incomingMessages) {
-        std::cout << "[GameServer] " << msg.connection.id << ": " << msg.text << std::endl;
+        std::cout << "[GameServer] RECV " << msg.connection.id << ": " << msg.text << std::endl;
         
         // If message about requesting the list of games or server shutdown, deal with it. Direct the rest to sessionManager.
         ParsedMessage pMsg = ParsedMessage::interpret(msg.text);
@@ -144,9 +144,7 @@ networking::Message GameServer::generateGameListResponse(networking::Connection 
             msgContent << "\n" << name.first;
         }
     }
-    std::cout << msgContent.str() << std::endl;
     msg.text = ParsedMessage::makeMsgText(ParsedMessage::Type::ListGames, msgContent.str());
-    std::cout << msg.text << std::endl;
     return msg;
 }
 
