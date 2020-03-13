@@ -33,7 +33,6 @@ template <typename T> struct rapper {
   std::vector<T> entities;
 };
 
-
 template<typename... T>
 using Type = std::variant<T...>;
 using Value = Type<
@@ -59,28 +58,43 @@ namespace Engine {
      */
     template <typename K, typename V> 
     struct GenType {
-
-        // K set(const G& key, const G& value) const {
-        //     map[key] = value;
-        // }
-
-        // V get(const G& key) const {
-        //     return map[key];
-        // }
-
         std::unordered_map<K, V> map;
         K key;
         V value;
     };
 
+    Value recursiveValueMap(const json& json) {
+        if(json.is_string()){
+            return (Value) (String) json;
+        }else if(json.is_number()){
+            return (Value) (Integer) json;
+        }else if(json.is_boolean()){
+            return (Value) (Boolean) json;
+        }else if (json.is_object()) {
+            Object map;
+            for(const auto&[key, value]: json.items()) {
+            map.values.emplace(key, recursiveValueMap(value));
+            }
+            return (Value) map;
+        }else if(json.is_array()){
+            Array arr;
+            for(const auto&[key, value]: json.items()) {
+            arr.values.emplace_back(recursiveValueMap(value));
+            }
+            return (Value) arr;
+        }
+    }
+
     /**
      * Rules
      */
 
-    // Will be used in conjunction with tokenizer to understand string expressionsS
-    template<typename E, typename A> // switch this to accept an varidic args
     struct Interpreter {
-        Interpreter (const E& type): type(type) {}
+        void operator()(std::monostate) const { }
+        void operator()(const String &str) const { }
+        void operator()(const Integer num) const { }
+        void operator()(const Array &array) const { }
+        void operator()(const Object &object) const { }
     };
 
     template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
@@ -175,7 +189,7 @@ namespace Engine {
     }; 
 
     /**
-     * Environment Types
+     * Main game configuration
     */
 
     struct PlayerCount {
@@ -183,26 +197,27 @@ namespace Engine {
         Integer max;
     };
 
-    struct CVPA
-        : GenType<String, Components<String, Integer, bool> > {
-        // constants, variables, perPlayer, perAudience are the same
-        GenType constants;
-        GenType variables;
-        GenType perPlayer;
-        GenType perAudience;
+    struct Constants {
+        Object constants;
     };
 
-    /**
-     * Main game configuration
-    */
+    struct Variables {
+        Object variables;
+    };
 
-    struct Setup {};
+    struct PerPlayer {
+        Object perPlayer;
+    };
+
+    struct PerAudience {
+        Object perAudience;
+    };
 
     struct Configuration {
-        String name;
-        PlayerCount playerCount;
+        std::string name;
+        PlayerCount playerCount; // an object type can be used here i guess
         bool audience;
-        Setup setup;
+        Object setup;
     };
 
     /**
@@ -210,7 +225,10 @@ namespace Engine {
     */
     struct Game {
         Configuration configuration;
-        CVPA cvpa;
+        Constants constants;
+        Variables variables;
+        PerPlayer perPlayer;
+        PerAudience perAudience;
         Rules rules;
     };
 
@@ -226,12 +244,12 @@ namespace Engine {
             GenType<String, Game> gameConfig;
 
             // Domain level set functions, these should never throw if we do our validation correctly
-            Value setConfiguration(const T& configuration) const noexcept;
-            Value setConstants(const T& constants) const noexcept;
-            Value setVariables(const T& variables) const noexcept;
-            Value setPerPlayer(const T& perPlayer) const noexcept;
-            Value setPerAudience(const T& perAudience) const noexcept;
-            Value setRules(const T& rules) const noexcept;
+            Configuration setConfiguration(const T& configuration) const noexcept;
+            Constants setConstants(const T& constants) const noexcept;
+            Variables setVariables(const T& variables) const noexcept;
+            PerPlayer setPerPlayer(const T& perPlayer) const noexcept;
+            PerAudience setPerAudience(const T& perAudience) const noexcept;
+            Rules setRules(const T& rules) const noexcept;
 
             // Parser Related methods
             bool validGameConfig(const T& input);
@@ -242,7 +260,6 @@ namespace Engine {
             // Game related methods
             void findAndExecute(/* find a specific function and execute dynamically*/);
     };
-
 
     /*************************************
     *
