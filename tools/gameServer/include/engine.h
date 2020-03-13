@@ -214,7 +214,7 @@ namespace Engine {
     };
 
     struct Configuration {
-        std::string name;
+        String name;
         PlayerCount playerCount; // an object type can be used here i guess
         bool audience;
         Object setup;
