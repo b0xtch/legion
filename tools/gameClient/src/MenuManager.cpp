@@ -16,6 +16,8 @@ MenuManager::MenuManager(ChatWindow *chatWindow)
     keypad( stdscr, TRUE );
 
     initializeWindows();
+
+    curs_set(0);
 }
 
 void MenuManager::addPage( std::shared_ptr<MenuPage> page ) {
@@ -220,6 +222,7 @@ void MenuManager::processFormInput() {
     switch ( keyPress ) {
         case KEY_DOWN:
             if ( selectedIndex < currentPage->getFieldNames().size() - 1 ) {
+                set_field_back(current_field(currentPage->getForm()), A_STANDOUT );
                 form_driver( currentPage->getForm(), REQ_NEXT_FIELD );
                 selectedIndex++;
             }
@@ -279,6 +282,7 @@ void MenuManager::switchCursorPosition( CursorPosition newPosition ) {
             set_menu_fore( currentPage->getMenu(), A_REVERSE );
             menu_driver( currentPage->getMenu(), REQ_FIRST_ITEM );
             chatWindow->deactivate();
+            curs_set(0);
             refreshWindows();
             break;
 
@@ -287,6 +291,8 @@ void MenuManager::switchCursorPosition( CursorPosition newPosition ) {
             selectedIndex = currentPage->getFieldNames().size() - 1;
             set_menu_fore( currentPage->getMenu(), A_NORMAL );
             form_driver( currentPage->getForm(), REQ_LAST_FIELD );
+            set_field_back( current_field( currentPage->getForm() ), A_STANDOUT );
+            curs_set(0);
             refreshWindows();
             break;
 
@@ -294,8 +300,8 @@ void MenuManager::switchCursorPosition( CursorPosition newPosition ) {
             cursorPosition = CursorPosition::chat;
             set_menu_fore( currentPage->getMenu(), A_NORMAL );
             refreshWindows();
+            curs_set(1);
             chatWindow->activate();
-            chatWindow->update();
             break;
     }
 
@@ -313,8 +319,7 @@ void MenuManager::displayChatText(const std::string& text) {
 }
 
 void MenuManager::update() {
-    refreshWindows();
-
+    chatWindow->refreshWindow();
     if (cursorPosition == CursorPosition::chat) {
         chatWindow->update();
         keyPress = chatWindow->getKeyPress();
