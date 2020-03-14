@@ -1,11 +1,12 @@
-#ifndef RULE_COLLECTION_H
-#define RULE_COLLECTION_H
+#ifndef RULE_COLLECTION_TEST_H
+#define RULE_COLLECTION_TEST_H
 
 #include <string>
 #include <vector>
-#include <assert.h>
 #include <map>
 #include <iostream>
+#include <algorithm>
+#include <random>
 
 namespace RuleCollection {
 
@@ -19,40 +20,13 @@ namespace RuleCollection {
 		std::string rule_name;
 	};
 
-	using RulesList = std::vector<GenRule*>;
+	using RulesList = std::vector<GenRule*>&;
 
 	/*************************************
 	*
 	*			Control Structures	
 	*
 	**************************************/
-
-	template <typename T> 
-	struct ForEach : GenRule{
-		ForEach(std::vector<T> v, T el, RulesList r) : 
-			GenRule{"ForEach"},
-			list{v},
-			element{el},
-			rulesToRun{r}
-			{};
-		
-		std::vector<T> list;
-		T element;
-		RulesList rulesToRun;
-
-		//is this correct????
-		// example:
-		// for each round, global message broadcast the round number
-		// value to be stored in global message struct
-		void func() override{
-			std::cout << "ForEach ..." << std::endl;
-			for(auto listElement : list){
-				for(auto rule : rulesToRun){
-					rule->func();
-				}
-			}
-		}
-	};
 
 	enum ConditionType{
 	    EQUAL,
@@ -63,7 +37,7 @@ namespace RuleCollection {
 	};
 
 	// helper for loop
-	//templated so that loop can take any condition (int, floats, etc)
+	//templated so that loop can compare any types (int, floats, bool, etc)
 	template <typename T>
 	struct Condition {
 	    Condition(T &v1, T &v2, ConditionType type) :
@@ -205,7 +179,7 @@ namespace RuleCollection {
 	//look into boost variant
 	template <typename T>
 	struct Case : GenRule {
-		Case(Condition<T> c, RulesList r) :
+		Case(Condition<T> &c, RulesList r) :
 			GenRule{"Case"},
 			whenCondition {c},
 			rulesToRun {r}
@@ -223,10 +197,7 @@ namespace RuleCollection {
 		}
 	};
 
-	// template <typename T>
-	// using std::vector<Case<T>> = CasesList;
 
-	// edge case: what if none of the cases in CaseList are true?
 	template <typename T>
 	struct When : GenRule {
 		When(std::vector<Case<T>> &c) :
@@ -249,50 +220,71 @@ namespace RuleCollection {
 	};
 
 
-	// // for convenience
-	// using json = nlohmann::json;
-	// using String = std::string;
-	// using Integer = int;
-	// using Boolean = bool;
-	// using Key = std::string;
-	// struct Object;
-	// struct Array;
-
-	// template <typename T> struct rapper {
-	//   rapper(T type) { 
-	//     entities.emplace_back(std::move(type)); 
-	//   }
-
-	//   // user-defined conversion, i think this migth be an implicit conversion
-	//   // An explicit conversion was tried but i am guessing because i am using templates
-	//   // Its implicit 
-	//   operator T() const { 
-	//     return entities.front(); 
-	//   }
-
-	//   std::vector<T> entities;
-	// };
 
 
-	// template<typename... T>
-	// using Type = std::variant<T...>;
-	// using Value = Type<
-	//   Integer,
-	//   String, 
-	//   Boolean,
-	//   rapper<Array>, 
-	//   rapper<Object>
-	// >;
+	/*************************************
+	*
+	*			List Operations	
+	*
+	**************************************/
 
-	// struct Object {
-	//   std::unordered_map<Key, Value> values;
-	// };
+	//just to print for testing purposes
 
-	// struct Array {
-	//   std::vector<Value> values;
-	// };
+	template <typename T>
+	void printList(std::vector<T> &list){
+		for(auto x : list){
+			std::cout << x << " "; 
+			std::cout << std::endl;
+		}
+	}
 
+	template <typename T>
+	struct Extend : GenRule {
+		Extend(T &v, std::vector<T> &l) :
+			GenRule{"Extend"},
+			value {v},
+			list {l}
+			{};
 
+		T value;
+		std::vector<T> list;
+
+		void func() override { 
+			list.push_back(value);
+			printList<T>(list);
+		}
+	};
+
+	template <typename T>
+	struct Reverse : GenRule {
+		Reverse(std::vector<T> &l) :
+			GenRule{"Reverse"},
+			list {l}
+			{};
+
+		std::vector<T> list;
+
+		void func() override { 
+			std::reverse(list.begin(), list.end()); 
+			printList<T>(list);
+		}
+	};
+
+	template <typename T>
+	struct Shuffle : GenRule {
+		Shuffle(std::vector<T> &l) :
+			GenRule{"Shuffle"},
+			list {l}
+			{};
+
+		std::vector<T> list;
+
+		void func() override { 
+			std::random_device rand;
+			std::shuffle(list.begin(), list.end(), rand); 
+			printList<T>(list);
+		}
+	};
 
 
 } // namespace RuleCollection
