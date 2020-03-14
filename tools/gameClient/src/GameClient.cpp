@@ -131,7 +131,7 @@ std::string processServerMessage(const std::string& response) {
     } else if (command == "!requestgames") {
 
         /**
-        The list of games on the server is given as a string, separated by spaces.
+        The list of games on the server is given as a string, separated by new lines.
         The following code separates the string into individual games and updates the global gamesList vector.
         **/
         std::vector<std::string> newGamesList;
@@ -141,12 +141,12 @@ std::string processServerMessage(const std::string& response) {
             bool endOfData = false;
 
             while (!endOfData) {
-                std::size_t end = data.find(start, " ");
+                std::size_t end = data.find(start, "\n");
                 if (end == string::npos) {
                     endOfData = true;
                 } else {
                     newGamesList.push_back(data.substr(start, end-start));
-                    start += 1;
+                    start += 2;
                 }
             }
 
