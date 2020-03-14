@@ -7,60 +7,75 @@
 #include <map>
 #include <menu.h>
 #include <form.h>
+#include <memory>
+
+struct MenuPageInfo {
+    using MenuName = std::string_view;
+    using ItemName = const char *;
+    using NameList = std::vector<ItemName>;
+    using ItemFunction = std::function<void()>;
+    using FunctionList = std::vector<ItemFunction>;
+
+    MenuPageInfo( 
+                    const MenuName &menuName,
+                    const NameList &fieldNames,
+                    const NameList &itemNames,
+                    const FunctionList &itemResults )
+    : menuName( menuName ), 
+      fieldNames( fieldNames ), 
+      itemNames( itemNames ), 
+      itemResults( itemResults ) { }
+
+    MenuName menuName;
+    NameList fieldNames;
+    NameList itemNames;
+    FunctionList itemResults;
+};
 
 class MenuPage {
 
 public:
 
-    using MenuName = std::string_view;
-    using PageMap = std::map<MenuName, MenuPage *>;
-    using ItemFunction = std::function<void()>;
-    using FunctionList = std::vector<ItemFunction>;
-    using ItemName = const char *;
-    using NameList = std::vector<ItemName>;
+    using PageMap = std::map<MenuPageInfo::MenuName, MenuPage *>;
     using ItemList = std::vector<ITEM *>;
     using FieldList = std::vector<FIELD *>;
     
-    MenuPage( const MenuName &menuName,
-              const NameList &fieldNames, 
-              const NameList &itemNames, 
-              const FunctionList &itemResults );
+    MenuPage( const std::shared_ptr<MenuPageInfo> &menuPageInfo )
+        : menuName( menuPageInfo->menuName ),
+        itemResults( menuPageInfo->itemResults ) { }
 
     void cleanup();
 
     int changeSelectedOptionOnInput();
 
-    std::vector<ItemName> getFieldNames();
     FieldList* getFieldList();
     void addField( FIELD *field );
     FORM* getForm();
     void setForm( FORM *form );
     bool hasForm();
 
-    std::vector<ItemName> getItemNames();
-    const FunctionList getItemResults();
+    std::vector<MenuPageInfo::ItemName> getItemNames();
+    const MenuPageInfo::FunctionList getItemResults();
     void addItem( ITEM *item );
     MENU* getMenu();
     void setMenu( MENU *menu );
     ItemList* getItemList();
 
-    MenuName getMenuName();
+    MenuPageInfo::MenuName getMenuName();
 
 private:
 
     MenuPage();
 
-    MenuName menuName;
+    MenuPageInfo::MenuName menuName;
 
     // Menu components
     FORM *form;
-    std::vector<ItemName> fieldNames;
-    std::vector<FIELD *> fieldList;
+    FieldList fieldList;
 
     MENU *menu;
-    std::vector<ItemName> itemNames;
     ItemList itemList;
-    const FunctionList itemResults;
+    const MenuPageInfo::FunctionList itemResults;
 };
 
 #endif

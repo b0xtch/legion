@@ -1,18 +1,5 @@
 #include "MenuPage.h"
 
-MenuPage::MenuPage( const MenuPage::MenuName &menuName,
-                    const MenuPage::NameList &fieldNames,
-                    const MenuPage::NameList &itemNames,
-                    const MenuPage::FunctionList &itemResults )
-    : menuName( menuName ), 
-      fieldNames( fieldNames ), 
-      itemNames( itemNames ), 
-      itemResults( itemResults ) { }
-
-std::vector<MenuPage::ItemName> MenuPage::getFieldNames() {
-    return fieldNames;
-}
-
 MenuPage::FieldList *MenuPage::getFieldList() {
     return &fieldList;
 }
@@ -30,11 +17,7 @@ void MenuPage::addField( FIELD *field ) {
 }
 
 bool MenuPage::hasForm() {
-    return !fieldNames.empty();
-}
-
-std::vector<MenuPage::ItemName> MenuPage::getItemNames() {
-    return itemNames;
+    return !fieldList.empty();
 }
 
 MENU *MenuPage::getMenu() {
@@ -53,23 +36,23 @@ MenuPage::ItemList *MenuPage::getItemList() {
     return &itemList;
 }
 
-const MenuPage::FunctionList MenuPage::getItemResults() {
+const MenuPageInfo::FunctionList MenuPage::getItemResults() {
     return itemResults;
 }
 
-MenuPage::MenuName MenuPage::getMenuName() {
+MenuPageInfo::MenuName MenuPage::getMenuName() {
     return menuName;
 }
 
 void MenuPage::cleanup() {
     unpost_form( form );
-    for ( int i = 0; i < itemNames.size(); i++ ) {
+    for ( int i = 0; i < itemList.size(); i++ ) {
         free_item( itemList[i] );
     }
     free_menu( menu );
 
     unpost_menu( menu );
-    for ( int i = 0; i < fieldNames.size(); i++ ) {
+    for ( int i = 0; i < fieldList.size(); i++ ) {
         free_field( fieldList[i] );
     }
     free_form( form );

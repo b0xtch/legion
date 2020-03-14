@@ -24,11 +24,11 @@ public:
 
     void initializeWindows();
     void initializeStartingPage();
-    void addPage( std::shared_ptr<MenuPage> page );
-    void setCurrentPage( std::shared_ptr<MenuPage> page );
+    void addPage( std::shared_ptr<MenuPageInfo> pageInfo );
+    void setCurrentPage( MenuPageInfo::MenuName pageName );
     std::shared_ptr<MenuPage> getCurrentPage();
     int getSelectedIndex();
-    void switchPage( MenuPage::MenuName &next_page_name );
+    void switchPage( MenuPageInfo::MenuName &next_page_name );
     void switchCursorPosition( CursorPosition newPosition );
     void processInput();
     void processMenuInput();
@@ -45,7 +45,7 @@ private:
     WINDOW *formWindow;
     WINDOW *menuWindow;
 
-    std::map<MenuPage::MenuName, std::shared_ptr<MenuPage>> menuPages;
+    std::map<MenuPageInfo::MenuName, std::shared_ptr<MenuPage>> menuPages;
     std::shared_ptr<MenuPage> currentPage;
     CursorPosition cursorPosition = CursorPosition::menu;
     int selectedIndex;

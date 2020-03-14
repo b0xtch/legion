@@ -20,18 +20,20 @@ MenuManager::MenuManager(ChatWindow *chatWindow)
     curs_set(0);
 }
 
-void MenuManager::addPage( std::shared_ptr<MenuPage> page ) {
+void MenuManager::addPage( std::shared_ptr<MenuPageInfo> pageInfo ) {
 
     const int marginLeft = 3;
     const int marginTop = 2;
 
+    std::shared_ptr<MenuPage> page = std::make_shared<MenuPage>( pageInfo );
+
     // Initialize forms
-    if ( page->hasForm() ) {
+    if ( !pageInfo->fieldNames.empty() ) {
         const int marginLeftField = 3;
         const int maxFieldLength = 15;
         int fieldIndex = 0;
 
-        for ( int i = 0; i < page->getFieldNames().size() * 2; i++ ) {
+        for ( int i = 0; i < pageInfo->fieldNames.size() * 2; i++ ) {
             bool isFieldName = i % 2 == 0;
 
             if ( isFieldName ) {
@@ -41,7 +43,7 @@ void MenuManager::addPage( std::shared_ptr<MenuPage> page ) {
                 field_opts_off( page->getFieldList()->at( i ), O_ACTIVE );
                 field_opts_off( page->getFieldList()->at( i ), O_EDIT );
                 set_field_buffer( page->getFieldList()->at( i ), 0,
-                                  page->getFieldNames()[fieldIndex] );
+                                  pageInfo->fieldNames[fieldIndex] );
                 fieldIndex++;
             } 
             else {
@@ -68,7 +70,7 @@ void MenuManager::addPage( std::shared_ptr<MenuPage> page ) {
     } 
 
     // Initialize menu
-    for ( auto &itemName : page->getItemNames() ) {
+    for ( auto &itemName : pageInfo->itemNames ) {
         page->addItem( new_item( itemName, itemName ) );
     }
     page->addItem( nullptr );
@@ -76,13 +78,13 @@ void MenuManager::addPage( std::shared_ptr<MenuPage> page ) {
     page->setMenu( new_menu( page->getItemList()->data() ) );
 
     int maxMenuItemLength = 0;
-    for ( std::string_view itemName : page->getItemNames() ) {
+    for ( std::string_view itemName : pageInfo->itemNames ) {
         if ( itemName.length() > maxMenuItemLength ) {
             maxMenuItemLength = itemName.length() + 1;
         }
     }
 	set_menu_win( page->getMenu(), menuWindow );
-	WINDOW *menuInner = derwin( menuWindow, page->getItemNames().size(), 
+	WINDOW *menuInner = derwin( menuWindow, pageInfo->itemNames.size(), 
                                  maxMenuItemLength, marginTop, marginLeft );
 	set_menu_sub( page->getMenu(), menuInner );
 
@@ -130,8 +132,8 @@ void MenuManager::initializeWindows() {
 
 }
 
-void MenuManager::setCurrentPage( std::shared_ptr<MenuPage> page ) {
-    currentPage = page;
+void MenuManager::setCurrentPage( MenuPageInfo::MenuName pageName ) {
+    currentPage = menuPages[ pageName ];
 }
 
 std::shared_ptr<MenuPage> MenuManager::getCurrentPage() {
@@ -142,7 +144,7 @@ int MenuManager::getSelectedIndex() {
     return selectedIndex;
 }
 
-void MenuManager::switchPage( MenuPage::MenuName &nextPageName ) {
+void MenuManager::switchPage( MenuPageInfo::MenuName &nextPageName ) {
 
     wclear( mainWindow );
     wclear( formWindow );
@@ -160,7 +162,7 @@ void MenuManager::switchPage( MenuPage::MenuName &nextPageName ) {
     
     unpost_menu( currentPage->getMenu() );
 
-    setCurrentPage( menuPages[nextPageName] );
+    setCurrentPage( nextPageName );
 
     if ( currentPage->hasForm() ) {
         assert( post_form( currentPage->getForm() ) == E_OK );
@@ -194,7 +196,7 @@ void MenuManager::processInput() {
 void MenuManager::processMenuInput() {
     switch ( keyPress ) {
         case KEY_DOWN:
-            if ( selectedIndex < currentPage->getItemNames().size() - 1 ) {
+            if ( selectedIndex < currentPage->getItemList()->size() - 1 ) {
                 menu_driver( currentPage->getMenu(), REQ_DOWN_ITEM );
                 selectedIndex++;
             }
@@ -221,7 +223,7 @@ void MenuManager::processMenuInput() {
 void MenuManager::processFormInput() {
     switch ( keyPress ) {
         case KEY_DOWN:
-            if ( selectedIndex < currentPage->getFieldNames().size() - 1 ) {
+            if ( selectedIndex < currentPage->getFieldList()->size() - 1 ) {
                 set_field_back(current_field(currentPage->getForm()), A_STANDOUT );
                 form_driver( currentPage->getForm(), REQ_NEXT_FIELD );
                 selectedIndex++;
@@ -288,7 +290,7 @@ void MenuManager::switchCursorPosition( CursorPosition newPosition ) {
 
         case CursorPosition::form:
             cursorPosition = CursorPosition::form;
-            selectedIndex = currentPage->getFieldNames().size() - 1;
+            selectedIndex = currentPage->getFieldList()->size() - 1;
             set_menu_fore( currentPage->getMenu(), A_NORMAL );
             form_driver( currentPage->getForm(), REQ_LAST_FIELD );
             set_field_back( current_field( currentPage->getForm() ), A_STANDOUT );
