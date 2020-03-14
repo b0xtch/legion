@@ -232,25 +232,25 @@ namespace RuleCollection {
 
 	template <typename T>
 	void printList(std::vector<T> &list){
-		for(auto x : list){
-			std::cout << x << " "; 
-			std::cout << std::endl;
-		}
+		for(auto x : list){ std::cout << x << " "; }
+		std::cout << std::endl;
 	}
 
 	template <typename T>
 	struct Extend : GenRule {
-		Extend(T &v, std::vector<T> &l) :
+		Extend(T v, std::vector<T> &l) :
 			GenRule{"Extend"},
 			value {v},
 			list {l}
 			{};
 
 		T value;
-		std::vector<T> list;
+		std::vector<T> &list;
 
 		void func() override { 
 			list.push_back(value);
+			
+			std::cout << "\nExtended List: " << std::endl;
 			printList<T>(list);
 		}
 	};
@@ -262,10 +262,12 @@ namespace RuleCollection {
 			list {l}
 			{};
 
-		std::vector<T> list;
+		std::vector<T> &list;
 
 		void func() override { 
 			std::reverse(list.begin(), list.end()); 
+
+			std::cout << "\nReversed List: " << std::endl;
 			printList<T>(list);
 		}
 	};
@@ -277,14 +279,40 @@ namespace RuleCollection {
 			list {l}
 			{};
 
-		std::vector<T> list;
+		std::vector<T> &list;
 
 		void func() override { 
 			std::random_device rand;
 			std::shuffle(list.begin(), list.end(), rand); 
+
+			std::cout << "\nShuffled List: " << std::endl;
 			printList<T>(list);
 		}
 	};
+
+	template <typename T>
+	struct Sort : GenRule {
+		Sort(std::vector<T> &l) :
+			GenRule{"Sort"},
+			list {l}
+			{};
+
+		std::vector<T> &list;
+
+		void func() override { 
+			std::stable_sort(list.begin(), list.end()); 
+
+			std::cout << "\nSorted List: " << std::endl;
+			printList<T>(list);
+		}
+	};
+
+	//list attributes
+
+	// dependent on Player.h
+	//Deal
+	//Discard
+
 
 
 } // namespace RuleCollection

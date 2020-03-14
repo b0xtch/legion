@@ -95,6 +95,30 @@ int main()
     loopobj2.func();
 
 
+    std::cout << "\n\n=============== Testing List Ops =============== \n\n" << std::endl; 
+
+    
+
+    std::vector<int> list = {5,60,-800,26,32,-46};
+
+    // no need for <int> to follow struct type
+
+    std::cout << "initial list: " << std::endl;
+    RuleCollection::printList(list);
+
+    RuleCollection::Extend listOpExtend {100, list};
+    listOpExtend.func();
+
+    RuleCollection::Reverse listOpReverse {list};
+    listOpReverse.func();
+
+    RuleCollection::Shuffle listOpShuffle {list};
+    listOpShuffle.func();
+
+    RuleCollection::Sort listOpSort {list};
+    listOpSort.func();
+
+
 
     return 0;
 }
