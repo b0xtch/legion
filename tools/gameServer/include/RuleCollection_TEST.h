@@ -38,16 +38,19 @@ namespace RuleCollection {
 
 	// helper for loop
 	//templated so that loop can compare any types (int, floats, bool, etc)
+	// NOTE: value2 is passed by copy so that for example when comparing ints, it can be a int var or 8
+	// LOGIC: value1 [logic sign] value2
+	// Example: value1 == value2
 	template <typename T>
 	struct Condition {
-	    Condition(T &v1, T &v2, ConditionType type) :
+	    Condition(T &v1, T v2, ConditionType type) :
 	        value1{v1},
 	        value2{v2},
 	        type{type}
 	        {};
 
 	    T& value1;
-	    T& value2;
+	    T value2;
 	    ConditionType type;
 
 	    bool operator()() const{

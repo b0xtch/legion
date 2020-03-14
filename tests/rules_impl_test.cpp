@@ -67,7 +67,7 @@ int main()
     RuleCollection::When<int> whenobj (caseList);
 
     //while loop condition
-    RuleCollection::Condition<int> end_condition2 {c, max1, RuleCollection::ConditionType::LESS};
+    RuleCollection::Condition<int> end_condition2 {c, 150, RuleCollection::ConditionType::LESS};
 
     //while loop rules
     RuleCollection::Arithmetic mathobj5(c, 10, RuleCollection::MathOperation::ADD);
