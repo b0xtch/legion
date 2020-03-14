@@ -450,12 +450,21 @@ struct Parallelfor : GenRule{
 		rules_to_run{r}
 		{};
 	
-	void parallel(){
+	// void parallel(){
+	// 	for(GenRule rule : rules_to_run){
+	// 		for(element : list){
+	// 			Visitors(rule);
+	// 			//TODO
+	// 		}
+	// 	}
+	// }
+
+	
+	void func(){
 		for(GenRule rule : rules_to_run){
-			for(element : list){
-				Visitors(rule);
-				//TODO
-			}
+			std::for_each(std::execution::seq, std::begin(list), std::end(list), [&](T){
+				
+			});
 		}
 	}
 	vector<T> list;

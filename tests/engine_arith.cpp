@@ -67,6 +67,9 @@ struct Components{
 
 int main() {    
     Arithmetic addition {{43, 5}, Arith::ADD};
-    Components<Arithmetic> comp4 {{addition}};
+    Components<> comp4 {{addition}};
     comp4.visit();
+    Value = 
+
+    Using 
 }

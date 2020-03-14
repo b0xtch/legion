@@ -88,7 +88,16 @@ namespace Engine {
             for (auto& entity : entities){
                 std::visit(overloaded {
                     [](Integer& value){value += value;},
-                    // [](ControlStructures rule){},
+                    [](ControlStructures rule){
+                        switch(rule){
+                            case ForEach:
+                            case Loop:
+                            case Inparallel:
+                            case Parallelfor:   rule->func();
+                            case Switch:
+                            case When:
+                        }
+                    },
                     // [](ListOperations rule){},
                     [](Arithmetic rule){
                         switch (rule.operation) {
