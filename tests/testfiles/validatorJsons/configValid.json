@@ -1,0 +1,13 @@
+{
+    "configuration": {
+        "name": "Testy",
+        "player count": {"min": 1, "max": 10},
+        "audience": true,
+        "setup": { }
+    },
+    "constants": {},
+    "variables": {},
+    "per-player": {},
+    "per-audience": {},
+    "rules": {}
+}

@@ -73,13 +73,13 @@ namespace Engine {
         }else if (json.is_object()) {
             Object map;
             for(const auto&[key, value]: json.items()) {
-            map.values.emplace(key, recursiveValueMap(value));
+                map.values.emplace(key, recursiveValueMap(value));
             }
             return (Value) map;
         }else if(json.is_array()){
             Array arr;
             for(const auto&[key, value]: json.items()) {
-            arr.values.emplace_back(recursiveValueMap(value));
+                arr.values.emplace_back(recursiveValueMap(value));
             }
             return (Value) arr;
         }
@@ -89,12 +89,34 @@ namespace Engine {
      * Rules
      */
 
+    // Mainly to interpret the values within the rules
     struct Interpreter {
-        void operator()(std::monostate) const { }
-        void operator()(const String &str) const { }
-        void operator()(const Integer num) const { }
-        void operator()(const Array &array) const { }
-        void operator()(const Object &object) const { }
+        void operator()(std::monostate) const {  }
+        void operator()(const String &string) const { // do something with string }
+        void operator()(const Integer num) const { // do something with the int use the arithmetic rule }
+        void operator()(const Array &array) const {
+            // Loop over the an array and extract the values to do processing by recursive visiting
+            if (!array.values.empty()) {
+                auto it = array.values.begin();
+                std::visit(*this, *it);
+
+                std::for_each(++it, array.values.end(), [this](const auto &arr) {
+                    std::visit(*this, arr);
+                });
+            }
+        }
+        void operator()(const Object &object) const {
+            // Loop over the an object and extract the key value to do processing by recursive visiting
+            if (!object.values.empty()) {
+                auto it = object.values.begin();
+                const auto &[key, value] = *it;
+                std::visit(*this, value);
+
+                std::for_each(++it, object.values.end(), [this](const auto &obj) {
+                    std::visit(*this, obj.second);
+                });
+            }
+        }
     };
 
     template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };

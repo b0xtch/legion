@@ -1,0 +1,13 @@
+{
+    "configuration": {
+        "name": "Zen Game",
+        "player count": {"min": 10, "max": 0},
+        "audience": {},
+        "setup": { }
+    },
+    "constants": {},
+    "variables": {},
+    "per-player": {},
+    "per-audience": {},
+    "rules": {}
+}

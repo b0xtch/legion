@@ -1,32 +1,36 @@
-#include <iostream>
 #include <ncurses.h>
 #include <menu.h>
 #include <form.h>
+#include <sstream>
+#include <memory>
 #include "json.hpp"
 
 #include "MenuPage.h"
+#include "MenuManager.h"
 #include "ChatWindow.h"
 #include "Client.h"
+#include "Utils.h"
 
 using namespace std;
 using json = nlohmann::json;
 
-// Basic menu structure referenced from: 
+// Basic menu structure referenced from:
 //    http://tldp.org/HOWTO/NCURSES-Programming-HOWTO/menus.html
 
-// Basic menu structure referenced from: 
+// Basic menu structure referenced from:
 //    http://tldp.org/HOWTO/NCURSES-Programming-HOWTO/forms.html
 
 // Idea on combining menus and forms on one page referenced from:
 //    https://alan-mushi.github.io/2015/05/26/simple-ncurses-popup-in-C.html
 
 
-// Make json message for server
-string makeServerMessage(string input);
+void initializeMenuPages( MenuManager &menuManager, bool &done,
+                            networking::Client &client );
 
-// Controls which window is active
-enum menuMode { mainMenu, chatMenu };
-menuMode currentMode;
+// Make json message for server
+std::string makeServerMessage(const std::string& input);
+// Parse json message from server
+std::string processServerMessage(const std::string& response);
 
 int main(int argc, char* argv[]) {
 
@@ -36,7 +40,6 @@ int main(int argc, char* argv[]) {
     }
 
     bool done = false;
-    currentMode = mainMenu;
     networking::Client client{argv[1], argv[2]};
 
     // Start Chat Window
@@ -47,154 +50,16 @@ int main(int argc, char* argv[]) {
             client.send( makeServerMessage(text) );
         }
     };
-    ChatWindow *chatWindow;
 
-    MenuManager::initialize_menu_manager();
+    ChatWindow chatWindow( onTextEntry );
 
-    // Initialize menu pages
+    MenuManager menuManager( &chatWindow );
 
-    // Main menu
-    const MenuPage::NameList main_menu_fields = {};
-
-    const MenuPage::NameList main_menu_items 
-        = {"Join lobby", "Create lobby", "Exit"};
-
-    // Main menu item functions
-    auto moveToJoinLobbyPage = [] () {
-        std::string next_page = "Join lobby";
-        MenuManager::switch_page( next_page );
-    };
-
-    auto exitProgram = [&done] () {
-        done = true;
-    };
-
-    auto moveBackToMainMenuPage = [] () {
-        std::string next_page = "Main menu";
-        MenuManager::switch_page( next_page );
-    };
-
-
-    MenuPage::FunctionList main_menu_item_results
-        = {exitProgram};
-
-    auto moveToCreateLobbyPage = [&client, &moveBackToMainMenuPage] () {
-
-        // Get the list of games
-
-        std::string commad_type =  "!requestGames ";
-        std::string serverMessage = makeServerMessage( commad_type );
-        client.send( serverMessage );
-
-        auto response = client.receive();
-        std::cout << response << std::endl;
-        while ( response.empty() ) {
-            response = client.receive();
-            std::cout << response << std::endl;
-        }
-
-        MenuPage::NameList games_list = {"Game 1", "Game 2"};
-            /* TEMP create list from response */
-
-        // Define the function that is called when a game is chosen
-
-        auto chooseGame = [&client, &games_list] () {
-
-            std::string game_choice = games_list[MenuManager::get_selected_index()];
-            client.send( game_choice );
-
-        };
-
-        // Create the "Creat lobby" menu page with the given games
-
-        MenuPage::NameList create_lobby_fields = {};
-
-        MenuPage::NameList create_lobby_items = {};
-
-        for ( const char *game_name : games_list ) {
-            create_lobby_items.push_back( game_name );
-        }
-        const char *back_string = "back";
-        create_lobby_items.push_back( back_string );
-
-        MenuPage::FunctionList create_lobby_item_results = {}; 
-
-        for ( int i = 0; i < games_list.size(); i++ ) {
-            create_lobby_item_results.push_back( chooseGame );
-        }
-        create_lobby_item_results.insert( 
-            create_lobby_item_results.begin(), moveBackToMainMenuPage );     
-
-        std::string create_lobby_name = "Create lobby";
-        MenuPage *create_lobby_page = new MenuPage( create_lobby_name,
-                                                create_lobby_fields, 
-                                                create_lobby_items, 
-                                                create_lobby_item_results );  
-        MenuManager::add_menu_page( create_lobby_name, create_lobby_page ); 
-
-        // The games are all loaded and the page is setup, so switch to the page
-
-        std::string next_page = "Create lobby";
-        MenuManager::switch_page( next_page );
-    };
-
-    main_menu_item_results.insert( main_menu_item_results.begin(), moveToCreateLobbyPage );
-    main_menu_item_results.insert( main_menu_item_results.begin(), moveToJoinLobbyPage );
-
-    string main_menu_name = "Main menu";
-    MenuPage *main_menu_page = new MenuPage( main_menu_name,
-                                            main_menu_fields, 
-                                            main_menu_items, 
-                                            main_menu_item_results );
-    MenuManager::add_menu_page( main_menu_name, main_menu_page );
-
-
-
-    // Join lobby menu
-    const MenuPage::NameList join_lobby_fields
-        = {"Lobby code:"};
-
-    const MenuPage::NameList join_lobby_items
-        = {"Join", "Back"};
-        
-
-    // Join lobby item functions
-    auto joinLobby = [&done, &client, &chatWindow, &onTextEntry] () {
-        std::string commad_type =  "!joinsession ";
-
-        MenuPage *join_page = MenuManager::get_current_page();
-        vector<FIELD *> connect_fields = join_page->get_field_list();
-
-        const int lobby_code_input_index = 1;
-        const char *lobby_code = 
-            field_buffer( connect_fields[lobby_code_input_index], 0 );
-        std::string lobby_code_string(lobby_code);
-
-        std::string command = commad_type + lobby_code_string;
-        std::string serverMessage = makeServerMessage( command );
-        client.send( serverMessage );
-
-        currentMode = chatMenu;
-        MenuManager::cleanup();
-        chatWindow = new ChatWindow(onTextEntry);
-    };
-
-    const MenuPage::FunctionList join_lobby_item_results
-        = {joinLobby, moveBackToMainMenuPage};
-
-    string join_lobby_name = "Join lobby";
-    MenuPage *join_lobby_page = new MenuPage( join_lobby_name,
-                                             join_lobby_fields,
-                                             join_lobby_items, 
-                                             join_lobby_item_results );
-    MenuManager::add_menu_page( join_lobby_name, join_lobby_page );
-
-    MenuManager::set_current_page( main_menu_page );
+    initializeMenuPages( menuManager, done, client );
 
     // Start menu
 
-    MenuManager::initialize_starting_page();
-
+    menuManager.initializeStartingPage();
     while (!done && !client.isDisconnected()) {
 
         try {
@@ -204,71 +69,202 @@ int main(int argc, char* argv[]) {
             done = true;
         }
 
-        if (currentMode == mainMenu) {
-
-            MenuManager::get_current_page()->change_selected_option_on_input();
-            MenuManager::main_menu_driver();
-
-        } else if (currentMode == chatMenu) {
-
-            auto response = client.receive();
-            if (!response.empty()) {
-                chatWindow->displayText(response);
-            }
-            chatWindow->update();
-
-        } else {
-
-            printf("Incorrect Mode.");
-            done = true;
-
+        auto response = client.receive();
+        if (!response.empty()) {
+            menuManager.displayChatText(processServerMessage(response));
         }
+
+        menuManager.update();
 
     }
 
-    delete chatWindow;
-
-    MenuManager::cleanup();
+    menuManager.cleanup();
 
     return 0;
 }
 
-/** 
-Takes a string input and converts it into a json object consisting of 2 fields.
-The first field is the command to be given to the server. The second field is any extra arguments for the command.
+std::string makeServerMessage(const std::string& input) {
 
-If the first word of the input matches a possible command, it is set as the value for the command field.
-Then the rest of the input is put in the data field.
-
-If the first word does not match a possible command, the input is assumed to be a chat message.
-The command is set to !chat, and the entire input is put in the data field.
-**/
-string makeServerMessage(string input) {
-    
-    vector<string> possibleCommands;
-    possibleCommands.push_back("!createsession");
-    possibleCommands.push_back("!joinsession");
-    possibleCommands.push_back("!leavesession");
-    possibleCommands.push_back("!gameinput");
-    possibleCommands.push_back("!whisper");
-    possibleCommands.push_back("!requestGames");
-
-    string command = "{ \"command\": \"";
-    
-    size_t endOfCommand = input.find(" ");
-    string firstWord = input.substr(0,endOfCommand);
-    if ( std::find(possibleCommands.begin(), possibleCommands.end(), firstWord) != possibleCommands.end() ) {
-        command += firstWord;
-    } else {
-        command += "!chat";
-        endOfCommand = 0;
-    }
-
-    string data = "\", \"data\": \"";
-    data += input.substr(endOfCommand, string::npos);
-
-    auto message = json::parse( command+data+"\" }" );
-
+    json message = Utils::makeJsonCommand(input);
     return message.dump();
 
+}
+
+/**
+Takes the string response from the server and converts it into json.
+Then gets the command and data from the json and performs action depending on their values.
+Returns a string that is to be displayed to the client user.
+**/
+std::string processServerMessage(const std::string& response) {
+
+    std::stringstream responseData;
+    json serverJson = json::parse(response);
+
+    std::string command = serverJson.at("command");
+    std::string data = serverJson.at("data");
+
+    if (command == "!chat") {
+        responseData << data;
+    } else if (command == "!createsession") {
+        if (data == "fail") {
+            responseData << "There was an error creating the session.";
+        } else {
+            responseData << "The session was successfully created.";
+        }
+    } else if (command == "!joinsession") {
+        if (data == "fail") {
+            responseData << "There was an error joining the session.";
+        } else {
+            responseData << "You have joined the session: " << data;
+        }
+    } else if (command == "!leavesession") {
+        responseData << "You have left the session: " << data;
+    } else if (command == "!gameinput") {
+        // WIP
+        // The game output should be displayed in a separate log than the chat
+        // To do: function that displays game data
+        responseData << data;
+    } else if (command == "!requestgames") {
+        responseData << "Choose a game: " << data;
+    }
+
+    return responseData.str();
+
+}
+
+void initializeMenuPages( MenuManager &menuManager, bool &done,
+                            networking::Client &client ) {
+
+    // Main menu
+    MenuPageInfo::NameList mainMenuFields = {};
+
+    MenuPageInfo::NameList mainMenuItems = { "Join lobby", "Create lobby", "Exit" };
+
+    // Main menu item functions
+    auto moveToJoinLobbyPage = [&menuManager] () {
+        MenuPageInfo::MenuName nextPage = "Join lobby";
+        menuManager.switchPage( nextPage );
+    };
+
+    auto moveToCreateLobbyPage = [&client, &menuManager] () {
+
+        // Get the list of games
+
+        std::string commadType =  "!requestgames ";
+        std::string serverMessage = makeServerMessage( commadType );
+        client.send( serverMessage );
+
+        auto response = client.receive();
+        //while ( response.empty() ) {
+        //    response = client.receive();
+        //}
+
+        MenuPageInfo::NameList gamesList = {"Game 1", "Game 2"};
+            /* TEMP create list from response */
+
+        // Define the function that is called when a game is chosen
+
+        auto chooseGame = [&client, &gamesList, &menuManager] () {
+
+            //std::string gameChoice = gamesList[menuManager.getSelectedIndex()];
+            //client.send( gameChoice );
+
+        };
+
+        // Create the "Creat lobby" menu page with the given games
+
+        MenuPageInfo::NameList createLobbyFields = {};
+
+        MenuPageInfo::NameList createLobbyItems = {};
+
+        for ( auto gameName : gamesList ) {
+            createLobbyItems.push_back( gameName );
+        }
+        MenuPageInfo::ItemName backString = "back";
+        createLobbyItems.push_back( backString );
+
+        MenuPageInfo::FunctionList createLobbyItemResults = {};
+
+        for ( int i = 0; i < gamesList.size(); i++ ) {
+            createLobbyItemResults.push_back( chooseGame );
+        }
+
+        auto moveBackToMainMenuPage = [&menuManager] () {
+            MenuPageInfo::MenuName nextPage = "Main menu";
+            menuManager.switchPage( nextPage );
+        };
+        createLobbyItemResults.push_back( moveBackToMainMenuPage );
+
+        MenuPageInfo::MenuName createLobbyName = "Create lobby";
+        std::shared_ptr<MenuPageInfo> createLobbyPage = std::make_shared<MenuPageInfo>( 
+                                                    createLobbyName,
+                                                    createLobbyFields,
+                                                    createLobbyItems,
+                                                    createLobbyItemResults );
+        menuManager.addPage( createLobbyPage );
+
+        // The games are all loaded and the page is setup, so switch to the page
+
+        MenuPageInfo::MenuName nextPage = "Create lobby";
+        menuManager.switchPage( nextPage );
+    };
+
+    auto exitProgram = [&done] () {
+        done = true;
+    };
+
+    MenuPageInfo::FunctionList mainMenuItemResults = { moveToJoinLobbyPage,
+                                                   moveToCreateLobbyPage,
+                                                   exitProgram };
+
+    MenuPageInfo::MenuName mainMenuName = "Main menu";
+    std::shared_ptr<MenuPageInfo> mainMenuPage = std::make_shared<MenuPageInfo>( 
+                                             mainMenuName,
+                                             mainMenuFields,
+                                             mainMenuItems,
+                                             mainMenuItemResults );
+    menuManager.addPage( mainMenuPage );
+
+
+
+    // Join lobby menu
+    const MenuPageInfo::NameList joinLobbyFields = {"Lobby code:"};
+
+    const MenuPageInfo::NameList joinLobbyItems = {"Join", "Back"};
+
+    // Join lobby item functions
+
+    auto moveBackToMainMenuPage = [&menuManager] () {
+        MenuPageInfo::MenuName nextPage = "Main menu";
+        menuManager.switchPage( nextPage );
+    };
+
+    auto joinLobby = [&done, &client, &menuManager] () {
+        std::string commadType =  "!joinsession ";
+
+        std::shared_ptr<MenuPage> joinPage = menuManager.getCurrentPage();
+        MenuPage::FieldList *connectFields = joinPage->getFieldList();
+
+        const int lobbyCodeInputIndex = 1;
+        const char *lobbyCode =
+            field_buffer( connectFields->at( lobbyCodeInputIndex ), 0 );
+        std::string lobbyCodeString(lobbyCode);
+
+        std::string command = commadType + lobbyCodeString;
+        std::string serverMessage = makeServerMessage( command );
+        client.send( serverMessage );
+    };
+
+    const MenuPageInfo::FunctionList joinLobbyItemResults
+        = {joinLobby, moveBackToMainMenuPage};
+
+    MenuPageInfo::MenuName joinLobbyName = "Join lobby"; 
+    std::shared_ptr<MenuPageInfo> joinLobbyPage = std::make_shared<MenuPageInfo>( 
+                                              joinLobbyName,
+                                              joinLobbyFields,
+                                              joinLobbyItems,
+                                              joinLobbyItemResults );
+    menuManager.addPage( joinLobbyPage );
+
+    menuManager.setCurrentPage( mainMenuPage->menuName );
 }
