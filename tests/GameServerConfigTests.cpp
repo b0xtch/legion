@@ -19,6 +19,8 @@ TEST(GameServerConfigTests, parseBadJson) {
 TEST(GameServerConfigTests, parseBadKeys) {
     GameServerConfig gsc{};
     EXPECT_THROW(gsc.parse("{ \"gamez\":\"./fake/directory/\", \"maxSessions\":373, \"maxConnections\":473 }"), std::runtime_error);
+    EXPECT_THROW(gsc.parse("{ \"games\":\"./fake/directory/\", \"raxSessions\":373, \"maxConnections\":473 }"), std::runtime_error);
+    EXPECT_THROW(gsc.parse("{ \"games\":\"./fake/directory/\", \"maxSessions\":373, \"eaxConnections\":473 }"), std::runtime_error);
 }
 
 TEST(GameServerConfigTests, parseBadValues) {
