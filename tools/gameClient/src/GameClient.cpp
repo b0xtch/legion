@@ -34,7 +34,7 @@ std::string processServerMessage(const std::string& response);
 // Get the current client games list (for testing purposes)
 std::string getGamesList();
 
-std::std::vector<std::string> *gamesList = nullptr; // A list of games on the server, updated when the client sends a !gamerequest command
+std::vector<std::string> *gamesList = nullptr; // A list of games on the server, updated when the client sends a !gamerequest command
 
 int main(int argc, char* argv[]) {
 
@@ -142,7 +142,7 @@ std::string processServerMessage(const std::string& response) {
 
             while (!endOfData) {
                 std::size_t end = data.find(start, "\n");
-                if (end == string::npos) {
+                if (end == std::string::npos) {
                     endOfData = true;
                 } else {
                     newGamesList.push_back(data.substr(start, end-start));
