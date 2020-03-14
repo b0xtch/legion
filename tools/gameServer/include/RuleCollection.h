@@ -359,6 +359,7 @@ namespace RuleCollection {
 		// map<Player, int> scoreboard;
 	};
 
+
 	struct Scores : GenRule {
 		Scores() {};
 		Scores(ScoreBoard &s, const condition &asc) :
@@ -367,6 +368,9 @@ namespace RuleCollection {
 			ascending{asc} // false -> desc
 			{};
 
+		void func(){
+			
+		}
 		ScoreBoard scoreboard;
 		condition ascending;
 	};
@@ -726,17 +730,19 @@ struct GlobalMessage : GenRule {
 	message value;
 };
 
-//WIP
-class ScoreBoard {
-public:
-	// addScore();
-	// getScore();
-	ScoreBoard();
+// //WIP
+// class ScoreBoard {
+// public:
+// 	// addScore();
+// 	// getScore();
+// 	ScoreBoard();
 
-private:
-	// map<Player, int> scoreboard;
-};
+// private:
+// 	// map<Player, int> scoreboard;
+// };
 
+
+template<typename T>
 struct Scores : GenRule {
 	Scores() {};
 	Scores(ScoreBoard &s, const condition &asc) :
@@ -745,6 +751,9 @@ struct Scores : GenRule {
 		ascending{asc} // false -> desc
 		{};
 
+	void func(){
+
+	}
 	ScoreBoard scoreboard;
 	condition ascending;
 };
