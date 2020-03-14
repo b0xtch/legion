@@ -61,7 +61,7 @@ GameServer::GameServer(GameServerConfig gameServerConfig, unsigned short port) :
         [this] (networking::Connection c) {
             this->sessionManager.removeConnection(c);
         }},
-    sessionManager{3}
+    sessionManager{gameServerConfig.getMaxSessions()}
 {
     fillGameFilesMap();
 }
