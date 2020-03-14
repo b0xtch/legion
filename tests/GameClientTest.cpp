@@ -119,7 +119,9 @@ TEST(clientIncomingTest, gameResponse) {
 }
 
 TEST(clientIncomingTest, gameListRequest) {
-    std::string testResponse = "{ \"command\" \" !gamesList\", \"data\": \"this is a list of games\" }";
+    std::string testResponse = "{ \"command\" \" !requestgames\", \"data\": \"this is a list of games\" }";
     std::string processedTestResponse = processServerMessage(testResponse);
-    EXPECT_EQ( "Choose a game: this is a list of games", processedTestResponse );
+    std::string gamesList = getGamesList();
+    EXPECT_EQ( "", processedTestResponse );
+    EXPECT_EQ( "this is a list of games ", gamesList );
 }

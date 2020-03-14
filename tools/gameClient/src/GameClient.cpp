@@ -31,6 +31,10 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
 std::string makeServerMessage(const std::string& input);
 // Parse json message from server
 std::string processServerMessage(const std::string& response);
+// Get the current client games list (for testing purposes)
+std::string getGamesList();
+
+std::vector<std::string> *gamesList = nullptr; // A list of games on the server, updated when the client sends a !gamerequest command
 
 int main(int argc, char* argv[]) {
 
@@ -125,10 +129,49 @@ std::string processServerMessage(const std::string& response) {
         // To do: function that displays game data
         responseData << data;
     } else if (command == "!requestgames") {
-        responseData << "Choose a game: " << data;
+
+        /**
+        The list of games on the server is given as a string, separated by new lines.
+        The following code separates the string into individual games and updates the global gamesList vector.
+        **/
+        std::vector<std::string> newGamesList;
+
+        if (!data.empty()) {
+            std::size_t start = 0;
+            bool endOfData = false;
+
+            while (!endOfData) {
+                std::size_t end = data.find(start, "\n");
+                if (end == std::string::npos) {
+                    endOfData = true;
+                } else {
+                    newGamesList.push_back(data.substr(start, end-start));
+                    start += 2;
+                }
+            }
+
+            newGamesList.push_back(data.substr(start);
+        }
+
+        gamesList = &newGamesList;
+
     }
 
     return responseData.str();
+
+}
+
+std::string getGamesList() {
+
+    std::stringstream games;
+
+    if (gamesList != nullptr) {
+        for (auto game : *gamesList) {
+            games << game << " ";
+        }
+    }
+
+    return games.str();
 
 }
 
@@ -196,7 +239,7 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
         createLobbyItemResults.push_back( moveBackToMainMenuPage );
 
         MenuPageInfo::MenuName createLobbyName = "Create lobby";
-        std::shared_ptr<MenuPageInfo> createLobbyPage = std::make_shared<MenuPageInfo>( 
+        std::shared_ptr<MenuPageInfo> createLobbyPage = std::make_shared<MenuPageInfo>(
                                                     createLobbyName,
                                                     createLobbyFields,
                                                     createLobbyItems,
@@ -218,7 +261,7 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
                                                    exitProgram };
 
     MenuPageInfo::MenuName mainMenuName = "Main menu";
-    std::shared_ptr<MenuPageInfo> mainMenuPage = std::make_shared<MenuPageInfo>( 
+    std::shared_ptr<MenuPageInfo> mainMenuPage = std::make_shared<MenuPageInfo>(
                                              mainMenuName,
                                              mainMenuFields,
                                              mainMenuItems,
@@ -258,8 +301,8 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
     const MenuPageInfo::FunctionList joinLobbyItemResults
         = {joinLobby, moveBackToMainMenuPage};
 
-    MenuPageInfo::MenuName joinLobbyName = "Join lobby"; 
-    std::shared_ptr<MenuPageInfo> joinLobbyPage = std::make_shared<MenuPageInfo>( 
+    MenuPageInfo::MenuName joinLobbyName = "Join lobby";
+    std::shared_ptr<MenuPageInfo> joinLobbyPage = std::make_shared<MenuPageInfo>(
                                               joinLobbyName,
                                               joinLobbyFields,
                                               joinLobbyItems,

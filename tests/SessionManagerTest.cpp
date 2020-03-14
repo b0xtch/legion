@@ -6,7 +6,7 @@
 /**
  * Test max session  
  * **/
-Test(SessionManager, maxSessions){
+TEST(SessionManager, maxSessions){
     SessionManager manager{5};
     ASSERT_EQ(5, manager.getMaxSessions());
 }
@@ -15,24 +15,24 @@ Test(SessionManager, maxSessions){
 /**
  * Test adding connections 
  * **/
-Test(Session, addingConnection){
+TEST(Session, addingConnection){
     SessionManager manager{5};
     Connection c{};
     manager.addConnection(c);
-    auto it = find(manager.unassignedConnections.begin(), unassignedConnections.end(), c);
-    ASSERT_TRUE(it != unassignedConnections.end());
+    std::set<networking::Connection> unassignedConnections = manager.getUnassignedConnections();
+    ASSERT_TRUE(unassignedConnections.find(c) != unassignedConnections.end());
 }
 
 
 /**
  * Test removing connections
  * **/
-Test(Session, removingConnections){
+TEST(Session, removingConnections){
     SessionManager manager{5};
     Connection c{};
     manager.addConnection(c);
-    manager.removeConnetions(c)
-    auto it = find(manager.unassignedConnections.begin(), unassignedConnections.end(), c);
-    ASSERT_TRUE(it == unassignedConnections.end());
+    manager.removeConnection(c);
+    std::set<networking::Connection> unassignedConnections = manager.getUnassignedConnections();
+    ASSERT_TRUE(unassignedConnections.find(c) == unassignedConnections.end());
 }
 

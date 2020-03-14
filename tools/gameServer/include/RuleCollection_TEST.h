@@ -1,11 +1,12 @@
-#ifndef RULE_COLLECTION_H
-#define RULE_COLLECTION_H
+#ifndef RULE_COLLECTION_TEST_H
+#define RULE_COLLECTION_TEST_H
 
 #include <string>
 #include <vector>
-#include <assert.h>
 #include <map>
 #include <iostream>
+#include <algorithm>
+#include <random>
 
 namespace RuleCollection {
 
@@ -19,40 +20,13 @@ namespace RuleCollection {
 		std::string rule_name;
 	};
 
-	using RulesList = std::vector<GenRule*>;
+	using RulesList = std::vector<GenRule*>&;
 
 	/*************************************
 	*
 	*			Control Structures	
 	*
 	**************************************/
-
-	template <typename T> 
-	struct ForEach : GenRule{
-		ForEach(std::vector<T> v, T el, RulesList r) : 
-			GenRule{"ForEach"},
-			list{v},
-			element{el},
-			rules_to_run{r}
-			{};
-		
-		std::vector<T> list;
-		T element;
-		RulesList rules_to_run;
-
-		//is this correct????
-		// example:
-		// for each round, global message broadcast the round number
-		// value to be stored in global message struct
-		void func() override{
-			std::cout << "ForEach ..." << std::endl;
-			for(auto listElement : list){
-				for(auto rule : rules_to_run){
-					rule->func();
-				}
-			}
-		}
-	};
 
 	enum ConditionType{
 	    EQUAL,
@@ -63,17 +37,20 @@ namespace RuleCollection {
 	};
 
 	// helper for loop
-	//templated so that loop can take any condition (int, floats, etc)
+	//templated so that loop can compare any types (int, floats, bool, etc)
+	// NOTE: value2 is passed by copy to allow literal comparisons
+	// LOGIC: value1 [logic sign] value2
+	// Example: value1 == value2
 	template <typename T>
 	struct Condition {
-	    Condition(T &v1, T &v2, ConditionType type) :
+	    Condition(T &v1, T v2, ConditionType type) :
 	        value1{v1},
 	        value2{v2},
 	        type{type}
 	        {};
 
 	    T& value1;
-	    T& value2;
+	    T value2;
 	    ConditionType type;
 
 	    bool operator()() const{
@@ -106,12 +83,12 @@ namespace RuleCollection {
 		GenRule{"Loop"},
 		loopCondition{con},
 		type{type},
-		rules_to_run{r}	
+		rulesToRun{r}	
 		{};
 		
 		Condition<T> loopCondition;
 		LoopType type;
-		RulesList rules_to_run;
+		RulesList rulesToRun;
 
 
 		void func() override{
@@ -121,7 +98,7 @@ namespace RuleCollection {
 		        case LoopType::UNTIL:
 		        	std::cout << "UNTIL ..." << std::endl;
 		            while(!loopCondition()){
-		                for(auto rule : rules_to_run){
+		                for(auto rule : rulesToRun){
 		                	std::cout<<rule->rule_name <<std::endl;
 		                    rule->func();
 		                    if(loopCondition()) break;
@@ -131,7 +108,7 @@ namespace RuleCollection {
 		        case LoopType::WHILE:
 		        	std::cout << "WHILE ..." << std::endl;
 		            while(loopCondition()){
-		                for(auto rule : rules_to_run){
+		                for(auto rule : rulesToRun){
 		                	std::cout << "Running rule " << rule->rule_name <<std::endl;
 		                    rule->func();
 		                    if(!loopCondition()) break;
@@ -147,7 +124,7 @@ namespace RuleCollection {
 	};
 
 	
-	typedef int& destination;
+	using destination = int&;
 
 	enum MathOperation {
 	    ADD,
@@ -196,6 +173,151 @@ namespace RuleCollection {
 	    }
 	};
 
-}
+
+	// Inparallel
+	// Parallel for
+	// Switch
+
+	//When
+	//look into boost variant
+	template <typename T>
+	struct Case : GenRule {
+		Case(Condition<T> &c, RulesList r) :
+			GenRule{"Case"},
+			whenCondition {c},
+			rulesToRun {r}
+			{};
+
+		Condition<T> whenCondition;
+		RulesList rulesToRun;
+
+		void func() override {
+			if(whenCondition()){
+				for(auto rules : rulesToRun){
+					rules->func();
+				}
+			}
+		}
+	};
+
+
+	template <typename T>
+	struct When : GenRule {
+		When(std::vector<Case<T>> &c) :
+			GenRule{"When"},
+			casesToCheck {c} 
+			{};
+
+			std::vector<Case<T>> casesToCheck;
+
+			void func() override {
+				for(auto currentCase : casesToCheck){
+					if(currentCase.whenCondition()){
+						std::cout << "Case valid" << std::endl;
+						currentCase.func();
+						break;
+					}
+				}
+			}
+
+	};
+
+
+
+
+	/*************************************
+	*
+	*			List Operations	
+	*
+	**************************************/
+
+	//just to print for testing purposes
+
+	template <typename T>
+	void printList(std::vector<T> &list){
+		for(auto x : list){ std::cout << x << " "; }
+		std::cout << std::endl;
+	}
+
+	template <typename T>
+	struct Extend : GenRule {
+		Extend(T v, std::vector<T> &l) :
+			GenRule{"Extend"},
+			value {v},
+			list {l}
+			{};
+
+		T value;
+		std::vector<T> &list;
+
+		void func() override { 
+			list.push_back(value);
+			
+			std::cout << "\nExtended List: " << std::endl;
+			printList<T>(list);
+		}
+	};
+
+	template <typename T>
+	struct Reverse : GenRule {
+		Reverse(std::vector<T> &l) :
+			GenRule{"Reverse"},
+			list {l}
+			{};
+
+		std::vector<T> &list;
+
+		void func() override { 
+			std::reverse(list.begin(), list.end()); 
+
+			std::cout << "\nReversed List: " << std::endl;
+			printList<T>(list);
+		}
+	};
+
+	template <typename T>
+	struct Shuffle : GenRule {
+		Shuffle(std::vector<T> &l) :
+			GenRule{"Shuffle"},
+			list {l}
+			{};
+
+		std::vector<T> &list;
+
+		void func() override { 
+			std::random_device rand;
+			std::shuffle(list.begin(), list.end(), rand); 
+
+			std::cout << "\nShuffled List: " << std::endl;
+			printList<T>(list);
+		}
+	};
+
+	template <typename T>
+	struct Sort : GenRule {
+		Sort(std::vector<T> &l) :
+			GenRule{"Sort"},
+			list {l}
+			{};
+
+		std::vector<T> &list;
+
+		void func() override { 
+			std::stable_sort(list.begin(), list.end()); 
+
+			std::cout << "\nSorted List: " << std::endl;
+			printList<T>(list);
+		}
+	};
+
+	//list attributes
+
+	// dependent on Player.h
+	//Deal
+	//Discard
+
+
+
+} // namespace RuleCollection
 
 #endif

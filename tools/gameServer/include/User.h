@@ -2,18 +2,23 @@
 #define USER_H
 
 #include <string>
-
 #include "Server.h"
+
 
 class User {
 public:
-    User(networking::Connection cnxn);
-    
-    networking::Connection getConn() const;
+    User(const networking::Connection& connection);
+
+    networking::Connection getConnection() const;
+
     std::string getName() const;
-    void setName(std::string&name);
+
+    void setName(std::string& name);
+
+    bool operator< (const User &user) const;
+
 private:
-    networking::Connection cnxn;
+    networking::Connection connection;
     
     std::string name;
 };
