@@ -5,7 +5,7 @@
 #include <vector>
 #include <assert.h>
 #include <map>
-
+#include<chrono>
 namespace RuleCollection {
 
 	struct GenRule{
@@ -217,7 +217,7 @@ namespace RuleCollection {
 		TRACK
 	};
 
-	typedef uint64_t  seconds;
+	typedef std::chrono::seconds seconds;
 
 	struct Timer : GenRule {
 		Timer() {};
@@ -232,6 +232,33 @@ namespace RuleCollection {
 				// 	assert flag == nullptr;
 				// }
 			};
+		
+		void func(){
+			std::vector<GenRule>::iterator iterator = std::begin(rules_to_run);
+			auto startTime = std::chrono::high_resolution_clock::now();
+			auto endTime = startTime + seconds;
+			auto newEndTime;
+			bool conditionToRun = startTime - endTime >= std::chrono::milliseconds(0);
+			switch(mode){
+				case TimerMode::AT_MOST: 
+					while(conditionToRun){
+						Engine::Interpreter:operator(*iterator);
+						if((iterator++) == std::end(rules_to_run)) break; std::cout << "The operation ended early\n";
+					}
+				case TimerMode::EXACT:
+					while(conditionToRun){
+						Engine::Interpreter::operator(*iterator);
+						if((iterator++) == std::end(rules_to_run) && conditionToRun)
+							sleep(std::chrono::high_resolution_clock::now() - endTime); //in case the operation ended early
+					}
+				case TimerMode::TRACK:
+					std::for_each(std::begin(rules_to_run), std::end(rules_to_run), [&](GenRule rule){
+						Engine::Interpreter::operator(rule);
+					});
+					newEndTime = std::chrono::high_resolution_clock::now();
+					std::cout << "Track result: " << newEndTime - startTime << std::endl;
+			}
+		}
 
 		seconds seconds;
 		mode mode;
