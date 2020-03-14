@@ -150,6 +150,8 @@ ChatWindowImpl::processInput(int key) {
     case ERR:
       // swallow
       break;
+    case KEY_LEFT:
+      break;
     default:
       form_driver(entryForm, key);
       break;
@@ -276,4 +278,9 @@ void
 ChatWindow::moveAndScale(ChatWindowInfo::Position position, 
                          ChatWindowInfo::Dimensions dimensions) {
   impl->moveAndScale(position, dimensions);
+}
+
+void
+ChatWindow::refreshWindow() {
+  impl->refreshWindow();
 }
