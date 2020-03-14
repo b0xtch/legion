@@ -116,51 +116,75 @@ namespace Engine {
     }
     
     template <typename T> 
-    Value EngineImpl<T>::setConfiguration(const T& in) {
-        Configuration configuration;
-        configuration.name = in["configuration"]["name"];
-        configuration.playerCount = {
-            in["configuration"]["player count"]["min"],
-            in["configuration"]["player count"]["max"]
-        };
-        configuration.audience = in["configuration"]["audience"];
+    Configuration EngineImpl<T>::setConfiguration(const T& in) {
+        Object setup;
+        setup.values.emplace("setup", recursiveValueMap(in["setup"]));
 
-        return (Value) configuration;
+        Configuration configuration{
+            in["name"],
+            {
+            in["player count"]["min"], 
+            in["player count"]["max"]
+            },
+            in["audience"],
+            setup
+        };
+
+        // this needs to be moved to a place where it is called when necessary\
+        // but it shows that now you can recurse and get the values.
+        // might not even use it as these are actionless unlike the rules
+        std::visit(Interpreter{}, (Value) configuration.setup); 
+
+        return configuration;
     }
 
     template <typename T> 
-    Value EngineImpl<T>::setConstants(const T& in){
-        CVPA constants;
-        json constantsJson = this->gameConfig["constants"];
-        constants.constants.map = getKeyToValueMapping(constantsJson);
+    Constants EngineImpl<T>::setConstants(const T& in){
+        Object vars;
+        consts.values.emplace("constants", recursiveValueMap(in));
+
+        Constants constants{ vars };
+
         return constants;
     }
 
     template <typename T> 
-    Value EngineImpl<T>::setVariables(const T& in){
-        CVPA variables;
-        json variablesJson = this->gameConfig["variables"];
-        variables.variables.map = getKeyToValueMapping(variablesJson);
+    Variables EngineImpl<T>::setVariables(const T& in){
+        Object vars;
+        vars.values.emplace("variables", recursiveValueMap(in));
+
+        Variables variables{ vars };
+
         return variables;
     }
 
     template <typename T> 
-    Value EngineImpl<T>::setPerPlayer(const T& in){
-        CVPA perPlayer;
+    PerPlayer EngineImpl<T>::setPerPlayer(const T& in){
+        Object vars;
+        vars.values.emplace("per-player", recursiveValueMap(in));
+
+        PerPlayer perPlayer{ vars };
+        
+        // not sure yet how this and per audience ties into the overall players
 
         return perPlayer;
     }
 
     template <typename T> 
-    Value EngineImpl<T>::setPerAudience(const T& in){
-        CVPA perAudience;
+    PerAudience EngineImpl<T>::setPerAudience(const T& in){
+        Object vars;
+        vars.values.emplace("per-audience", recursiveValueMap(in));
+
+        PerAudience perAudience{ vars };
 
         return perAudience;
     }
 
     template <typename T> 
-    Value EngineImpl<T>::setRules(const T& in){
+    Rules EngineImpl<T>::setRules(const T& in){
         Rules rules;
+
+        // TODO
 
         this->gameConfig["rules"] = rules;
         return rules;

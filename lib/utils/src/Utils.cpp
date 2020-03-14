@@ -71,15 +71,11 @@ namespace Utils {
         return gameName;
     }
 
+    const char* commandList[] = {"!chat","!createsession","!joinsession","!leavesession","!gameinput","!whisper","!requestgames"};
+
     json makeJsonCommand(const std::string& input) {
-        std::vector<std::string> possibleCommands;
-        possibleCommands.push_back("!createsession");
-        possibleCommands.push_back("!joinsession");
-        possibleCommands.push_back("!leavesession");
-        possibleCommands.push_back("!gameinput");
-        possibleCommands.push_back("!whisper");
-        possibleCommands.push_back("!requestgames");
-        possibleCommands.push_back("!chat");
+        int commandNum = sizeof(commandList) / sizeof(commandList[0]);
+        std::vector<std::string> possibleCommands(commandList, commandList+commandNum);
 
         std::stringstream commandStream;
         commandStream << "{ \"command\": \""; // Start the json object and declare the command field
@@ -89,7 +85,7 @@ namespace Utils {
         if ( std::find(possibleCommands.begin(), possibleCommands.end(), firstWord) != possibleCommands.end() ) {
             commandStream << firstWord;
         } else {
-            commandStream << "!chat";
+            commandStream << commandList[0];
             endOfCommand = 0;
         }
 

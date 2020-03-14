@@ -11,12 +11,27 @@
 
 // for convenience
 using json = nlohmann::json;
-using String = String;
+using String = std::string;
 using Integer = int;
 using Boolean = bool;
-using Key = String;
-using Object = std::map<String, std::variant<Integer, String, Boolean>>;
-using Array = std::vector<std::variant<Integer, String, Boolean>>;
+using Key = std::string;
+struct Object;
+struct Array;
+
+template <typename T> struct rapper {
+  rapper(T type) { 
+    entities.emplace_back(std::move(type)); 
+  }
+
+  // user-defined conversion, i think this migth be an implicit conversion
+  // An explicit conversion was tried but i am guessing because i am using templates
+  // Its implicit 
+  operator T() const { 
+    return entities.front(); 
+  }
+
+  std::vector<T> entities;
+};
 
 template<typename... T>
 using Type = std::variant<T...>;
@@ -24,27 +39,17 @@ using Value = Type<
   Integer,
   String, 
   Boolean,
-  Object,
-  Array
+  rapper<Array>, 
+  rapper<Object>
 >;
 
-// ATTEMPT A RECURSIVE W/O boost
-// template<typename... T>
-// using Type = std::variant<T...>;
-// struct RecursiveVariant;
-// using Value = Type<
-//   Integer,
-//   String, 
-//   Boolean,
-//   std::vector<RecursiveVariant>,
-//   std::unique_ptr<RecursiveVariant>,
-//   std::unordered_map<Key, std::unique_ptr<RecursiveVariant>>
-// >;
-// struct RecursiveVariant {
-//   Value values;
-// };
-// using Object = std::unordered_map<Key, Value>;
-// using Array = std::vector<Value>;
+struct Object {
+  std::unordered_map<Key, Value> values;
+};
+
+struct Array {
+  std::vector<Value> values;
+};
 
 namespace Engine {
 
@@ -53,28 +58,65 @@ namespace Engine {
      */
     template <typename K, typename V> 
     struct GenType {
-
-        // K set(const G& key, const G& value) const {
-        //     map[key] = value;
-        // }
-
-        // V get(const G& key) const {
-        //     return map[key];
-        // }
-
         std::unordered_map<K, V> map;
         K key;
         V value;
     };
 
+    Value recursiveValueMap(const json& json) {
+        if(json.is_string()){
+            return (Value) (String) json;
+        }else if(json.is_number()){
+            return (Value) (Integer) json;
+        }else if(json.is_boolean()){
+            return (Value) (Boolean) json;
+        }else if (json.is_object()) {
+            Object map;
+            for(const auto&[key, value]: json.items()) {
+                map.values.emplace(key, recursiveValueMap(value));
+            }
+            return (Value) map;
+        }else if(json.is_array()){
+            Array arr;
+            for(const auto&[key, value]: json.items()) {
+                arr.values.emplace_back(recursiveValueMap(value));
+            }
+            return (Value) arr;
+        }
+    }
+
     /**
      * Rules
      */
 
-    // Will be used in conjunction with tokenizer to understand string expressionsS
-    template<typename E, typename A> // switch this to accept an varidic args
+    // Mainly to interpret the values within the rules
     struct Interpreter {
-        Interpreter (const E& type): type(type) {}
+        void operator()(std::monostate) const {  }
+        void operator()(const String &string) const { // do something with string }
+        void operator()(const Integer num) const { // do something with the int use the arithmetic rule }
+        void operator()(const Array &array) const {
+            // Loop over the an array and extract the values to do processing by recursive visiting
+            if (!array.values.empty()) {
+                auto it = array.values.begin();
+                std::visit(*this, *it);
+
+                std::for_each(++it, array.values.end(), [this](const auto &arr) {
+                    std::visit(*this, arr);
+                });
+            }
+        }
+        void operator()(const Object &object) const {
+            // Loop over the an object and extract the key value to do processing by recursive visiting
+            if (!object.values.empty()) {
+                auto it = object.values.begin();
+                const auto &[key, value] = *it;
+                std::visit(*this, value);
+
+                std::for_each(++it, object.values.end(), [this](const auto &obj) {
+                    std::visit(*this, obj.second);
+                });
+            }
+        }
     };
 
     template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
@@ -178,7 +220,7 @@ namespace Engine {
     }; 
 
     /**
-     * Environment Types
+     * Main game configuration
     */
 
     struct PlayerCount {
@@ -186,26 +228,27 @@ namespace Engine {
         Integer max;
     };
 
-    struct CVPA
-        : GenType<String, Components<String, Integer, bool> > {
-        // constants, variables, perPlayer, perAudience are the same
-        GenType constants;
-        GenType variables;
-        GenType perPlayer;
-        GenType perAudience;
+    struct Constants {
+        Object constants;
     };
 
-    /**
-     * Main game configuration
-    */
+    struct Variables {
+        Object variables;
+    };
 
-    struct Setup {};
+    struct PerPlayer {
+        Object perPlayer;
+    };
+
+    struct PerAudience {
+        Object perAudience;
+    };
 
     struct Configuration {
         String name;
-        PlayerCount playerCount;
+        PlayerCount playerCount; // an object type can be used here i guess
         bool audience;
-        Setup setup;
+        Object setup;
     };
 
     /**
@@ -213,7 +256,10 @@ namespace Engine {
     */
     struct Game {
         Configuration configuration;
-        CVPA cvpa;
+        Constants constants;
+        Variables variables;
+        PerPlayer perPlayer;
+        PerAudience perAudience;
         Rules rules;
     };
 
@@ -229,12 +275,12 @@ namespace Engine {
             GenType<String, Game> gameConfig;
 
             // Domain level set functions, these should never throw if we do our validation correctly
-            Value setConfiguration(const T& configuration) const noexcept;
-            Value setConstants(const T& constants) const noexcept;
-            Value setVariables(const T& variables) const noexcept;
-            Value setPerPlayer(const T& perPlayer) const noexcept;
-            Value setPerAudience(const T& perAudience) const noexcept;
-            Value setRules(const T& rules) const noexcept;
+            Configuration setConfiguration(const T& configuration) const noexcept;
+            Constants setConstants(const T& constants) const noexcept;
+            Variables setVariables(const T& variables) const noexcept;
+            PerPlayer setPerPlayer(const T& perPlayer) const noexcept;
+            PerAudience setPerAudience(const T& perAudience) const noexcept;
+            Rules setRules(const T& rules) const noexcept;
 
             // Parser Related methods
             bool validGameConfig(const T& input);
@@ -245,7 +291,6 @@ namespace Engine {
             // Game related methods
             void findAndExecute(/* find a specific function and execute dynamically*/);
     };
-
 
     /*************************************
     *
