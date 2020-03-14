@@ -29,6 +29,8 @@ public:
     Session();
     
     std::set<User> getAllUsers();
+
+    int getNumberOfUsers();
     
     Connection getClient(const Connection &connection);
 

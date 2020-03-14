@@ -16,6 +16,9 @@ std::set<User> Session::getAllUsers(){
     return users;
 };
 
+int Session::getNumberOfUsers(){
+    return users.size();
+}
 
 /**
  * This function adds new connection to session given session limit has'nt reached yet
