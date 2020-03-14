@@ -2,8 +2,10 @@
 #define SESSION_MANAGER_H
 
 #include <set>
+#include <map>
 #include "Server.h" 
 #include "Session.h"
+#include "User.h"
 
 using networking::Server;
 using networking::Connection;
@@ -25,7 +27,7 @@ public:
 
   std::vector<Message> processMessage(const Message& message);
   
-  std::vector<Message> constructMessage(const std::string& message, std::unordered_map<ConnectionId, Connection>& connections);
+  std::vector<Message> constructMessage(const std::string& message, std::set<User>& users);
   
   void addConnection(const Connection& connection);
 
@@ -33,10 +35,10 @@ public:
   
   void sendMessage(const Connection& connection);
   
-  Session& getSessionForConnection(const Connection& connection);
+  Session getSessionForConnection(const Connection& connection);
 
 private:
-  std::set<Session> sessions;
+  std::map<std::string, Session> sessions;
   
   std::set<Connection> unassignedConnections;
   

@@ -31,14 +31,16 @@ public:
     std::set<User> getAllUsers();
     
     Connection getClient(const Connection &connection);
-    
-    void addUser(const User &user);
-    
-    bool isUser(const User &user);
 
-    void removeUser(const User &user);
+    void addUser(const Connection &connection);
     
-    std::string getSessionId();
+    bool isUser(const Connection &connection) const;
+
+    void removeUser(const Connection &connection);
+    
+    std::string getSessionId() const;
+
+    bool operator< (const Session &session) const;
 
 private:
     

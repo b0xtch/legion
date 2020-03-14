@@ -30,6 +30,10 @@ struct Connection {
   operator==(Connection other) const {
     return id == other.id;
   }
+
+  bool operator < (Connection other) const {
+      return id < other.id;
+  }
 };
 
 

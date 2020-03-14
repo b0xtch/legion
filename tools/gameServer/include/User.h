@@ -4,6 +4,7 @@
 #include <string>
 #include "Server.h"
 
+
 class User {
 public:
     User(const networking::Connection& connection);

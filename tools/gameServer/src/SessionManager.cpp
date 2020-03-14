@@ -17,7 +17,7 @@ SessionManager::SessionManager(int maxSessions): MAX_SESSIONS_PER_SERVER{maxSess
 Session SessionManager::createNewSession(){
     if(sessions.size() <= MAX_SESSIONS_PER_SERVER){
         Session session = Session{};
-        sessions.insert(session)
+        sessions[session.getSessionId()] = session;
         return session;
     };
     throw; // ServerLimitReached();
@@ -53,41 +53,33 @@ void SessionManager::removeConnection(const Connection& connection){
  * Function for adding connection to existing session
  * **/
 void SessionManager::addToSession(const Connection& connectionToAdd, std::string& sessionId){
-    auto it = sessions.find_if(sessions.begin(), sessions.end(), [](const Session &session){
-        return session.getSessionId() == sessionId;
-    })
+    sessions[sessionId].addUser(connectionToAdd);
 };
 
 
 /**
  * Find session for particular connection
  * **/  
-Session& SessionManager::getSessionForConnection(const Connection& connection){
-  auto it = find_if(
-    sessions.begin(), sessions.end(), [&](std::unordered_map<std::string, Session>::value_type& v){
-      return v.second.isClient(connection);
+Session SessionManager::getSessionForConnection(const Connection& connection){
+    auto it = find_if(sessions.begin(), sessions.end(), [&](const std::pair<std::string, Session> &map){
+        return map.second.isUser(connection);
+    });
+    if(it != sessions.end()){
+        return it->second;
     }
-  );
-  // std::cout << "Get Session: " << it->first << std::endl; 
-  if(it != sessions.end()){
-    return it->second;
-  }
-
 }
 
 
 /**
  * This function constructs vector of struct message for all passed connections
  * **/
-std::vector<Message> SessionManager::constructMessage(const std::string& message, std::unordered_map<ConnectionId, Connection>& connections){
+std::vector<Message> SessionManager::constructMessage(const std::string& message, std::set<User>& users){
   std::vector<Message> messages;
-  for(auto connection: connections){
-    std::cout << "Connection: " << connection.first << std::endl;
+  for(auto user: users){
     messages.push_back(
-      Message{connection.second, message}
+      Message{user.getConnection(), message}
     );
   }
-
   return messages;
 }
 
@@ -104,20 +96,20 @@ std::vector<Message> SessionManager::processMessage(const Message& message){
 
     if(type == ParsedMessage::Type::CreateSession){
         Session session = createNewSession();
-        session.addClient(message.connection);
-        std::unordered_map<ConnectionId, Connection> connections = session.getAllClients();
-        return constructMessage("New Player Joined", connections);
+        session.addUser(message.connection);
+        std::set<User> users = session.getAllUsers();
+        return constructMessage("New Player Joined", users);
    
     } else if(type == ParsedMessage::Type::Chat){
         Session session = getSessionForConnection(message.connection);
-        std::unordered_map<ConnectionId, Connection> connections = session.getAllClients();
-        return constructMessage(message.text, connections);
+        std::set<User> users = session.getAllUsers();
+        return constructMessage(message.text, users);
 
     } else if(type == ParsedMessage::Type::LeaveSession){
         Session session = getSessionForConnection(message.connection);
-        session.removeConnection(message.connection);
-        std::unordered_map<ConnectionId, Connection> connections = session.getAllClients();
-        return constructMessage("Player Left", connections);
+        session.removeUser(message.connection);
+        std::set<User> users = session.getAllUsers();
+        return constructMessage("Player Left", users);
     } 
 }  
 

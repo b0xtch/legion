@@ -20,18 +20,18 @@ std::set<User> Session::getAllUsers(){
 /**
  * This function adds new connection to session given session limit has'nt reached yet
  * **/
-void Session::addUser(const User& user){
+void Session::addUser(const Connection& connection){
     if(users.size() >= MAX_SESSION_SIZE){
         throw;// SessSessionLimitExceeded();
     };
-    users.insert(user);
+    users.insert(User{connection});
 };
 
 
 /**
  * Simple getter for getting sesion id
  * **/
-std::string Session::getSessionId(){
+std::string Session::getSessionId() const{
     return sessionId.id;
 };
 
@@ -39,17 +39,23 @@ std::string Session::getSessionId(){
 /**
  * Check if connection is part of this session
  * **/
-bool Session::isUser(const User& user){
-    return users.find(user) != users.end();
+bool Session::isUser(const Connection &connection) const{
+    auto it = find_if(users.begin(), users.end(), [&](const User &user){return user.getConnection() == connection;});
+    return it != users.end();
 }
 
 
 /**
  * Method for removing connection from session
  * **/
-void Session::removeUser(const User &user){
-    if(users.find(user) != users.end()){
-        users.erase(user);
+void Session::removeUser(const Connection &connection){
+    auto it = find_if(users.begin(), users.end(), [&](const User &user){return user.getConnection() == connection;});
+    if(it != users.end()){
+        users.erase(it);
     }
+}
+
+bool Session::operator< (const Session &session) const{
+    return this->getSessionId() >=  session.getSessionId();
 }
 
