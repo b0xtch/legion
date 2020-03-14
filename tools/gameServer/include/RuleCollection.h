@@ -536,8 +536,16 @@ struct Deal : GenRule{
 		count{count}
 		{};
 
+	void func(){
+		if(count > from.size()){
+			throw std::out_of_range("Cannot deal more than the list has");
+		}
 
-	
+		for(int i = 0; i < count; i++){
+			to.push_back(std::end(from));
+			from.pop_back();
+		}
+	}
 	vector<T> from, to;
 	int count;
 };
@@ -550,6 +558,12 @@ struct Discard : GenRule{
 		from{from},
 		count{count}
 		{};
+
+	void func(){
+		for(int i = 0; i < count; i++){
+			from.pop_back();
+		}
+	}
 
 	vector<T> from;
 	int count;
