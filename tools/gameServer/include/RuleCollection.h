@@ -5,7 +5,7 @@
 #include <vector>
 #include <assert.h>
 #include <map>
-
+#include<chrono>
 namespace RuleCollection {
 
 	struct GenRule{
@@ -217,7 +217,7 @@ namespace RuleCollection {
 		TRACK
 	};
 
-	typedef uint64_t  seconds;
+	typedef std::chrono::seconds seconds;
 
 	struct Timer : GenRule {
 		Timer() {};
@@ -232,6 +232,33 @@ namespace RuleCollection {
 				// 	assert flag == nullptr;
 				// }
 			};
+		
+		void func(){
+			std::vector<GenRule>::iterator iterator = std::begin(rules_to_run);
+			auto startTime = std::chrono::high_resolution_clock::now();
+			auto endTime = startTime + seconds;
+			auto newEndTime;
+			bool conditionToRun = startTime - endTime >= std::chrono::milliseconds(0);
+			switch(mode){
+				case TimerMode::AT_MOST: 
+					while(conditionToRun){
+						Engine::Interpreter:operator(*iterator);
+						if((iterator++) == std::end(rules_to_run)) break; std::cout << "The operation ended early\n";
+					}
+				case TimerMode::EXACT:
+					while(conditionToRun){
+						Engine::Interpreter::operator(*iterator);
+						if((iterator++) == std::end(rules_to_run) && conditionToRun)
+							sleep(std::chrono::high_resolution_clock::now() - endTime); //in case the operation ended early
+					}
+				case TimerMode::TRACK:
+					std::for_each(std::begin(rules_to_run), std::end(rules_to_run), [&](GenRule rule){
+						Engine::Interpreter::operator(rule);
+					});
+					newEndTime = std::chrono::high_resolution_clock::now();
+					std::cout << "Track result: " << newEndTime - startTime << std::endl;
+			}
+		}
 
 		seconds seconds;
 		mode mode;
@@ -332,6 +359,7 @@ namespace RuleCollection {
 		// map<Player, int> scoreboard;
 	};
 
+
 	struct Scores : GenRule {
 		Scores() {};
 		Scores(ScoreBoard &s, const condition &asc) :
@@ -340,6 +368,9 @@ namespace RuleCollection {
 			ascending{asc} // false -> desc
 			{};
 
+		void func(){
+			
+		}
 		ScoreBoard scoreboard;
 		condition ascending;
 	};
@@ -450,12 +481,22 @@ struct Parallelfor : GenRule{
 		rules_to_run{r}
 		{};
 	
-	void parallel(){
+	// void parallel(){
+	// 	for(GenRule rule : rules_to_run){
+	// 		for(element : list){
+	// 			Visitors(rule);
+	// 			//TODO
+	// 		}
+	// 	}
+	// }
+
+	
+	void func(){
 		for(GenRule rule : rules_to_run){
-			for(element : list){
-				Visitors(rule);
-				//TODO
-			}
+			std::for_each(std::execution::seq, std::begin(list), std::end(list), [&](auto object){
+				Engine::Interpreter::operator(object); //visit each and execute sequentially the objects inside parallelfor
+				//TODO Add Test
+			});
 		}
 	}
 	vector<T> list;
@@ -526,6 +567,16 @@ struct Deal : GenRule{
 		count{count}
 		{};
 
+	void func(){
+		if(count > from.size()){
+			throw std::out_of_range("Cannot deal more than the list has");
+		}
+
+		for(int i = 0; i < count; i++){
+			to.push_back(std::end(from));
+			from.pop_back();
+		}
+	}
 	vector<T> from, to;
 	int count;
 };
@@ -538,6 +589,12 @@ struct Discard : GenRule{
 		from{from},
 		count{count}
 		{};
+
+	void func(){
+		for(int i = 0; i < count; i++){
+			from.pop_back();
+		}
+	}
 
 	vector<T> from;
 	int count;
@@ -673,17 +730,19 @@ struct GlobalMessage : GenRule {
 	message value;
 };
 
-//WIP
-class ScoreBoard {
-public:
-	// addScore();
-	// getScore();
-	ScoreBoard();
+// //WIP
+// class ScoreBoard {
+// public:
+// 	// addScore();
+// 	// getScore();
+// 	ScoreBoard();
 
-private:
-	// map<Player, int> scoreboard;
-};
+// private:
+// 	// map<Player, int> scoreboard;
+// };
 
+
+template<typename T>
 struct Scores : GenRule {
 	Scores() {};
 	Scores(ScoreBoard &s, const condition &asc) :
@@ -692,6 +751,9 @@ struct Scores : GenRule {
 		ascending{asc} // false -> desc
 		{};
 
+	void func(){
+
+	}
 	ScoreBoard scoreboard;
 	condition ascending;
 };
