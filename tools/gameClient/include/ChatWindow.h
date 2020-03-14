@@ -68,6 +68,8 @@ public:
 
   void moveAndScale(ChatWindowInfo::Position position, ChatWindowInfo::Dimensions dimensions);
 
+  void refreshWindow();
+
 private:
   std::unique_ptr<ChatWindowImpl> impl;
 };

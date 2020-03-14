@@ -9,6 +9,7 @@
 #include "MenuManager.h"
 #include "ChatWindow.h"
 #include "Client.h"
+#include "Utils.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -82,44 +83,9 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-/**
-Takes a string input and converts it into a json object consisting of 2 fields.
-The first field is the command to be given to the server. The second field is any extra arguments for the command.
-
-If the first word of the input matches a possible command, it is set as the value for the command field.
-Then the rest of the input is put in the data field.
-
-If the first word does not match a possible command, the input is assumed to be a chat message.
-The command is set to !chat, and the entire input is put in the data field.
-**/
 std::string makeServerMessage(const std::string& input) {
 
-    vector<std::string> possibleCommands;
-    possibleCommands.push_back("!createsession");
-    possibleCommands.push_back("!joinsession");
-    possibleCommands.push_back("!leavesession");
-    possibleCommands.push_back("!gameinput");
-    possibleCommands.push_back("!whisper");
-    possibleCommands.push_back("!requestgames");
-
-    std::stringstream commandStream;
-    commandStream << "{ \"command\": \""; // Start the json object and declare the command field
-
-    size_t endOfCommand = input.find(" ");
-    std::string firstWord = input.substr(0,endOfCommand);
-    if ( std::find(possibleCommands.begin(), possibleCommands.end(), firstWord) != possibleCommands.end() ) {
-        commandStream << firstWord;
-    } else {
-        commandStream << "!chat";
-        endOfCommand = 0;
-    }
-
-    commandStream << "\", \"data\": \""; // Declare the data field
-    commandStream << input.substr(endOfCommand, string::npos); // Get the data value
-    commandStream << "\" }"; // End of the json object
-
-    json message = json::parse( commandStream.str() );
-
+    json message = Utils::makeJsonCommand(input);
     return message.dump();
 
 }
@@ -170,13 +136,13 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
                             networking::Client &client ) {
 
     // Main menu
-    MenuPage::NameList mainMenuFields = {};
+    MenuPageInfo::NameList mainMenuFields = {};
 
-    MenuPage::NameList mainMenuItems = { "Join lobby", "Create lobby", "Exit" };
+    MenuPageInfo::NameList mainMenuItems = { "Join lobby", "Create lobby", "Exit" };
 
     // Main menu item functions
     auto moveToJoinLobbyPage = [&menuManager] () {
-        MenuPage::MenuName nextPage = "Join lobby";
+        MenuPageInfo::MenuName nextPage = "Join lobby";
         menuManager.switchPage( nextPage );
     };
 
@@ -193,7 +159,7 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
         //    response = client.receive();
         //}
 
-        MenuPage::NameList gamesList = {"Game 1", "Game 2"};
+        MenuPageInfo::NameList gamesList = {"Game 1", "Game 2"};
             /* TEMP create list from response */
 
         // Define the function that is called when a game is chosen
@@ -207,30 +173,30 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
 
         // Create the "Creat lobby" menu page with the given games
 
-        MenuPage::NameList createLobbyFields = {};
+        MenuPageInfo::NameList createLobbyFields = {};
 
-        MenuPage::NameList createLobbyItems = {};
+        MenuPageInfo::NameList createLobbyItems = {};
 
         for ( auto gameName : gamesList ) {
             createLobbyItems.push_back( gameName );
         }
-        MenuPage::ItemName backString = "back";
+        MenuPageInfo::ItemName backString = "back";
         createLobbyItems.push_back( backString );
 
-        MenuPage::FunctionList createLobbyItemResults = {};
+        MenuPageInfo::FunctionList createLobbyItemResults = {};
 
         for ( int i = 0; i < gamesList.size(); i++ ) {
             createLobbyItemResults.push_back( chooseGame );
         }
 
         auto moveBackToMainMenuPage = [&menuManager] () {
-            MenuPage::MenuName nextPage = "Main menu";
+            MenuPageInfo::MenuName nextPage = "Main menu";
             menuManager.switchPage( nextPage );
         };
         createLobbyItemResults.push_back( moveBackToMainMenuPage );
 
-        MenuPage::MenuName createLobbyName = "Create lobby";
-        std::shared_ptr<MenuPage> createLobbyPage = std::make_shared<MenuPage>( 
+        MenuPageInfo::MenuName createLobbyName = "Create lobby";
+        std::shared_ptr<MenuPageInfo> createLobbyPage = std::make_shared<MenuPageInfo>( 
                                                     createLobbyName,
                                                     createLobbyFields,
                                                     createLobbyItems,
@@ -239,7 +205,7 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
 
         // The games are all loaded and the page is setup, so switch to the page
 
-        MenuPage::MenuName nextPage = "Create lobby";
+        MenuPageInfo::MenuName nextPage = "Create lobby";
         menuManager.switchPage( nextPage );
     };
 
@@ -247,12 +213,12 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
         done = true;
     };
 
-    MenuPage::FunctionList mainMenuItemResults = { moveToJoinLobbyPage,
+    MenuPageInfo::FunctionList mainMenuItemResults = { moveToJoinLobbyPage,
                                                    moveToCreateLobbyPage,
                                                    exitProgram };
 
-    MenuPage::MenuName mainMenuName = "Main menu";
-    std::shared_ptr<MenuPage> mainMenuPage = std::make_shared<MenuPage>( 
+    MenuPageInfo::MenuName mainMenuName = "Main menu";
+    std::shared_ptr<MenuPageInfo> mainMenuPage = std::make_shared<MenuPageInfo>( 
                                              mainMenuName,
                                              mainMenuFields,
                                              mainMenuItems,
@@ -262,14 +228,14 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
 
 
     // Join lobby menu
-    const MenuPage::NameList joinLobbyFields = {"Lobby code:"};
+    const MenuPageInfo::NameList joinLobbyFields = {"Lobby code:"};
 
-    const MenuPage::NameList joinLobbyItems = {"Join", "Back"};
+    const MenuPageInfo::NameList joinLobbyItems = {"Join", "Back"};
 
     // Join lobby item functions
 
     auto moveBackToMainMenuPage = [&menuManager] () {
-        MenuPage::MenuName nextPage = "Main menu";
+        MenuPageInfo::MenuName nextPage = "Main menu";
         menuManager.switchPage( nextPage );
     };
 
@@ -289,16 +255,16 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
         client.send( serverMessage );
     };
 
-    const MenuPage::FunctionList joinLobbyItemResults
+    const MenuPageInfo::FunctionList joinLobbyItemResults
         = {joinLobby, moveBackToMainMenuPage};
 
-    MenuPage::MenuName joinLobbyName = "Join lobby"; 
-    std::shared_ptr<MenuPage> joinLobbyPage = std::make_shared<MenuPage>( 
+    MenuPageInfo::MenuName joinLobbyName = "Join lobby"; 
+    std::shared_ptr<MenuPageInfo> joinLobbyPage = std::make_shared<MenuPageInfo>( 
                                               joinLobbyName,
                                               joinLobbyFields,
                                               joinLobbyItems,
                                               joinLobbyItemResults );
     menuManager.addPage( joinLobbyPage );
 
-    menuManager.setCurrentPage( mainMenuPage );
+    menuManager.setCurrentPage( mainMenuPage->menuName );
 }

@@ -6,9 +6,9 @@
 
 using json = nlohmann::json;
 using Rule = ruleValidationHelper::Rule;
+using RuleMap = std::map<std::string, Rule>;
 
 static JsonDSL dsl;
-static std::map<std::string, Rule> ruleMap = ruleValidationHelper::getRuleMap();
 
 static void validateNecessaryParametersPresent(const json& ruleJson, Rule& ruleDefinition){
     auto paramItBegin = ruleDefinition.getParametersBegin();
@@ -38,6 +38,7 @@ static void validateNecessaryParametersPresent(const json& ruleJson, Rule& ruleD
         std::string paramUsed = ruleDefinition.hasParameter(caseStr) ? caseStr : conditionStr;
 
         for(auto caseObj : cases){
+
             bool hasCaseField = caseObj.contains(paramUsed);
             bool hasNestedRules = caseObj.contains(dsl.getSpecString(JsonDSL::Rules));
 
@@ -61,9 +62,12 @@ static void validateNecessaryParametersPresent(const json& ruleJson, Rule& ruleD
 //this function assumes that the cases parameter is defined 
 //and that its contents contain valid data in the correct format
 static void validateAllParametersAreValid(const json& ruleJson, const Rule& ruleDefinition){
+
+    std::string ruleName = ruleJson[dsl.getRuleParameterString(JsonDSL::Rule)];
+
     for(auto parameter : ruleJson.items()){
         if(!ruleDefinition.hasParameter(parameter.key())){
-            throw std::invalid_argument("An illegal key was found inside one of the rules.");
+            throw std::invalid_argument("An illegal key was found inside the rule: " + ruleName + ".");
         }
     }
 
@@ -74,7 +78,7 @@ static void validateAllParametersAreValid(const json& ruleJson, const Rule& rule
         int numberOfFieldsInsideCase = 2;
         for(auto caseObj : cases){
             if(caseObj.size() != numberOfFieldsInsideCase){
-                throw std::invalid_argument("The case objects must contain only two fields, case/condition and rules.");
+                throw std::invalid_argument("The cases object for rule " + ruleName + " must contain only two fields, case/condition and rules.");
             }
         }
     }
@@ -82,9 +86,9 @@ static void validateAllParametersAreValid(const json& ruleJson, const Rule& rule
 
 //forward declaration of function for validateSingleRule to use
 //necessary because both functions call each other in a recursive fashion
-static void validateRulesStructure(const json& rulesJson);
+static void validateRulesStructure(const json& rulesJson, const RuleMap& ruleMap);
 
-static void validateSingleRule(const json& ruleJson){
+static void validateSingleRule(const json& ruleJson, const RuleMap& ruleMap){
     //check that a rule key is present in the json and has a valid value
     std::string ruleString = dsl.getRuleParameterString(JsonDSL::Rule);
     
@@ -109,28 +113,35 @@ static void validateSingleRule(const json& ruleJson){
         json cases = ruleJson[dsl.getRuleParameterString(JsonDSL::Cases)];
         for(auto caseJson : cases){
             auto nestedRules = caseJson[dsl.getSpecString(JsonDSL::Rules)];
-            validateRulesStructure(nestedRules);
+            validateRulesStructure(nestedRules, ruleMap);
         }
     } else if (ruleDefiniton.hasSetOfRules){
         json nestedRules = ruleJson[dsl.getSpecString(JsonDSL::Rules)];
-        validateRulesStructure(nestedRules);
+        validateRulesStructure(nestedRules, ruleMap);
     }
 }
 
-static void validateRulesStructure(const json& rulesJson){
+static void validateRulesStructure(const json& rulesJson, const RuleMap& ruleMap){
     if(!rulesJson.is_array()){
         throw std::invalid_argument("The rules are expected to be stored in an array.");
     }
 
     for(auto rule : rulesJson){
-        validateSingleRule(rule);
+        validateSingleRule(rule, ruleMap);
     }
 }
 
 VariableValidator RulesValidator::validateRules(const json& j_object){
+    //cannot be outside of function or else this will segfault
+    RuleMap ruleMap = ruleValidationHelper::getRuleMap();
+
     std::string rulesString = dsl.getSpecString(JsonDSL::Rules);
     json rules = j_object[rulesString];
-    validateRulesStructure(rules);
+
+    if(rules.size() != 0){
+        validateRulesStructure(rules, ruleMap);
+    }
+    
     return VariableValidator();
 }
 
