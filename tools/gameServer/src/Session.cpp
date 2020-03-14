@@ -12,54 +12,53 @@ Session::Session(): sessionId{Utils::generateSessionId(6)}{};
 /**
  * This function returns all available connections
  * **/
-std::unordered_map<ConnectionId, Connection> Session::getAllClients(){
-    return clients;
+std::set<User> Session::getAllUsers(){
+    return users;
 };
 
-
-/**
- * This function returns particular connection if exists
- * **/
-Connection Session::getClient(const Connection& connection){
-    if (isClient(connection)){
-        return clients[connection.id];
-    }
-    throw;
-};
-
+int Session::getNumberOfUsers(){
+    return users.size();
+}
 
 /**
  * This function adds new connection to session given session limit has'nt reached yet
  * **/
-void Session::addClient(const Connection& connection){
-    if(clients.size() >= MAX_SESSION_SIZE){
+void Session::addUser(const Connection& connection){
+    if(users.size() >= MAX_SESSION_SIZE){
         throw;// SessSessionLimitExceeded();
     };
-
-    clients[connection.id] = connection;
+    users.insert(User{connection});
 };
 
 
 /**
  * Simple getter for getting sesion id
  * **/
-std::string Session::getSessionId(){
-    return sessionId;
+std::string Session::getSessionId() const{
+    return sessionId.id;
 };
 
 
 /**
  * Check if connection is part of this session
  * **/
-bool Session::isClient(const Connection& connection){
-    return clients.find(connection.id) != clients.end();
+bool Session::isUser(const Connection &connection) const{
+    auto it = find_if(users.begin(), users.end(), [&](const User &user){return user.getConnection() == connection;});
+    return it != users.end();
 }
+
 
 /**
  * Method for removing connection from session
  * **/
-void Session::removeConnection(const Connection &connection){
-    if(clients.find(connection.id) != clients.end()){
-        clients.erase(connection.id);
+void Session::removeUser(const Connection &connection){
+    auto it = find_if(users.begin(), users.end(), [&](const User &user){return user.getConnection() == connection;});
+    if(it != users.end()){
+        users.erase(it);
     }
 }
+
+bool Session::operator< (const Session &session) const{
+    return this->getSessionId() >=  session.getSessionId();
+}
+

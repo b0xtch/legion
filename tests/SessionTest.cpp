@@ -6,9 +6,9 @@
 /**
  * Test session id get created of size 6
  * **/
-Test(Session, isSessionIdCreated){
+TEST(Session, isSessionIdCreated){
     Session session = Session();
-    std::string_view id = session.getSessionId(id);
+    std::string_view id = session.getSessionId();
     ASSERT_EQ(6, id.size());
 }
 
@@ -16,41 +16,41 @@ Test(Session, isSessionIdCreated){
 /**
  * Test adding client
  * **/
-Test(Session, addingClient){
+TEST(Session, addingClient){
     Session session = Session();
     Connection c{};
-    session.addClient(c);
-    ASSERT_TRUE(session.clients.find(c)!=session.clients.end());
+    session.addUser(c);
+    ASSERT_TRUE(session.isUser(c));
 }
 
 
 /**
  * Test removing client
  * **/
-Test(Session, removingClient){
+TEST(Session, removingClient){
     Session session = Session();
     Connection c{};
-    session.addClient(c);
-    session.removeClient(c);
-    ASSERT_EQ(0, session.clients.size());
+    session.addUser(c);
+    session.removeUser(c);
+    ASSERT_EQ(0, session.getNumberOfUsers());
 }
 
 
 /**
  * Test if client is part of session
  * **/
-Test(Session, isClient){
+TEST(Session, isClient){
     Session session = Session();
     Connection c{};
-    session.addClient(c);
-    ASSERT_TRUE(session.isClient(c));
+    session.addUser(c);
+    ASSERT_TRUE(session.isUser(c));
 }
 
 
 /**
  * Test retrieving session id
  * **/
-Test(Session, retrieveSessionId){
+TEST(Session, retrieveSessionId){
     Session session = Session();
     ASSERT_TRUE(session.getSessionId().size() > 0);
 }
