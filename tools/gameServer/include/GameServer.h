@@ -29,10 +29,7 @@ private:
 class GameServer {
 public:
 
-    GameServer(GameServerConfig gameServerConfig, unsigned short port, const std::string& htmlFile);
-    
-    /** Useful for testing the GameServer. Perfroms an std::move on the server. */
-    GameServer(GameServerConfig gameServerConfig, networking::Server& server, SessionManager& sessionManager);
+    GameServer(GameServerConfig gameServerConfig, unsigned short port);
     
     /** Sends out all the messages passed to the intended clients. */
     void send(const std::deque<networking::Message>& messages);
@@ -49,16 +46,12 @@ public:
     /** Returns if the server should keep running. */
     bool getKeepRunning() const;
     
-    /** Returns the location of the HTML file that it was initialized with. */
-    std::string_view getHtmlFile() const;
-    
 private:
     networking::Message generateGameListResponse(networking::Connection recipient);
     void fillGameFilesMap();
     
     bool keepRunning;
     unsigned short port;
-    std::string_view htmlFile;
     networking::Server server;
     SessionManager sessionManager;
     GameServerConfig gameServerConfig;
