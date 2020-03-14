@@ -135,7 +135,7 @@ namespace Engine {
                             case ForEach:
                             case Loop:
                             case Inparallel:
-                            case Parallelfor:   rule->func();
+                            case Parallelfor:
                             case Switch:
                             case When:
                         }

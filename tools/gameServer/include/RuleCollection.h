@@ -462,8 +462,9 @@ struct Parallelfor : GenRule{
 	
 	void func(){
 		for(GenRule rule : rules_to_run){
-			std::for_each(std::execution::seq, std::begin(list), std::end(list), [&](T){
-				
+			std::for_each(std::execution::seq, std::begin(list), std::end(list), [&](auto object){
+				Engine::Interpreter::operator(object); //visit each and execute sequentially the objects inside parallelfor
+				//TODO Add Test
 			});
 		}
 	}
@@ -535,6 +536,8 @@ struct Deal : GenRule{
 		count{count}
 		{};
 
+
+	
 	vector<T> from, to;
 	int count;
 };
