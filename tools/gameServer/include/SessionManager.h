@@ -1,8 +1,7 @@
 #ifndef SESSION_MANAGER_H
 #define SESSION_MANAGER_H
 
-#include <vector>
-#include <unordered_map>
+#include <set>
 #include "Server.h" 
 #include "Session.h"
 
@@ -37,9 +36,9 @@ public:
   Session& getSessionForConnection(const Connection& connection);
 
 private:
-  std::unordered_map<std::string, Session> sessions;
+  std::set<Session> sessions;
   
-  std::vector<Connection> unassignedConnections;
+  std::set<Connection> unassignedConnections;
   
   int MAX_SESSIONS_PER_SERVER;
 };

@@ -10,17 +10,17 @@ using json = nlohmann::json;
  * **/
 SessionManager::SessionManager(int maxSessions): MAX_SESSIONS_PER_SERVER{maxSessions} {}
 
+
 /**
  * function for creating a new session
  * **/
 Session SessionManager::createNewSession(){
-  if(sessions.size() <= MAX_SESSIONS_PER_SERVER){
-    Session session = Session{};
-    sessions[session.getSessionId()] = session;
-    return session;
-  };
-
-  throw; // ServerLimitReached();
+    if(sessions.size() <= MAX_SESSIONS_PER_SERVER){
+        Session session = Session{};
+        sessions.insert(session)
+        return session;
+    };
+    throw; // ServerLimitReached();
 };
 
 
@@ -31,24 +31,21 @@ int SessionManager::getMaxSessions(){
     return MAX_SESSIONS_PER_SERVER;
 }
 
+
 /**
  * Function for adding a new connection which is not part of any session
  * **/
 void SessionManager::addConnection(const Connection& connection){
-  unassignedConnections.push_back(connection);
+    unassignedConnections.insert(connection);
 };
+
 
 /**
  * Function for removing a connection
  * **/
 void SessionManager::removeConnection(const Connection& connection){
-    auto connectionIter = find_if(
-            unassignedConnections.begin(), unassignedConnections.end(), [&](const Connection &connection){
-            return connection == connection;
-        }
-    );
-    if(connectionIter == unassignedConnections.end()){
-        unassignedConnections.erase(connectionIter);
+    if(unassignedConnections.find(connection) != unassignedConnections.end()){
+        unassignedConnections.erase(connection);
     }
 }
 
@@ -56,22 +53,9 @@ void SessionManager::removeConnection(const Connection& connection){
  * Function for adding connection to existing session
  * **/
 void SessionManager::addToSession(const Connection& connectionToAdd, std::string& sessionId){
-    auto connectionIter = find_if(
-            unassignedConnections.begin(), unassignedConnections.end(), [&](const Connection &connection){
-            return connection == connectionToAdd;
-        }
-    );
-    
-    if (connectionIter == unassignedConnections.end()){
-        throw; // ConnectionNotFound();
-    };
-    
-    if (sessions.find(sessionId) == sessions.end()){
-        throw; // SessionNotFound();
-    };
-    
-    std::cout<<"Session found"<< std::endl;
-    sessions[sessionId].addClient(connectionToAdd);
+    auto it = sessions.find_if(sessions.begin(), sessions.end(), [](const Session &session){
+        return session.getSessionId() == sessionId;
+    })
 };
 
 
