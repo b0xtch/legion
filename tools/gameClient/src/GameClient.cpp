@@ -9,6 +9,7 @@
 #include "MenuManager.h"
 #include "ChatWindow.h"
 #include "Client.h"
+#include "Utils.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -82,44 +83,9 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-/**
-Takes a string input and converts it into a json object consisting of 2 fields.
-The first field is the command to be given to the server. The second field is any extra arguments for the command.
-
-If the first word of the input matches a possible command, it is set as the value for the command field.
-Then the rest of the input is put in the data field.
-
-If the first word does not match a possible command, the input is assumed to be a chat message.
-The command is set to !chat, and the entire input is put in the data field.
-**/
 std::string makeServerMessage(const std::string& input) {
 
-    vector<std::string> possibleCommands;
-    possibleCommands.push_back("!createsession");
-    possibleCommands.push_back("!joinsession");
-    possibleCommands.push_back("!leavesession");
-    possibleCommands.push_back("!gameinput");
-    possibleCommands.push_back("!whisper");
-    possibleCommands.push_back("!requestgames");
-
-    std::stringstream commandStream;
-    commandStream << "{ \"command\": \""; // Start the json object and declare the command field
-
-    size_t endOfCommand = input.find(" ");
-    std::string firstWord = input.substr(0,endOfCommand);
-    if ( std::find(possibleCommands.begin(), possibleCommands.end(), firstWord) != possibleCommands.end() ) {
-        commandStream << firstWord;
-    } else {
-        commandStream << "!chat";
-        endOfCommand = 0;
-    }
-
-    commandStream << "\", \"data\": \""; // Declare the data field
-    commandStream << input.substr(endOfCommand, string::npos); // Get the data value
-    commandStream << "\" }"; // End of the json object
-
-    json message = json::parse( commandStream.str() );
-
+    json message = Utils::makeJsonCommand(input);
     return message.dump();
 
 }
