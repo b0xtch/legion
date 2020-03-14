@@ -38,7 +38,7 @@ namespace RuleCollection {
 
 	// helper for loop
 	//templated so that loop can compare any types (int, floats, bool, etc)
-	// NOTE: value2 is passed by copy so that for example when comparing ints, it can be a int var or 8
+	// NOTE: value2 is passed by copy to allow literal comparisons
 	// LOGIC: value1 [logic sign] value2
 	// Example: value1 == value2
 	template <typename T>
