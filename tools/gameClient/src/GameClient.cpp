@@ -31,8 +31,10 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
 std::string makeServerMessage(const std::string& input);
 // Parse json message from server
 std::string processServerMessage(const std::string& response);
+// Get the current client games list (for testing purposes)
+std::string getGamesList();
 
-std::std::vector<std::string> gamesList*; // A list of games on the server, updated when the client sends a !gamerequest command
+std::std::vector<std::string> *gamesList = nullptr; // A list of games on the server, updated when the client sends a !gamerequest command
 
 int main(int argc, char* argv[]) {
 
@@ -156,6 +158,20 @@ std::string processServerMessage(const std::string& response) {
     }
 
     return responseData.str();
+
+}
+
+std::string getGamesList() {
+
+    std::stringstream games;
+
+    if (gamesList != nullptr) {
+        for (auto game : *gamesList) {
+            games << game << " ";
+        }
+    }
+
+    return games.str();
 
 }
 
