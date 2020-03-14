@@ -2,9 +2,7 @@
 #include "gmock/gmock.h"
 #include "GameServer.h"
 
-// WIP: GameServerConfig should be made more testable?
-
-TEST(GameServerConfigTests, constructor) {
+TEST(GameServerConfigTests, parse) {
     GameServerConfig gsc{};
     gsc.parse("{ \"games\":\"./fake/directory/\", \"maxSessions\":373, \"maxConnections\":473 }");
     ASSERT_STREQ("./fake/directory/", gsc.getGameConfigDir().c_str());
@@ -12,25 +10,21 @@ TEST(GameServerConfigTests, constructor) {
     ASSERT_EQ(473, gsc.getMaxConnections());
 }
 
-TEST(GameServerConfigTests, constructorWithBadJson) {
-    // https://stackoverflow.com/a/23271612 (testing exceptions)
+TEST(GameServerConfigTests, parseBadJson) {
     GameServerConfig gsc{};
-    try {
-        gsc.parse("{ ,\"games\":\"./fake/directory/\", \"maxSessions\":373, \"maxConnections\":473 }");
-        FAIL(); // If parse didn't throw an exception, then the test failed.
-    }
-    catch (std::runtime_error& e) {
-        
-    }
+    EXPECT_THROW(gsc.parse(""), std::runtime_error);
+    EXPECT_THROW(gsc.parse("{ ,\"games\":\"./fake/directory/\", \"maxSessions\":373, \"maxConnections\":473 }"), std::runtime_error);
 }
 
-TEST(GameServerConfigTests, constructorWithBadKeys) {
+TEST(GameServerConfigTests, parseBadKeys) {
     GameServerConfig gsc{};
-    try {
-        gsc.parse("{ \"gamez\":\"./fake/directory/\", \"maxSessions\":373, \"maxConnections\":473 }");
-        FAIL();
-    }
-    catch (std::runtime_error& e) {
-        
-    }
+    EXPECT_THROW(gsc.parse("{ \"gamez\":\"./fake/directory/\", \"maxSessions\":373, \"maxConnections\":473 }"), std::runtime_error);
+    EXPECT_THROW(gsc.parse("{ \"games\":\"./fake/directory/\", \"raxSessions\":373, \"maxConnections\":473 }"), std::runtime_error);
+    EXPECT_THROW(gsc.parse("{ \"games\":\"./fake/directory/\", \"maxSessions\":373, \"eaxConnections\":473 }"), std::runtime_error);
+}
+
+TEST(GameServerConfigTests, parseBadValues) {
+    GameServerConfig gsc{};
+    EXPECT_THROW(gsc.parse("{ \"games\":\"./fake/directory/\", \"maxSessions\":\"not a number\", \"maxConnections\":473 }"), std::runtime_error);
+    EXPECT_THROW(gsc.parse("{ \"games\":\"./fake/directory/\", \"maxSessions\":\"not a number\", \"maxConnections\":null }"), std::runtime_error);
 }

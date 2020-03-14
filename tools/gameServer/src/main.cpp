@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
         std::cerr << e.what() << std::endl;
     }
     
-    GameServer gameServer{gsConfig, port, ""};
+    GameServer gameServer{gsConfig, port};
     
     bool keepRunning = true;
     while (keepRunning) {

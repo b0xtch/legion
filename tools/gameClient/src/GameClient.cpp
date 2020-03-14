@@ -177,7 +177,7 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
 
         // Get the list of games
 
-        std::string commadType =  "!requestGames ";
+        std::string commadType =  "!requestgames ";
         std::string serverMessage = makeServerMessage( commadType );
         client.send( serverMessage );
 

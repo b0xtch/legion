@@ -50,30 +50,20 @@ int GameServerConfig::getMaxConnections() const {
     return maxConnections;
 }
 
-GameServer::GameServer(GameServerConfig gameServerConfig, unsigned short port, const std::string& htmlFile) :
+GameServer::GameServer(GameServerConfig gameServerConfig, unsigned short port) :
     gameServerConfig{gameServerConfig},
     keepRunning{true},
     port{port},
-    htmlFile{htmlFile},
-    server{port, htmlFile,
+    server{port, "",
         [this] (networking::Connection c) {
             this->sessionManager.addConnection(c);
         },
         [this] (networking::Connection c) {
-            //this->sessionManager.removeConnection(c); Currently no implementation
+            this->sessionManager.removeConnection(c);
         }},
-    sessionManager{3}
+    sessionManager{gameServerConfig.getMaxSessions()}
 {
     fillGameFilesMap();
-}
-
-GameServer::GameServer(GameServerConfig gameServerConfig, networking::Server& server, SessionManager& sessionManager) :
-    gameServerConfig{gameServerConfig},
-    server{std::move(server)},
-    sessionManager{sessionManager},
-    keepRunning{true}, port{0}, htmlFile{""}
-{
-    
 }
 
 void GameServer::send(const std::deque<networking::Message>& messages) {
@@ -87,14 +77,11 @@ void GameServer::update() {
 void GameServer::receive() {
     auto incomingMessages = server.receive();
     
-    // Check and deal with messages about requesting the list of games.
-    
-    
     // Check and deal with messages about creating/joining rooms or server shutdowns.
     std::deque<networking::Message> batchToSend{};
     
     for (auto& msg : incomingMessages) {
-        std::cout << "[GameServer] " << msg.connection.id << ": " << msg.text << std::endl;
+        std::cout << "[GameServer] RECV " << msg.connection.id << ": " << msg.text << std::endl;
         
         // If message about requesting the list of games or server shutdown, deal with it. Direct the rest to sessionManager.
         ParsedMessage pMsg = ParsedMessage::interpret(msg.text);
@@ -125,32 +112,22 @@ bool GameServer::getKeepRunning() const {
     return keepRunning;
 }
 
-std::string_view GameServer::getHtmlFile() const {
-    return htmlFile;
-}
-
-// TODO change to use ParsedMessage::makeMsg
 networking::Message GameServer::generateGameListResponse(networking::Connection recipient) {
     networking::Message msg;
     msg.connection = recipient;
     
     std::stringstream msgContent;
-    msgContent << "{\"" << PMConstants::KEY_COMMAND << "\":\"" << PMConstants::TYPE_LIST_GAMES << "\",";
-    msgContent << "\"" << PMConstants::KEY_DATA << "\":" << "[";
     
     // The type of "name" is std::pair<std::string gameName, std::string gamePath>
     for (auto& name : gameNameToPathMap) {
         if (name == *gameNameToPathMap.begin()) {
-            msgContent << "\"" << name.first << "\"";
+            msgContent << name.first;
         }
         else {
-            msgContent << "," << "\"" << name.first << "\"";
+            msgContent << "\n" << name.first;
         }
     }
-    
-    msgContent << "]}";
-    msg.text = msgContent.str();
-    
+    msg.text = ParsedMessage::makeMsgText(ParsedMessage::Type::ListGames, msgContent.str());
     return msg;
 }
 
