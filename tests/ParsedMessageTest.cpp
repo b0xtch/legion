@@ -66,10 +66,10 @@ TEST(ParsedMessageTests, interpretBadKeys) {
 }
 
 TEST(ParsedMessageTests, makeMsg_enum) {
-    std::string text = ParsedMessage::makeMsgText(ParsedMessage::Type::ServerStop, "stop! hammer time!");
+    std::string text = ParsedMessage::makeMsgText(ParsedMessage::Type::ServerStop, "");
     std::pair<std::string, std::string> pair = msgTextToPair(text);
     EXPECT_EQ(PMConstants::TYPE_SERVER_STOP, pair.first);
-    EXPECT_EQ("stop! hammer time!", pair.second);
+    EXPECT_EQ("", pair.second);
     
     text = ParsedMessage::makeMsgText(ParsedMessage::Type::CreateSession, "{\"gamename\":\"kahoot 2\"}");
     pair = msgTextToPair(text);
@@ -116,7 +116,12 @@ TEST(ParsedMessageTests, makeMsg_enumBad) {
 
 TEST(ParsedMessageTests, makeMsg_string) {
     std::string text = ParsedMessage::makeMsgText("this is a custom command!", "stop! hammer time!");
-    auto [command, data] = msgTextToPair(text);
-    EXPECT_EQ("this is a custom command!", command);
-    EXPECT_EQ("stop! hammer time!", data);
+    std::pair<std::string, std::string> pair = msgTextToPair(text);
+    EXPECT_EQ("this is a custom command!", pair.first);
+    EXPECT_EQ("stop! hammer time!", pair.second);
+    
+    text = ParsedMessage::makeMsgText("", "");
+    pair = msgTextToPair(text);
+    EXPECT_EQ("", pair.first);
+    EXPECT_EQ("", pair.second);
 }
