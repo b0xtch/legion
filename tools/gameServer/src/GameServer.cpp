@@ -50,30 +50,20 @@ int GameServerConfig::getMaxConnections() const {
     return maxConnections;
 }
 
-GameServer::GameServer(GameServerConfig gameServerConfig, unsigned short port, const std::string& htmlFile) :
+GameServer::GameServer(GameServerConfig gameServerConfig, unsigned short port) :
     gameServerConfig{gameServerConfig},
     keepRunning{true},
     port{port},
-    htmlFile{htmlFile},
-    server{port, htmlFile,
+    server{port, "",
         [this] (networking::Connection c) {
             this->sessionManager.addConnection(c);
         },
         [this] (networking::Connection c) {
-            //this->sessionManager.removeConnection(c); Currently no implementation
+            this->sessionManager.removeConnection(c);
         }},
     sessionManager{3}
 {
     fillGameFilesMap();
-}
-
-GameServer::GameServer(GameServerConfig gameServerConfig, networking::Server& server, SessionManager& sessionManager) :
-    gameServerConfig{gameServerConfig},
-    server{std::move(server)},
-    sessionManager{sessionManager},
-    keepRunning{true}, port{0}, htmlFile{""}
-{
-    
 }
 
 void GameServer::send(const std::deque<networking::Message>& messages) {
@@ -86,9 +76,6 @@ void GameServer::update() {
 
 void GameServer::receive() {
     auto incomingMessages = server.receive();
-    
-    // Check and deal with messages about requesting the list of games.
-    
     
     // Check and deal with messages about creating/joining rooms or server shutdowns.
     std::deque<networking::Message> batchToSend{};
@@ -123,10 +110,6 @@ unsigned short GameServer::getPort() const {
 
 bool GameServer::getKeepRunning() const {
     return keepRunning;
-}
-
-std::string_view GameServer::getHtmlFile() const {
-    return htmlFile;
 }
 
 networking::Message GameServer::generateGameListResponse(networking::Connection recipient) {
