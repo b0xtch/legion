@@ -83,6 +83,20 @@ std::vector<Message> SessionManager::constructMessage(const std::string& message
   return messages;
 }
 
+std::vector<Message> SessionManager::constructMessage(const std::string& message, std::set<Connection>& connections){
+  std::vector<Message> messages;
+  for(auto connection: connections){
+    messages.push_back(
+      Message{connection.id, message}
+    );
+  }
+  return messages;
+}
+
+std::set<Connection> SessionManager::getUnassignedConnections(){
+    return unassignedConnections;
+}
+
 
 /**
  * This function recieves messages and returns new vector of
@@ -104,6 +118,8 @@ std::vector<Message> SessionManager::processMessage(const Message& message){
         Session session = getSessionForConnection(message.connection);
         std::set<User> users = session.getAllUsers();
         return constructMessage(message.text, users);
+        /* std::set<Connection> connections = getUnassignedConnections(); */
+        /* return constructMessage(message.text, connections); */
 
     } else if(type == ParsedMessage::Type::LeaveSession){
         Session session = getSessionForConnection(message.connection);

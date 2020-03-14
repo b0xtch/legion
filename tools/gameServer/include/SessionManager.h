@@ -28,12 +28,16 @@ public:
   std::vector<Message> processMessage(const Message& message);
   
   std::vector<Message> constructMessage(const std::string& message, std::set<User>& users);
+
+  std::vector<Message> constructMessage(const std::string& message, std::set<Connection>& user);
   
   void addConnection(const Connection& connection);
 
   void removeConnection(const Connection& connection);
   
   void sendMessage(const Connection& connection);
+  
+  std::set<Connection> getUnassignedConnections();
   
   Session getSessionForConnection(const Connection& connection);
 
