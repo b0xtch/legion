@@ -15,6 +15,12 @@ GameServerConfig::GameServerConfig() :
     
 }
 
+GameServerConfig::GameServerConfig(const std::string& gameDir, int maxSessions, int maxConnections) :
+    gameDir{gameDir}, maxSessions{maxSessions}, maxConnections{maxConnections}
+{
+    
+}
+
 void GameServerConfig::parse(const std::string& configText) {
     using json = nlohmann::json;
     
@@ -81,7 +87,7 @@ void GameServer::receive() {
     std::deque<networking::Message> batchToSend{};
     
     for (auto& msg : incomingMessages) {
-        std::cout << "[GameServer] RECV " << msg.connection.id << ": " << msg.text << std::endl;
+        //std::cout << "[GameServer] RECV " << msg.connection.id << ": " << msg.text << std::endl;
         
         // If message about requesting the list of games or server shutdown, deal with it. Direct the rest to sessionManager.
         ParsedMessage pMsg = ParsedMessage::interpret(msg.text);

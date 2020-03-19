@@ -7,6 +7,7 @@ add_executable(runAllTests
   Dummy.cpp # This file is a placeholder and tests nothing.
 
   UserTest.cpp
+  GameServerTest.cpp
   GameServerConfigTest.cpp
   ValidatorTest.cpp
   ParsedMessageTest.cpp

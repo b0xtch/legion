@@ -11,6 +11,7 @@
 class GameServerConfig {
 public:
     GameServerConfig();
+    GameServerConfig(const std::string& gameDir, int maxSessions, int maxConnections);
     void parse(const std::string& configData);
     
     std::string getGameConfigDir() const;
