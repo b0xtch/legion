@@ -9,18 +9,31 @@
 #include "Server.h"
 #include "Client.h"
 
-const int CLIENT_RECEIVE_ATTEMPTS = 10;
-const int CLIENT_UPDATE_ATTEMPTS = 5;
-const int SERVER_RECEIVE_ATTEMPTS = 10;
+const int CLIENT_RECEIVE_ATTEMPTS = 3;
+const int CLIENT_UPDATE_ATTEMPTS = 3;
+const int SERVER_UPDATE_ATTEMPTS = 3;
+const int WARMUP_ROUNDS = 3;
+
+std::string makeMessage();
+void sendFromClient(networking::Client& client, const std::string& message);
+void updateClient(networking::Client& client);
+std::string receiveToClient(networking::Client& client);
+void updateGameServer(GameServer& gameServer);
+void warmup(networking::Client& client, GameServer& gameServer);
 
 std::string makeMessage(const std::string& command, const std::string& data) {
     return "{\"command\":\"" + command + "\",\"data\":\"" + data + "\"}";
 }
 
+void sendFromClient(networking::Client& client, const std::string& message) {
+    client.send(message);
+    updateClient(client);
+}
+
 void updateClient(networking::Client& client) {
     for (int i = 0; i < CLIENT_UPDATE_ATTEMPTS; i++) {
         client.update();
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
 
@@ -31,7 +44,7 @@ std::string receiveToClient(networking::Client& client) {
         client.update();
         recv = client.receive();
         attempts++;
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
     if (attempts >= CLIENT_RECEIVE_ATTEMPTS) {
         throw std::runtime_error{"Timeout. Client unable to receive after " + std::to_string(CLIENT_RECEIVE_ATTEMPTS) + " attempts."};
@@ -39,17 +52,26 @@ std::string receiveToClient(networking::Client& client) {
     return recv;
 }
 
-std::string updateGameServer(GameServer& gameServer) {
+void updateGameServer(GameServer& gameServer) {
     try {
-        for (int attempts = 0; attempts < SERVER_RECEIVE_ATTEMPTS && gameServer.getKeepRunning(); attempts++) {
+        for (int attempts = 0; attempts < SERVER_UPDATE_ATTEMPTS && gameServer.getKeepRunning(); attempts++) {
             gameServer.update();
             gameServer.receive();
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
         }
     }
     catch (std::exception& e) {
-        std::cerr << "An error occurred updating the server: " << e.what() << "\nTerminating" << std::endl;
-        return "";
+        std::cerr << "An error occurred updating the server: " << e.what() << std::endl;
+    }
+}
+
+void warmup(networking::Client& client, GameServer& gameServer) {
+    client.update();
+    for (int i = 0; i < WARMUP_ROUNDS; i++) {
+        gameServer.update();
+        gameServer.receive();
+        client.update();
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 }
 
@@ -60,24 +82,23 @@ TEST(GameServerTests, portAndKeepRunning) {
     EXPECT_TRUE(gameServer.getKeepRunning());
     
     networking::Client client{"localhost", "42010"};
-    client.send(makeMessage(PMConstants::TYPE_SERVER_STOP, ""));
-    //updateClient(client);
-    client.update();
-    //updateGameServer(gameServer);
-    gameServer.update();
-    gameServer.receive();
+    
+    warmup(client, gameServer);
+    sendFromClient(client, makeMessage(PMConstants::TYPE_SERVER_STOP, ""));
+    updateGameServer(gameServer);
+    
     EXPECT_FALSE(gameServer.getKeepRunning());
 }
 
 TEST(GameServerTests, responseToRequestGames) {
-    GameServerConfig gsc{"../tests/gameServer/", 10, 100}; // Assumes test is being run from <project-dir>/build/
+    GameServerConfig gsc{"../tests/testFiles/gameServer/", 10, 100}; // Assumes test is being run from <project-dir>/build/
     GameServer gameServer{gsc, 42020};
-    
     networking::Client client{"localhost", "42020"};
-    client.send(makeMessage(PMConstants::TYPE_LIST_GAMES, ""));
-    updateClient(client);
     
+    warmup(client, gameServer);
+    sendFromClient(client, makeMessage(PMConstants::TYPE_LIST_GAMES, ""));
     updateGameServer(gameServer);
+    
     std::string message;
     try {
         message = receiveToClient(client);
@@ -90,7 +111,7 @@ TEST(GameServerTests, responseToRequestGames) {
     EXPECT_EQ(expected, message);
 }
 
-TEST(GameServerTests, sendToClients) {
-    GameServerConfig gsc{"", 10, 100}; // Assumes test is being run from <project-dir>/build/
+TEST(IgnoreGameServerTests, sendToClients) {
+    GameServerConfig gsc{"", 10, 100};
     GameServer gameServer{gsc, 42030};
 }

@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <iostream>
 
 #include "ParsedMessage.h"
 #include "json.hpp"
@@ -63,6 +64,7 @@ GameServer::GameServer(GameServerConfig gameServerConfig, unsigned short port) :
     server{port, "",
         [this] (networking::Connection c) {
             this->sessionManager.addConnection(c);
+            std::cout << "[GameServer] new cnx: " << c.id << std::endl;
         },
         [this] (networking::Connection c) {
             this->sessionManager.removeConnection(c);
@@ -87,7 +89,7 @@ void GameServer::receive() {
     std::deque<networking::Message> batchToSend{};
     
     for (auto& msg : incomingMessages) {
-        //std::cout << "[GameServer] RECV " << msg.connection.id << ": " << msg.text << std::endl;
+        std::cout << "[GameServer] RECV " << msg.connection.id << ": " << msg.text << std::endl;
         
         // If message about requesting the list of games or server shutdown, deal with it. Direct the rest to sessionManager.
         ParsedMessage pMsg = ParsedMessage::interpret(msg.text);
