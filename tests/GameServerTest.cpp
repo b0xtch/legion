@@ -1,6 +1,7 @@
 #include <chrono>
 #include <thread>
 #include <exception>
+#include <memory>
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -75,13 +76,20 @@ void warmup(networking::Client& client, GameServer& gameServer) {
     }
 }
 
-TEST(GameServerTests, portAndKeepRunning) {
+/** Tests the port it was constructed with. */
+TEST(GameServerTests, port) {
     GameServerConfig gsc{};
     GameServer gameServer{gsc, 42010};
     EXPECT_EQ(42010, gameServer.getPort());
+}
+
+/** Tests if the GameServer sets a flag to stop running depending on the message. */
+TEST(GameServerTests, keepRunning) {
+    GameServerConfig gsc{"", 10, 100};
+    GameServer gameServer{gsc, 42020};
     EXPECT_TRUE(gameServer.getKeepRunning());
     
-    networking::Client client{"localhost", "42010"};
+    networking::Client client{"localhost", "42020"};
     
     warmup(client, gameServer);
     sendFromClient(client, makeMessage(PMConstants::TYPE_SERVER_STOP, ""));
@@ -90,10 +98,11 @@ TEST(GameServerTests, portAndKeepRunning) {
     EXPECT_FALSE(gameServer.getKeepRunning());
 }
 
+/** Tests if the GameServer can respond to clients that ask for list of games. */
 TEST(GameServerTests, responseToRequestGames) {
-    GameServerConfig gsc{"../tests/testFiles/gameServer/", 10, 100}; // Assumes test is being run from <project-dir>/build/
-    GameServer gameServer{gsc, 42020};
-    networking::Client client{"localhost", "42020"};
+    GameServerConfig gsc{"../tests/testfiles/gameServer/", 10, 100}; // Assumes test is being run from <project-dir>/build/
+    GameServer gameServer{gsc, 42030};
+    networking::Client client{"localhost", "42030"};
     
     warmup(client, gameServer);
     sendFromClient(client, makeMessage(PMConstants::TYPE_LIST_GAMES, ""));
@@ -109,9 +118,42 @@ TEST(GameServerTests, responseToRequestGames) {
     
     auto expected = makeMessage(PMConstants::TYPE_LIST_GAMES, "Kahoot 2\\nRock Paper Scissors\\nZen Game");
     EXPECT_EQ(expected, message);
+    
+    // Ensure GameServer sends back the same games for any client.
+    
+    networking::Client client2{"localhost", "42030"};
+    
+    warmup(client2, gameServer);
+    sendFromClient(client2, makeMessage(PMConstants::TYPE_LIST_GAMES, ""));
+    updateGameServer(gameServer);
+    
+    try {
+        message = receiveToClient(client2);
+    }
+    catch (std::runtime_error& e) {
+        FAIL() << e.what();
+    }
+    
+    expected = makeMessage(PMConstants::TYPE_LIST_GAMES, "Kahoot 2\\nRock Paper Scissors\\nZen Game");
+    EXPECT_EQ(expected, message);
 }
 
-TEST(IgnoreGameServerTests, sendToClients) {
-    GameServerConfig gsc{"", 10, 100};
-    GameServer gameServer{gsc, 42030};
+/** Tests if the GameServer will cause clients to disconnect when it goes out of scope. */
+TEST(GameServerTests, disconnection) {
+    GameServerConfig gsc{}; // Assumes test is being run from <project-dir>/build/
+    
+    std::unique_ptr<GameServer> gameServerPtr = std::make_unique<GameServer>(gsc, 42040);
+    
+    networking::Client client1{"localhost", "42040"};
+    networking::Client client2{"localhost", "42040"};
+    warmup(client1, *gameServerPtr);
+    warmup(client2, *gameServerPtr);
+    
+    gameServerPtr.reset(nullptr);
+    
+    updateClient(client1);
+    updateClient(client2);
+    
+    EXPECT_TRUE(client1.isDisconnected());
+    EXPECT_TRUE(client2.isDisconnected());
 }

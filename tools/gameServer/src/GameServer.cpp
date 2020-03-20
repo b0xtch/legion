@@ -64,10 +64,11 @@ GameServer::GameServer(GameServerConfig gameServerConfig, unsigned short port) :
     server{port, "",
         [this] (networking::Connection c) {
             this->sessionManager.addConnection(c);
-            std::cout << "[GameServer] new cnx: " << c.id << std::endl;
+            std::cout << "[GameServer] New connection: " << c.id << std::endl;
         },
         [this] (networking::Connection c) {
             this->sessionManager.removeConnection(c);
+            //std::cout << "[GameServer] Disconnection: " << c.id << std::endl;
         }},
     sessionManager{gameServerConfig.getMaxSessions()}
 {
@@ -75,14 +76,22 @@ GameServer::GameServer(GameServerConfig gameServerConfig, unsigned short port) :
 }
 
 void GameServer::send(const std::deque<networking::Message>& messages) {
-    server.send(messages);
+    if (keepRunning) {
+        server.send(messages);
+    }
 }
 
 void GameServer::update() {
-    server.update();
+    if (keepRunning) {
+        server.update();
+    }
 }
 
 void GameServer::receive() {
+    if (!keepRunning) {
+        return;
+    }
+    
     auto incomingMessages = server.receive();
     
     // Check and deal with messages about creating/joining rooms or server shutdowns.
