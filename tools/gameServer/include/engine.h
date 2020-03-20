@@ -45,7 +45,7 @@ using Value = Type<
 >;
 
 struct Object {
-  std::unordered_map<Key, Value> values;
+  std::map<Key, Value> values;
 };
 
 struct Array {
