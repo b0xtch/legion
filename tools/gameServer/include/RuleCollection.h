@@ -467,6 +467,9 @@ struct Inparallel : GenRule {
 	GenRule{"Inparallel"},
 	rules_to_run{r}	
 	{};
+	void func(){
+
+	}
 	
 	vector<GenRule> rules_to_run;
 };
@@ -492,12 +495,13 @@ struct Parallelfor : GenRule{
 
 	
 	void func(){
-		for(GenRule rule : rules_to_run){
-			std::for_each(std::execution::seq, std::begin(list), std::end(list), [&](auto object){
-				Engine::Interpreter::operator(object); //visit each and execute sequentially the objects inside parallelfor
-				//TODO Add Test
-			});
-		}
+		// for(GenRule rule : rules_to_run){
+		// 	std::for_each(std::execution::seq, std::begin(list), std::end(list), [&](auto object){
+		// 		Engine::Interpreter::operator(object); //visit each and execute sequentially the objects inside parallelfor
+		// 		//TODO Add Test
+		// 	});
+		// }
+
 	}
 	vector<T> list;
 	T element;
@@ -656,6 +660,34 @@ struct Timer : GenRule {
 *			Human Input	
 *
 **************************************/
+
+//To scan for Python type {} variable accesses
+//an unordered_map or ordered_map can be desirable
+//as everything that is passed in through the JSON Config
+//are std::string(s) and we can map those std::string(s)
+//to Key(s) in engine.h and basically map it with anything
+//in this specific case, mapping the, for example, {player.name}
+//in "prompt" of InputChoice to a vector of player.name's
+//this would involve combining RuleCollection.h + RuleCollection_TEST.h
+//+ engine.h + player.h + game.h together just for this strategy
+template <typename T>
+struct InputChoice : GenRule{
+	InputChoice(T to, T prompt, T choices, T result):
+		to{to},
+		prompt{prompt},
+		choices{choices},
+		result{result}
+		{}
+	
+	void func(){
+		
+	}
+
+	T to;
+	T prompt;
+	T result;
+	std::chrono::seconds timeout;
+}
 
 // template <typename T> 
 // struct InputText : GenRule {

@@ -132,12 +132,13 @@ namespace Engine {
                     [](Integer& value){value += value;},
                     [](ControlStructures rule){
                         switch(rule){
-                            case ForEach:
-                            case Loop:
-                            case Inparallel:
-                            case Parallelfor:
-                            case Switch:
-                            case When:
+                            case ControlStructures::ForEach:
+                            case ControlStructures::Loop:
+                            case ControlStructures::Inparallel:
+                            case ControlStructures::Parallelfor:
+                            case ControlStructures::Switch:
+                            case ControlStructures::When:
+                            default: break;
                         }
                     },
                     // [](ListOperations rule){},
@@ -153,7 +154,12 @@ namespace Engine {
                     [](Timing rule){
                         rule->func();
                     },
-                    // [](HumanInput rule){},
+                    [](HumanInput rule){
+                        switch(rule){
+                            case HumanInput::InputChoice:
+                                
+                        }
+                    },
                     // [](Output rule){}
                 }, entity);
             }
@@ -204,7 +210,9 @@ namespace Engine {
         Timer timer;
     };
 
-    struct HumanInput{};
+    struct HumanInput{
+        
+    };
 
     struct Output {
         GlobalMessage globalMessage;
