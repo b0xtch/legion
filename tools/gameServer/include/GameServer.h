@@ -29,7 +29,7 @@ private:
 
 class GameServer {
 public:
-
+    /** Create a game server with the given configuration at a given port. */
     GameServer(GameServerConfig gameServerConfig, unsigned short port);
     
     /** Sends out all the messages passed to the intended clients. */
@@ -48,7 +48,10 @@ public:
     bool getKeepRunning() const;
     
 private:
+    /** Create a message representing the list of games that can be played. */
     networking::Message generateGameListResponse(networking::Connection recipient);
+    
+    /** Fills a structure that maps a game name to a game file. */
     void fillGameFilesMap();
     
     bool keepRunning;

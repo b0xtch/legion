@@ -102,12 +102,11 @@ TEST(GameServerTests, keepRunning) {
 TEST(GameServerTests, responseToRequestGames) {
     GameServerConfig gsc{"../tests/testfiles/gameServer/", 10, 100}; // Assumes test is being run from <project-dir>/build/
     GameServer gameServer{gsc, 42030};
-    networking::Client client{"localhost", "42030"};
     
+    networking::Client client{"localhost", "42030"};
     warmup(client, gameServer);
     sendFromClient(client, makeMessage(PMConstants::TYPE_LIST_GAMES, ""));
     updateGameServer(gameServer);
-    
     std::string message;
     try {
         message = receiveToClient(client);
@@ -115,25 +114,19 @@ TEST(GameServerTests, responseToRequestGames) {
     catch (std::runtime_error& e) {
         FAIL() << e.what();
     }
-    
     auto expected = makeMessage(PMConstants::TYPE_LIST_GAMES, "Kahoot 2\\nRock Paper Scissors\\nZen Game");
     EXPECT_EQ(expected, message);
     
-    // Ensure GameServer sends back the same games for any client.
-    
     networking::Client client2{"localhost", "42030"};
-    
     warmup(client2, gameServer);
     sendFromClient(client2, makeMessage(PMConstants::TYPE_LIST_GAMES, ""));
     updateGameServer(gameServer);
-    
     try {
         message = receiveToClient(client2);
     }
     catch (std::runtime_error& e) {
         FAIL() << e.what();
     }
-    
     expected = makeMessage(PMConstants::TYPE_LIST_GAMES, "Kahoot 2\\nRock Paper Scissors\\nZen Game");
     EXPECT_EQ(expected, message);
 }
@@ -149,7 +142,7 @@ TEST(GameServerTests, disconnection) {
     warmup(client1, *gameServerPtr);
     warmup(client2, *gameServerPtr);
     
-    gameServerPtr.reset(nullptr);
+    gameServerPtr.reset(nullptr); // Cause gameServer's destructor to be called
     
     updateClient(client1);
     updateClient(client2);
