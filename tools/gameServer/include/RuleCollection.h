@@ -5,7 +5,7 @@
 #include <vector>
 #include <assert.h>
 #include <map>
-#include<chrono>
+#include <chrono>
 namespace RuleCollection {
 
 	struct GenRule{

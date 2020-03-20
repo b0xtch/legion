@@ -150,7 +150,9 @@ namespace Engine {
                             default: break;
                         }
                     },
-                    // [](Timing rule){},
+                    [](Timing rule){
+                        rule->func();
+                    },
                     // [](HumanInput rule){},
                     // [](Output rule){}
                 }, entity);
