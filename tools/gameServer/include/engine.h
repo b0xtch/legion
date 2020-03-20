@@ -124,6 +124,7 @@ namespace Engine {
                 auto it = object.values.begin();
 
                 std::for_each(it, object.values.end(), [this](const auto &obj) {
+                    std::visit(*this, (Value) obj.first);
                     std::visit(*this, obj.second);
                 });
             }
