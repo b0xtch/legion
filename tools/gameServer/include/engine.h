@@ -10,15 +10,16 @@
 #include "absl/strings"
 
 // for convenience
-using json = nlohmann::json;
-using String = std::string;
+using json    = nlohmann::json;
+using String  = std::string;
 using Integer = int;
 using Boolean = bool;
-using Key = std::string;
+using Key     = std::string;
 struct Object;
 struct Array;
 
-template <typename T> struct rapper {
+template <typename T> 
+struct rapper {
   rapper(T type) { 
     entities.emplace_back(std::move(type)); 
   }
