@@ -93,15 +93,27 @@ namespace Engine {
     // Mainly to interpret the values within the rules
     struct Interpreter {
         void operator()(std::monostate) const {  }
-        void operator()(const String &string) const { // do something with string }
-        void operator()(const Integer num) const { // do something with the int use the arithmetic rule }
+        void operator()(const String &str) const { 
+            std::cout << str << std::endl; 
+            // All values like:
+            // Winners: {winners.elements.name}
+            // Will be proccessed here
+
+
+        }
+        void operator()(const Integer num) const { 
+            std::cout << num << std::endl; 
+            // All values like: 0 
+
+
+
+        }
         void operator()(const Array &array) const {
             // Loop over the an array and extract the values to do processing by recursive visiting
             if (!array.values.empty()) {
                 auto it = array.values.begin();
-                std::visit(*this, *it);
 
-                std::for_each(++it, array.values.end(), [this](const auto &arr) {
+                std::for_each(it, array.values.end(), [this](const auto &arr) {
                     std::visit(*this, arr);
                 });
             }
@@ -110,10 +122,8 @@ namespace Engine {
             // Loop over the an object and extract the key value to do processing by recursive visiting
             if (!object.values.empty()) {
                 auto it = object.values.begin();
-                const auto &[key, value] = *it;
-                std::visit(*this, value);
 
-                std::for_each(++it, object.values.end(), [this](const auto &obj) {
+                std::for_each(it, object.values.end(), [this](const auto &obj) {
                     std::visit(*this, obj.second);
                 });
             }
