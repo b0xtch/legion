@@ -8,10 +8,15 @@
 #include "jsonDSL.h"
 #include "RuleCollection.h"
 #include "absl/strings"
+#include "game.h"
+#include "player.h"
 
 // for convenience
-using json    = nlohmann::json;
-using String  = std::string;
+using PlayerList = GameImpl::Game::getAllPlayers(); //vector of all players, 
+                                                    //this will also have to connect to server 
+                                                    //in order to get realtime results
+using json = nlohmann::json;
+using String = std::string;
 using Integer = int;
 using Boolean = bool;
 using Key     = std::string;
@@ -252,16 +257,17 @@ namespace Engine {
             for (auto& entity : entities){
                 std::visit(overloaded {
                     [](Integer& value){value += value;},
-                    [](ControlStructures rule){
-                        switch(rule){
-                            case ForEach:
-                            case Loop:
-                            case Inparallel:
-                            case Parallelfor:
-                            case Switch:
-                            case When:
-                        }
-                    },
+                    // [](ControlStructures rule){
+                    //     switch(rule){
+                    //         case ControlStructures::ForEach:
+                    //         case ControlStructures::Loop:
+                    //         case ControlStructures::Inparallel:
+                    //         case ControlStructures::Parallelfor:
+                    //         case ControlStructures::Switch:
+                    //         case ControlStructures::When:
+                    //         default: break;
+                    //     }
+                    // },
                     // [](ListOperations rule){},
                     [](Arithmetic rule){
                         switch (rule.operation) {
@@ -272,8 +278,18 @@ namespace Engine {
                             default: break;
                         }
                     },
-                    // [](Timing rule){},
-                    // [](HumanInput rule){},
+                    // [](Timing rule){
+                    //     rule->func();
+                    // },
+                    [](InputChoice rule){
+                        
+                    },
+                    // [](HumanInput rule){
+                    //     switch(rule){
+                    //         case HumanInput::InputChoice:
+                                
+                    //     }
+                    // },
                     // [](Output rule){}
                 }, entity);
             }
@@ -324,7 +340,9 @@ namespace Engine {
         Timer timer;
     };
 
-    struct HumanInput{};
+    struct HumanInput{
+        
+    };
 
     struct Output {
         GlobalMessage globalMessage;
