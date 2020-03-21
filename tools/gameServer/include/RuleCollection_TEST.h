@@ -7,6 +7,9 @@
 #include <iostream>
 #include <algorithm>
 #include <random>
+#include <utility>
+
+#include "player.h"
 
 namespace RuleCollection {
 
@@ -123,6 +126,60 @@ namespace RuleCollection {
 
 	};
 
+
+	// Inparallel
+	// Parallel for
+	// Switch
+
+	//When
+	template <typename T>
+	struct Case : GenRule {
+		Case(Condition<T> &c, RulesList r) :
+			GenRule{"Case"},
+			whenCondition {c},
+			rulesToRun {r}
+			{};
+
+		Condition<T> whenCondition;
+		RulesList rulesToRun;
+
+		void func() override {
+			if(whenCondition()){
+				for(auto rules : rulesToRun){
+					rules->func();
+				}
+			}
+		}
+	};
+
+
+	template <typename T>
+	struct When : GenRule {
+		When(std::vector<Case<T>> &c) :
+			GenRule{"When"},
+			casesToCheck {c} 
+			{};
+
+			std::vector<Case<T>> casesToCheck;
+
+			void func() override {
+				for(auto currentCase : casesToCheck){
+					if(currentCase.whenCondition()){
+						std::cout << "Case valid" << std::endl;
+						currentCase.func();
+						break;
+					}
+				}
+			}
+
+	};
+
+	/*************************************
+	*
+	*		Arithmetic Operations	
+	*
+	**************************************/
+
 	
 	using destination = int&;
 
@@ -174,55 +231,6 @@ namespace RuleCollection {
 	};
 
 
-	// Inparallel
-	// Parallel for
-	// Switch
-
-	//When
-	//look into boost variant
-	template <typename T>
-	struct Case : GenRule {
-		Case(Condition<T> &c, RulesList r) :
-			GenRule{"Case"},
-			whenCondition {c},
-			rulesToRun {r}
-			{};
-
-		Condition<T> whenCondition;
-		RulesList rulesToRun;
-
-		void func() override {
-			if(whenCondition()){
-				for(auto rules : rulesToRun){
-					rules->func();
-				}
-			}
-		}
-	};
-
-
-	template <typename T>
-	struct When : GenRule {
-		When(std::vector<Case<T>> &c) :
-			GenRule{"When"},
-			casesToCheck {c} 
-			{};
-
-			std::vector<Case<T>> casesToCheck;
-
-			void func() override {
-				for(auto currentCase : casesToCheck){
-					if(currentCase.whenCondition()){
-						std::cout << "Case valid" << std::endl;
-						currentCase.func();
-						break;
-					}
-				}
-			}
-
-	};
-
-
 
 
 	/*************************************
@@ -232,7 +240,6 @@ namespace RuleCollection {
 	**************************************/
 
 	//just to print for testing purposes
-
 	template <typename T>
 	void printList(std::vector<T> &list){
 		for(auto x : list){ std::cout << x << " "; }
@@ -316,6 +323,83 @@ namespace RuleCollection {
 	//Deal
 	//Discard
 
+	/*************************************
+	*
+	*				Scores
+	*
+	**************************************/
+
+	struct  ScoreMap {
+		ScoreMap() :
+			scoreboard{} {};
+
+		ScoreMap(std::vector<Player> playerList){
+				for(auto p : playerList){
+					// scoreboard.insert({p.getPlayerPoints(), p.getPlayerName()});
+					scoreboard[p.getPlayerName()] = p.getPlayerPoints();
+				}
+			}
+
+		void add(Player &p){
+			scoreboard[p.getPlayerName()] = p.getPlayerPoints();
+		}
+
+		void remove(Player &p){
+			scoreboard.erase(p.getPlayerName());
+		}
+
+		std::map<pName, int> scoreboard;
+	};
+
+
+
+	struct Scores : GenRule {
+		//default ascending = false
+		Scores(ScoreMap &s) :
+			GenRule{"Scores"},
+			scores{s},
+			ascending{false}
+			{};
+
+		Scores(ScoreMap &s, bool asc) :
+			GenRule{"Scores"},
+			scores{s},
+			ascending{asc} // false -> desc
+			{};
+
+		void func(){
+			
+			//make map key-value elements into pairs
+			for(const auto& [key, value] : scores.scoreboard){
+				scoresPairs.push_back(std::make_pair(value, key));
+			}
+
+			//sort pairs
+			if(ascending){
+				std::sort(scoresPairs.begin(), scoresPairs.end());
+			}
+			else{
+				std::sort(
+					scoresPairs.begin(), 
+					scoresPairs.end(), 
+					[](const std::pair<int,pName> &a, const std::pair<int,pName> &b){
+						return a.first > b.first;
+					});
+			}
+
+			//print scoreboard
+			int i = 1;
+			for(auto p : scoresPairs){
+				std::cout << i << ") \t" << p.second << "\t\t" << p.first << std::endl;
+				i++;
+			}
+
+		}
+
+		ScoreMap &scores;
+		std::vector< std::pair <int,pName> > scoresPairs;
+		bool ascending;
+	};
 
 
 } // namespace RuleCollection
