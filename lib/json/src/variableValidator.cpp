@@ -34,11 +34,27 @@ static bool isLiteralVar(JsonDSL::VariableDataType varType){
 using varCollection = std::vector<std::string>;
 using varMap = std::map<JsonDSL::VariableDataType, varCollection>;
 
-static void collectLiteralVarsWithPrepend(json& j_object, const std::string& prependStr, const varMap& map){
-    
+static void collectLiteralVarsWithPrepend(json& j_object, const std::string& prependStr, varMap& map){
+    for(auto jsonItem : j_object.items()){
+        JsonDSL::VariableDataType varType = checkForDataType(jsonItem);
+
+        if(!isLiteralVar(varType)){
+            continue;
+        }
+
+        std::stringstream ss;
+        ss << prependStr << jsonItem.key();
+
+        map[varType].push_back(ss.str());
+        j_object.erase(jsonItem.key());
+    }
 }
 
-static varMap setUpVarMap(){
+static void collectLiteralVars(json& j_object, varMap& map){
+    collectLiteralVarsWithPrepend(j_object, "", map);
+}
+
+static varMap getEmptyVarMap(){
     varMap map;
     map.insert(std::make_pair(JsonDSL::VarInteger, varCollection{}));
     map.insert(std::make_pair(JsonDSL::VarBoolean, varCollection{}));
@@ -48,7 +64,7 @@ static varMap setUpVarMap(){
     return map;
 }
 
-static void collectAllVariables(const json& j_object){
+static varMap collectAllVariables(const json& j_object){
     std::string configStr = dsl.getSpecString(JsonDSL::Configuration);
     std::string setupStr = dsl.getConfigString(JsonDSL::Setup);
     std::string perPlayerStr = dsl.getSpecString(JsonDSL::PerPlayer);
@@ -62,9 +78,16 @@ static void collectAllVariables(const json& j_object){
     json constVars = j_object[constStr];
     json varVars = j_object[varStr];
 
-    collectLiteralVarsWithPrepend(perPlayerVars, "players");
-    collectLiteralVarsWithPrepend(perAudienceVars, "audience");
+    varMap map = getEmptyVarMap();
+
+    collectLiteralVarsWithPrepend(perPlayerVars, "players.", map);
+    collectLiteralVarsWithPrepend(perAudienceVars, "audience.", map);
+    collectLiteralVars(setupVars, map);
+    collectLiteralVars(constVars, map);
+    collectLiteralVars(varVars, map);
     
+
+    return map;
 }
 
 void VariableValidator::validateVariableUsage(const json& j_object){
