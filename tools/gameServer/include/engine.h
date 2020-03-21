@@ -9,6 +9,41 @@
 #include "RuleCollection.h"
 #include "absl/strings"
 
+/**
+ *      
+ * Control Structures
+        foreach
+        loop
+        inparallel
+        parallelfor
+        switch
+        when
+
+* List Operations
+        extend
+        reverse
+        shuffle
+        sort
+        deal
+        discard
+
+* Arithmetic Operations
+        add
+
+* Timing
+        timer
+
+* Human Input
+        input-choice
+        input-text
+        input-vote
+
+* Output
+        message
+        global-message
+        scores
+*/
+
 // for convenience
 using json    = nlohmann::json;
 using String  = std::string;
@@ -111,20 +146,27 @@ namespace Engine {
         void operator()(const Array &array) const {
             // Loop over the an array and extract the values to do processing by recursive visiting
             if (!array.values.empty()) {
-                auto it = array.values.begin();
-
-                std::for_each(it, array.values.end(), [this](const auto &arr) {
-                    std::visit(*this, arr);
+                std::for_each(array.values.begin(), array.values.end(), [this](const auto &arr) {
+                    std::visit(*this, arr); // This basically visits values within arrays important if arrays have objects
                 });
             }
         }
         void operator()(const Object &object) const {
+            
             // Loop over the an object and extract the key value to do processing by recursive visiting
             if (!object.values.empty()) {
-                auto it = object.values.begin();
 
-                std::for_each(it, object.values.end(), [this](const auto &obj) {
-                    std::visit(*this, (Value) obj.first);
+                // Get type of rule. "rule": "scores"
+                if ( auto rule{ obj.values.find( "rule" ) }; rule != std::end( obj.values )) {
+                    auto[ key, type ] { *rule };
+
+                    std::cout << key << std::endl; 
+                    std::visit(*this, type);
+                    std::cout << std::endl; 
+                }
+
+                std::for_each(object.values.begin(), object.values.end(), [this](const auto &obj) {
+                    std::visit(*this, (Value) obj.first); // this visitation now visits this interpreter but will visit based on the string
                     std::visit(*this, obj.second);
                 });
             }
