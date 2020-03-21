@@ -126,6 +126,60 @@ namespace RuleCollection {
 
 	};
 
+
+	// Inparallel
+	// Parallel for
+	// Switch
+
+	//When
+	template <typename T>
+	struct Case : GenRule {
+		Case(Condition<T> &c, RulesList r) :
+			GenRule{"Case"},
+			whenCondition {c},
+			rulesToRun {r}
+			{};
+
+		Condition<T> whenCondition;
+		RulesList rulesToRun;
+
+		void func() override {
+			if(whenCondition()){
+				for(auto rules : rulesToRun){
+					rules->func();
+				}
+			}
+		}
+	};
+
+
+	template <typename T>
+	struct When : GenRule {
+		When(std::vector<Case<T>> &c) :
+			GenRule{"When"},
+			casesToCheck {c} 
+			{};
+
+			std::vector<Case<T>> casesToCheck;
+
+			void func() override {
+				for(auto currentCase : casesToCheck){
+					if(currentCase.whenCondition()){
+						std::cout << "Case valid" << std::endl;
+						currentCase.func();
+						break;
+					}
+				}
+			}
+
+	};
+
+	/*************************************
+	*
+	*		Arithmetic Operations	
+	*
+	**************************************/
+
 	
 	using destination = int&;
 
@@ -177,55 +231,6 @@ namespace RuleCollection {
 	};
 
 
-	// Inparallel
-	// Parallel for
-	// Switch
-
-	//When
-	//look into boost variant
-	template <typename T>
-	struct Case : GenRule {
-		Case(Condition<T> &c, RulesList r) :
-			GenRule{"Case"},
-			whenCondition {c},
-			rulesToRun {r}
-			{};
-
-		Condition<T> whenCondition;
-		RulesList rulesToRun;
-
-		void func() override {
-			if(whenCondition()){
-				for(auto rules : rulesToRun){
-					rules->func();
-				}
-			}
-		}
-	};
-
-
-	template <typename T>
-	struct When : GenRule {
-		When(std::vector<Case<T>> &c) :
-			GenRule{"When"},
-			casesToCheck {c} 
-			{};
-
-			std::vector<Case<T>> casesToCheck;
-
-			void func() override {
-				for(auto currentCase : casesToCheck){
-					if(currentCase.whenCondition()){
-						std::cout << "Case valid" << std::endl;
-						currentCase.func();
-						break;
-					}
-				}
-			}
-
-	};
-
-
 
 
 	/*************************************
@@ -235,7 +240,6 @@ namespace RuleCollection {
 	**************************************/
 
 	//just to print for testing purposes
-
 	template <typename T>
 	void printList(std::vector<T> &list){
 		for(auto x : list){ std::cout << x << " "; }
