@@ -119,7 +119,9 @@ std::unordered_map<std::string, std::function<void(const Object &obj)>> RuleStru
 
     }},
     {"global-message",  [](const Object &obj){  
+      std::cout << "here" << std::endl; // works
 
+      GlobalMessage({obj});
     }},
     {"scores",          [](const Object &obj){  
       std::cout << "here" << std::endl; // works
@@ -167,8 +169,8 @@ namespace Engine {
             auto lambda = [](auto&& variant) {
             return std::visit(
                 [](auto&& arg) -> Value {
-                using T = std::decay_t<decltype(arg)>;
-                return arg;
+                    using T = std::decay_t<decltype(arg)>;
+                    return arg;
                 },
             variant);
             };
@@ -203,12 +205,11 @@ namespace Engine {
             // Loop over the an array and extract the values to do processing by recursive visiting
             if (!array.values.empty()) {
                 std::for_each(array.values.begin(), array.values.end(), [this](const auto &arr) {
-                    std::visit(*this, arr); // This basically visits values within arrays important if arrays have objects
+                    std::visit(*this, arr);
                 });
             }
         }
         void operator()(const Object &object) const {
-            
             // Loop over the an object and extract the key value to do processing by recursive visiting
             if (!object.values.empty()) {
 
@@ -216,7 +217,7 @@ namespace Engine {
                 if ( auto rule{ obj.values.find( "rule" ) }; rule != std::end( obj.values )) {
                     auto[ key, type ] { *rule };
 
-                    // TODO: Remove these statments
+                    // TODO: Remove these 3 statments
                     std::cout << key << std::endl; 
                     std::visit(*this, type);
                     std::cout << std::endl; 
@@ -230,6 +231,7 @@ namespace Engine {
                         }, Value(type)
                     );
 
+                    // This will be abstract because it will be used heavily by the rule map
                     std::for_each(object.values.begin(), object.values.end(), [this](const auto &obj) {
                         std::visit(*this, (Value) obj.first); // this visitation now visits this interpreter but will visit based on the string
                         std::visit(*this, obj.second);
