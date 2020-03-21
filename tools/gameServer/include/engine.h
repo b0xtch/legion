@@ -9,41 +9,6 @@
 #include "RuleCollection.h"
 #include "absl/strings"
 
-/**
- *      
- * Control Structures
-        foreach
-        loop
-        inparallel
-        parallelfor
-        switch
-        when
-
-* List Operations
-        extend
-        reverse
-        shuffle
-        sort
-        deal
-        discard
-
-* Arithmetic Operations
-        add
-
-* Timing
-        timer
-
-* Human Input
-        input-choice
-        input-text
-        input-vote
-
-* Output
-        message
-        global-message
-        scores
-*/
-
 // for convenience
 using json    = nlohmann::json;
 using String  = std::string;
@@ -87,6 +52,81 @@ struct Array {
   std::vector<Value> values;
 };
 
+// main purpose of this map is to convert each rule object into its appropriate type
+// ex: 
+/**
+ *  { "rule": "scores",
+      "score": "wins",
+      "ascending": false
+    }
+
+    to 
+
+    struct Scores{
+      ....
+    }
+ * */
+std::unordered_map<std::string, std::function<void(const Object &obj)>> RuleStructure{
+    {"foreach",         [](const Object &obj){  
+
+    }},
+    {"loop",            [](const Object &obj){  
+
+    }},
+    {"inparallel",      [](const Object &obj){  
+
+    }},
+    {"parallelfor",     [](const Object &obj){  
+
+    }},
+    {"switch",          [](const Object &obj){  
+
+    }},
+    {"when",            [](const Object &obj){  
+
+    }},
+    {"extend",          [](const Object &obj){  
+
+    }},
+    {"reverse",         [](const Object &obj){  
+
+    }},
+    {"shuffle",         [](const Object &obj){  
+
+    }},
+    {"sort",            [](const Object &obj){  
+
+    }},
+    {"deal",            [](const Object &obj){  
+
+    }},
+    {"discard",         [](const Object &obj){  
+
+    }},
+    {"timer",           [](const Object &obj){  
+
+    }},
+    {"input-choice",    [](const Object &obj){  
+
+    }},
+    {"input-text",      [](const Object &obj){  
+
+    }},
+    {"input-vote",      [](const Object &obj){  
+
+    }},
+    {"message",         [](const Object &obj){  
+
+    }},
+    {"global-message",  [](const Object &obj){  
+
+    }},
+    {"scores",          [](const Object &obj){  
+      std::cout << "here" << std::endl; // works
+      
+    }},
+};
+
 namespace Engine {
 
     /**
@@ -120,6 +160,22 @@ namespace Engine {
             return (Value) arr;
         }
     }
+
+    // STILL IN DEVELOPMENT
+    struct BuildRule {
+        void build() {
+            auto lambda = [](auto&& variant) {
+            return std::visit(
+                [](auto&& arg) -> Value {
+                using T = std::decay_t<decltype(arg)>;
+                return arg;
+                },
+            variant);
+            };
+
+            auto it = lambda(Value(2)); // example code
+        }
+    };
 
     /**
      * Rules
@@ -160,15 +216,25 @@ namespace Engine {
                 if ( auto rule{ obj.values.find( "rule" ) }; rule != std::end( obj.values )) {
                     auto[ key, type ] { *rule };
 
+                    // TODO: Remove these statments
                     std::cout << key << std::endl; 
                     std::visit(*this, type);
                     std::cout << std::endl; 
-                }
 
-                std::for_each(object.values.begin(), object.values.end(), [this](const auto &obj) {
-                    std::visit(*this, (Value) obj.first); // this visitation now visits this interpreter but will visit based on the string
-                    std::visit(*this, obj.second);
-                });
+                    // I need to figure out how i can pass by refrence this obj change it and return it
+                    std::visit([obj](auto&& arg){
+                        using T = std::decay_t<decltype(arg)>; // similar to typeid().name()
+                            if constexpr (std::is_same_v<T, String>) {
+                                RuleStructure[arg](obj);
+                            }
+                        }, Value(type)
+                    );
+
+                    std::for_each(object.values.begin(), object.values.end(), [this](const auto &obj) {
+                        std::visit(*this, (Value) obj.first); // this visitation now visits this interpreter but will visit based on the string
+                        std::visit(*this, obj.second);
+                    });
+                }
             }
         }
     };
