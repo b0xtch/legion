@@ -13,7 +13,8 @@
 
 // for convenience
 using PlayerList = GameImpl::Game::getAllPlayers(); //vector of all players, 
-                                                    //this will also have to connect to server in order to get realtime results
+                                                    //this will also have to connect to server 
+                                                    //in order to get realtime results
 using json = nlohmann::json;
 using String = std::string;
 using Integer = int;
