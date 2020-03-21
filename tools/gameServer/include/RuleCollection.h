@@ -242,18 +242,18 @@ namespace RuleCollection {
 			switch(mode){
 				case TimerMode::AT_MOST: 
 					while(conditionToRun){
-						Engine::Interpreter:operator(*iterator);
+						Engine::Interpreter:operator()(*iterator);
 						if((iterator++) == std::end(rules_to_run)) break; std::cout << "The operation ended early\n";
 					}
 				case TimerMode::EXACT:
 					while(conditionToRun){
-						Engine::Interpreter::operator(*iterator);
+						Engine::Interpreter::operator()(*iterator);
 						if((iterator++) == std::end(rules_to_run) && conditionToRun)
 							sleep(std::chrono::high_resolution_clock::now() - endTime); //in case the operation ended early
 					}
 				case TimerMode::TRACK:
 					std::for_each(std::begin(rules_to_run), std::end(rules_to_run), [&](GenRule rule){
-						Engine::Interpreter::operator(rule);
+						Engine::Interpreter::operator()(rule);
 					});
 					newEndTime = std::chrono::high_resolution_clock::now();
 					std::cout << "Track result: " << newEndTime - startTime << std::endl;
