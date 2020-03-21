@@ -7,6 +7,7 @@
 #include <iostream>
 #include <algorithm>
 #include <random>
+#include <utility>
 
 #include "player.h"
 
@@ -324,45 +325,75 @@ namespace RuleCollection {
 	*
 	**************************************/
 
-	struct  ScoreBoard {
-		ScoreBoard(std::vector<Player> playerList){
+	struct  ScoreMap {
+		ScoreMap() :
+			scoreboard{} {};
+
+		ScoreMap(std::vector<Player> playerList){
 				for(auto p : playerList){
 					// scoreboard.insert({p.getPlayerPoints(), p.getPlayerName()});
 					scoreboard[p.getPlayerName()] = p.getPlayerPoints();
 				}
 			}
 
-		void addScore(Player &p){
+		void add(Player &p){
 			scoreboard[p.getPlayerName()] = p.getPlayerPoints();
 		}
 
-		void removeScore(Player &p){
+		void remove(Player &p){
 			scoreboard.erase(p.getPlayerName());
 		}
 
 		std::map<pName, int> scoreboard;
 	};
 
+
+
 	struct Scores : GenRule {
-		Scores(ScoreBoard &s, bool asc) :
+		//default ascending = false
+		Scores(ScoreMap &s) :
+			GenRule{"Scores"},
+			scores{s},
+			ascending{false}
+			{};
+
+		Scores(ScoreMap &s, bool asc) :
 			GenRule{"Scores"},
 			scores{s},
 			ascending{asc} // false -> desc
 			{};
 
 		void func(){
-			int i = 1;
+			
+			//make map key-value elements into pairs
 			for(const auto& [key, value] : scores.scoreboard){
-				std::cout << i << ": " << key << " - " << value << std::endl;
+				scoresPairs.push_back(std::make_pair(value, key));
+			}
+
+			//sort pairs
+			if(ascending){
+				std::sort(scoresPairs.begin(), scoresPairs.end());
+			}
+			else{
+				std::sort(
+					scoresPairs.begin(), 
+					scoresPairs.end(), 
+					[](const std::pair<int,pName> &a, const std::pair<int,pName> &b){
+						return a.first > b.first;
+					});
+			}
+
+			//print scoreboard
+			int i = 1;
+			for(auto p : scoresPairs){
+				std::cout << i << ") \t" << p.second << "\t\t" << p.first << std::endl;
 				i++;
 			}
 
-			// std::for_each(scoreboard.begin(), scoreboard.end(), [](const auto &mapPair) {
-			// 	std::cout << mapPair.first << " " << mapPair.second << std::endl;
-			// });
 		}
 
-		ScoreBoard &scores;
+		ScoreMap &scores;
+		std::vector< std::pair <int,pName> > scoresPairs;
 		bool ascending;
 	};
 
