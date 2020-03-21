@@ -6,8 +6,9 @@ add_executable(runAllTests
   # Place each file name on a separate line.
   Dummy.cpp # This file is a placeholder and tests nothing.
 
-  UserTests.cpp
-  GameServerConfigTests.cpp
+  UserTest.cpp
+  GameServerTest.cpp
+  GameServerConfigTest.cpp
   ValidatorTest.cpp
   ParsedMessageTest.cpp
   SessionTest.cpp

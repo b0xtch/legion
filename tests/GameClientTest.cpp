@@ -5,6 +5,68 @@
 
 using json = nlohmann::json;
 
+// String Splitting testJson
+
+TEST(clientSplitTest, splitStringIncludeDelim) {
+    std::string testString = "{a}{b}{c}";
+    std::string delimiter = "}";
+
+    std::vector<std::string> expectedList;
+    expectedList.push_back("{a}");
+    expectedList.push_back("{b}");
+    expectedList.push_back("{c}");
+
+    EXPECT_EQ( expectedList, splitString(testString, delimiter, true) );
+}
+
+TEST(clientSplitTest, splitStringExcludeDelim) {
+    std::string testString = "a-b-c";
+    std::string delimiter = "-";
+
+    std::vector<std::string> expectedList;
+    expectedList.push_back("a");
+    expectedList.push_back("b");
+    expectedList.push_back("c");
+
+    EXPECT_EQ( expectedList, splitString(testString, delimiter, false) );
+}
+
+TEST(clientSplitTest, splitStringExcludeNewline) {
+    std::string testString = "a\nb\nc";
+    std::string delimiter = "\n";
+
+    std::vector<std::string> expectedList;
+    expectedList.push_back("a");
+    expectedList.push_back("b");
+    expectedList.push_back("c");
+
+    EXPECT_EQ( expectedList, splitString(testString, delimiter, false) );
+}
+
+TEST(clientSplitTest, splitStringIncludeOnlyDelimiter) {
+    std::string testString = "---";
+    std::string delimiter = "-";
+
+    std::vector<std::string> expectedList;
+    expectedList.push_back("-");
+    expectedList.push_back("-");
+    expectedList.push_back("-");
+
+    EXPECT_EQ( expectedList, splitString(testString, delimiter, true) );
+}
+
+TEST(clientSplitTest, splitStringExcludeOnlyDelimiter) {
+    std::string testString = "---";
+    std::string delimiter = "-";
+
+    std::vector<std::string> expectedList;
+    expectedList.push_back("");
+    expectedList.push_back("");
+    expectedList.push_back("");
+
+    EXPECT_EQ( expectedList, splitString(testString, delimiter, false) );
+}
+
 // Message Creation Tests
 
 json inputToJson(const std::string& testInput) {
