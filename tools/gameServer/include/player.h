@@ -4,21 +4,24 @@
 #include <string>
 #include <utility>
 // using std::unique_ptr
-typedef int variable;
-typedef std::string stringVar;
+
+using pID = int;
+using pName = std::string;
+
 class Player{
 public:
-  Player(const variable&, const stringVar&);
-  // void incrementPoints(const variable&);
-  // void decrementPoints(const variable&);
-  variable getPlayerID();
-  // variable getPlayerPoints();
-  friend bool operator== (const Player&, const Player&);
+  Player(pID, pName);
+  void incrementPoints(int);
+  void decrementPoints(int);
+  pID& getPlayerID();
+  pName& getPlayerName();
+  int& getPlayerPoints();
+  // friend bool operator== (const Player&, const Player&);
 private:
-  variable playerID;
-  // variable playersPoints;
-  stringVar playerName;
-  networking::Connection connection; //Connections from PA, PB, PC to Game class for instantitations
+  pID playerID;
+  pName playerName;
+  int playerPoints;
+  // networking::Connection connection; //Connections from PA, PB, PC to Game class for instantitations
 };
 
 #endif

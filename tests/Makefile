@@ -14,7 +14,7 @@ RULE_INCLUDE := ../tools/gameServer/include/
 
 ENGINE_ARITH_CPP := engine_arith.cpp
 
-RULES_IMPL_CPP := rules_impl_test.cpp
+RULES_IMPL_CPP := rules_impl_test.cpp ../tools/gameServer/src/player.cpp
 
 RULES_IMPL_2_CPP := rules_impl_test_2.cpp
 
