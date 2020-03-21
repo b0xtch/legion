@@ -141,16 +141,16 @@ std::string processServerMessage(const std::string& response) {
             bool endOfData = false;
 
             while (!endOfData) {
-                std::size_t end = data.find(start, "\n");
+                std::size_t end = data.find("\n", start);
                 if (end == std::string::npos) {
                     endOfData = true;
                 } else {
                     newGamesList.push_back(data.substr(start, end-start));
-                    start += 2;
+                    start += 1;
                 }
             }
 
-            newGamesList.push_back(data.substr(start);
+            newGamesList.push_back(data.substr(start));
         }
 
         gamesList = &newGamesList;
