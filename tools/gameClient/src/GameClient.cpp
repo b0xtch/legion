@@ -27,6 +27,8 @@ using json = nlohmann::json;
 void initializeMenuPages( MenuManager &menuManager, bool &done,
                             networking::Client &client );
 
+// Split a string into multiple substrings
+std::vector<std::string> splitString(const std::string& text, const std::string& splitOn, bool includeSplit);
 // Make json message for server
 std::string makeServerMessage(const std::string& input);
 // Parse json message from server
@@ -75,7 +77,11 @@ int main(int argc, char* argv[]) {
 
         auto response = client.receive();
         if (!response.empty()) {
-            menuManager.displayChatText(processServerMessage(response));
+            std::vector<std::string> commands = splitString(response, "}", true);
+
+            for ( auto cmd : commands ) {
+                menuManager.displayChatText(processServerMessage(cmd));
+            }
         }
 
         menuManager.update();
@@ -85,6 +91,35 @@ int main(int argc, char* argv[]) {
     menuManager.cleanup();
 
     return 0;
+}
+
+/**
+Takes a string and a second string to split the first string on.
+Splits the first string and returns a list of all the new substrings.
+The substrings will include the next split string if includeSplit is true.
+**/
+std::vector<std::string> splitString(const std::string& text, const std::string& splitOn, bool includeSplit) {
+
+    std::vector<std::string> splits;
+
+    if (!text.empty()) {
+        std::size_t start = 0;
+        std::size_t end = text.find(splitOn);
+
+        while (end != std::string::npos) {
+            if (includeSplit) {
+                splits.push_back(text.substr(start, end-start+splitOn.length()));
+            } else {
+                splits.push_back(text.substr(start, end-start));
+            }
+            start = end + splitOn.length();
+            end = text.find(splitOn, start);
+        }
+
+        splits.push_back(text.substr(start));
+    }
+
+    return splits;
 }
 
 std::string makeServerMessage(const std::string& input) {
@@ -129,32 +164,8 @@ std::string processServerMessage(const std::string& response) {
         // To do: function that displays game data
         responseData << data;
     } else if (command == "!requestgames") {
-
-        /**
-        The list of games on the server is given as a string, separated by new lines.
-        The following code separates the string into individual games and updates the global gamesList vector.
-        **/
-        std::vector<std::string> newGamesList;
-
-        if (!data.empty()) {
-            std::size_t start = 0;
-            bool endOfData = false;
-
-            while (!endOfData) {
-                std::size_t end = data.find(start, "\n");
-                if (end == std::string::npos) {
-                    endOfData = true;
-                } else {
-                    newGamesList.push_back(data.substr(start, end-start));
-                    start += 2;
-                }
-            }
-
-            newGamesList.push_back(data.substr(start);
-        }
-
+        std::vector<std::string> newGamesList = splitString(data, "\n", false);
         gamesList = &newGamesList;
-
     }
 
     return responseData.str();
