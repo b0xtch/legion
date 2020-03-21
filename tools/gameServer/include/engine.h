@@ -8,8 +8,12 @@
 #include "jsonDSL.h"
 #include "RuleCollection.h"
 #include "absl/strings"
+#include "game.h"
+#include "player.h"
 
 // for convenience
+using PlayerList = GameImpl::Game::getAllPlayers(); //vector of all players, 
+                                                    //this will also have to connect to server in order to get realtime results
 using json = nlohmann::json;
 using String = std::string;
 using Integer = int;
@@ -49,6 +53,20 @@ struct Object {
 
 struct Array {
   std::vector<Value> values;
+};
+
+struct InputChoice{
+    InputChoice(Key to, Key prompt, Key choices, Key result):
+        to(to),
+        prompt(prompt),
+        choices(choices),
+        result(result)
+        {}
+    
+    Key to;
+    Key prompt;
+    Key choices;
+    Key result;
 };
 
 namespace Engine {
@@ -151,8 +169,11 @@ namespace Engine {
                             default: break;
                         }
                     },
-                    [](Timing rule){
-                        rule->func();
+                    // [](Timing rule){
+                    //     rule->func();
+                    // },
+                    [](InputChoice rule){
+                        
                     },
                     // [](HumanInput rule){
                     //     switch(rule){
