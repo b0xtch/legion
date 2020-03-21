@@ -187,7 +187,7 @@ namespace Engine {
         vars.values.emplace_back(recursiveValueMap(in));
         Rules rules { vars };
 
-        std::visit(Interpreter{}, (Value) rules.rules);
+        std::visit(Interpreter{}, rules.rules);
 
         return rules;
     }

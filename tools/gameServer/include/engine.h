@@ -283,26 +283,26 @@ namespace Engine {
     };
 
     struct Constants {
-        Object constants;
+        Value constants;
     };
 
     struct Variables {
-        Object variables;
+        Value variables;
     };
 
     struct PerPlayer {
-        Object perPlayer;
+        Value perPlayer;
     };
 
     struct PerAudience {
-        Object perAudience;
+        Value perAudience;
     };
 
     struct Configuration {
         String name;
         PlayerCount playerCount; // an object type can be used here i guess
         bool audience;
-        Object setup;
+        Value setup;
     };
 
     /**
