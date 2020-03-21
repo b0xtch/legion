@@ -12,30 +12,6 @@ static JsonDSL dsl;
 static std::vector<std::string> intFuncs = {"upfrom"};
 static std::vector<std::string> listFuncs = {"collect", "contains", "elements"};
 
-std::optional<JsonDSL::VariableDataType> getLiteralTypeFromString(std::string expression, varMap& map){
-    auto boolVars = map[JsonDSL::VarBoolean];
-    auto strVars = map[JsonDSL::VarString];
-    auto intVars = map[JsonDSL::VarInteger];
-
-    auto boolIt = std::find(boolVars.begin(), boolVars.end(), expression);
-    auto strIt = std::find(strVars.begin(), strVars.end(), expression);
-    auto intIt = std::find(intVars.begin(), intVars.end(), expression);
-
-    bool boolFound = boolIt != boolVars.end();
-    bool strFound = strIt != strVars.end();
-    bool intFound = intIt != intVars.end();
-
-    if(boolFound){
-        return JsonDSL::VarBoolean;
-    }else if(strFound){
-        return JsonDSL::VarString;
-    }else if(intFound){
-        return JsonDSL::VarInteger;
-    }else {
-        return {};
-    }
-}
-
 JsonDSL::VariableDataType getTypeFromJson(const nlohmann::json& j_object){
     if(j_object.is_number_integer()){
         return JsonDSL::VarInteger;
@@ -62,6 +38,30 @@ static bool isLiteralVar(JsonDSL::VariableDataType varType){
 
 using varCollection = std::vector<std::string>;
 using varMap = std::map<JsonDSL::VariableDataType, varCollection>;
+
+std::optional<JsonDSL::VariableDataType> getLiteralTypeFromString(std::string expression, varMap& map){
+    auto boolVars = map[JsonDSL::VarBoolean];
+    auto strVars = map[JsonDSL::VarString];
+    auto intVars = map[JsonDSL::VarInteger];
+
+    auto boolIt = std::find(boolVars.begin(), boolVars.end(), expression);
+    auto strIt = std::find(strVars.begin(), strVars.end(), expression);
+    auto intIt = std::find(intVars.begin(), intVars.end(), expression);
+
+    bool boolFound = boolIt != boolVars.end();
+    bool strFound = strIt != strVars.end();
+    bool intFound = intIt != intVars.end();
+
+    if(boolFound){
+        return JsonDSL::VarBoolean;
+    }else if(strFound){
+        return JsonDSL::VarString;
+    }else if(intFound){
+        return JsonDSL::VarInteger;
+    }else {
+        return {};
+    }
+}
 
 static void collectLiteralVarsWithPrepend(json& j_object, const std::string& prependStr, varMap& map){
     for(auto jsonItem : j_object.items()){
@@ -124,11 +124,11 @@ bool isBooleanExpression(std::string expression, varMap& map){
     auto firstVarType = getLiteralTypeFromString(args.at(0), map);
     auto secondVarType = getLiteralTypeFromString(args.at(1), map);
 
-    if(!firstVarType.has_value || !secondVarType.has_value){
+    if(!firstVarType.has_value() || !secondVarType.has_value()){
         return false;
     }
     
-    return firstVarType.value == secondVarType.value;
+    return firstVarType.value() == secondVarType.value();
 }
 
 
