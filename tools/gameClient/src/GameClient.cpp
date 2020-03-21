@@ -28,7 +28,7 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
                             networking::Client &client );
 
 // Split a string into multiple substrings
-std::vector<std::string> splitString(const std::string& text, const std::string& splitOn, bool includeSplit)
+std::vector<std::string> splitString(const std::string& text, const std::string& splitOn, bool includeSplit);
 // Make json message for server
 std::string makeServerMessage(const std::string& input);
 // Parse json message from server
