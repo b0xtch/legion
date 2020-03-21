@@ -47,7 +47,7 @@ public:
     };
 
     enum VariableDataType{
-        VarInteger, VarBoolean, VarString, VarStructured
+        VarInteger, VarBoolean, VarString, VarList, VarObject
     };
 
     // TODO:: get it to kevs standard
