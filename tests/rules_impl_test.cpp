@@ -2,7 +2,8 @@
 #include <string>
 #include <iostream>
 
-#include <RuleCollection_TEST.h>
+#include "RuleCollection_TEST.h"
+#include "player.h"
 
 int retMod2(int x) {return x % 2;}
 int retMod3(int x) {return x % 3;}
@@ -119,6 +120,27 @@ int main()
     listOpSort.func();
 
 
+    std::cout << "\n\n=============== Testing Scores =============== \n\n" << std::endl; 
+
+    Player p1{1, "Alex"};
+    Player p2{2, "Bob"};
+    Player p3{3, "Chuck"};
+    Player p4{4, "Dennis"};
+    Player p5{5, "Earl"};
+
+    p1.incrementPoints(420);
+    p2.incrementPoints(420);
+    p3.incrementPoints(6969);
+    p4.incrementPoints(333);
+    p5.incrementPoints(5000);
+
+    std::vector<Player> playerList = {p1,p2,p3,p4,p5};
+
+    RuleCollection::ScoreBoard sb {playerList};
+
+    RuleCollection::Scores scores {sb, true};
+
+    scores.func();
 
     return 0;
 }

@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <random>
 
+#include "player.h"
+
 namespace RuleCollection {
 
 	struct GenRule{
@@ -316,6 +318,53 @@ namespace RuleCollection {
 	//Deal
 	//Discard
 
+	/*************************************
+	*
+	*				Scores
+	*
+	**************************************/
+
+	struct  ScoreBoard {
+		ScoreBoard(std::vector<Player> playerList){
+				for(auto p : playerList){
+					// scoreboard.insert({p.getPlayerPoints(), p.getPlayerName()});
+					scoreboard[p.getPlayerName()] = p.getPlayerPoints();
+				}
+			}
+
+		void addScore(Player &p){
+			scoreboard[p.getPlayerName()] = p.getPlayerPoints();
+		}
+
+		void removeScore(Player &p){
+			scoreboard.erase(p.getPlayerName());
+		}
+
+		std::map<pName, int> scoreboard;
+	};
+
+	struct Scores : GenRule {
+		Scores(ScoreBoard &s, bool asc) :
+			GenRule{"Scores"},
+			scores{s},
+			ascending{asc} // false -> desc
+			{};
+
+		void func(){
+			int i = 1;
+			for(const auto& [key, value] : scores.scoreboard){
+				std::cout << i << ": " << key << " - " << value << std::endl;
+				i++;
+			}
+
+			// std::for_each(scoreboard.begin(), scoreboard.end(), [](const auto &mapPair) {
+			// 	std::cout << mapPair.first << " " << mapPair.second << std::endl;
+			// });
+		}
+
+		ScoreBoard &scores;
+		bool ascending;
+	};
 
 
 } // namespace RuleCollection
