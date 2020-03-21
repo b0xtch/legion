@@ -68,6 +68,7 @@ struct InputChoice{
     Key prompt;
     Key choices;
     Key result;
+    //lots of TODOs
 };
 
 namespace Engine {
