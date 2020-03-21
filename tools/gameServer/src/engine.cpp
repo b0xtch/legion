@@ -182,11 +182,13 @@ namespace Engine {
 
     template <typename T> 
     Rules EngineImpl<T>::setRules(const T& in){
-        Rules rules;
+        Array vars;
 
-        // TODO
+        vars.values.emplace_back(recursiveValueMap(in));
+        Rules rules { vars };
 
-        this->gameConfig["rules"] = rules;
+        std::visit(Interpreter{}, rules.rules);
+
         return rules;
     }
 
