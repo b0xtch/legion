@@ -8,8 +8,8 @@
 #include "json.hpp"
 
 namespace PMConstants {
-    const std::string KEY_COMMAND = "command";
-    const std::string KEY_DATA = "data";
+    const std::string JKEY_COMMAND = "command";
+    const std::string JKEY_DATA = "data";
     
     const std::string TYPE_SERVER_STOP = "serverstop";
     const std::string TYPE_CREATE_SESSION = "!createsession";

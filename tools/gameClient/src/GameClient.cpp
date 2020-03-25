@@ -10,8 +10,11 @@
 #include "ChatWindow.h"
 #include "Client.h"
 #include "Utils.h"
+#include "ParsedMessage.h"
 
-using namespace std;
+#include <thread>
+#include <chrono>
+
 using json = nlohmann::json;
 
 // Basic menu structure referenced from:
@@ -199,19 +202,20 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
         MenuPageInfo::MenuName nextPage = "Join lobby";
         menuManager.switchPage( nextPage );
     };
-
+    
     auto moveToCreateLobbyPage = [&client, &menuManager] () {
 
         // Get the list of games
+        std::string serverMessage = ParsedMessage::makeMsgText(PMConstants::TYPE_LIST_GAMES, "");
+        client.send(serverMessage);
 
-        std::string commadType =  "!requestgames ";
-        std::string serverMessage = makeServerMessage( commadType );
-        client.send( serverMessage );
-
+        client.update();
         auto response = client.receive();
-        //while ( response.empty() ) {
-        //    response = client.receive();
-        //}
+        while ( response.empty() ) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            client.update();
+            response = client.receive();
+        }
 
         MenuPageInfo::NameList gamesList = {"Game 1", "Game 2"};
             /* TEMP create list from response */

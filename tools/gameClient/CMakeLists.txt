@@ -33,6 +33,7 @@ target_link_libraries(GameClient
   -lform
   nlohmann_json
   Utils
+  ParsedMessage
 )
 
 install(TARGETS GameClient
