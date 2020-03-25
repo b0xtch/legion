@@ -66,7 +66,6 @@ void MenuManager::addPage( std::shared_ptr<MenuPageInfo> pageInfo ) {
                                      page->getForm()->cols + 1, 
                                      1, 1 );
         set_form_sub( page->getForm(), formInner );
-
     } 
 
     // Initialize menu

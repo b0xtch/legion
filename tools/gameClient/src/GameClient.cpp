@@ -4,6 +4,7 @@
 #include <sstream>
 #include <memory>
 #include "json.hpp"
+#include <iostream>
 
 #include "MenuPage.h"
 #include "MenuManager.h"
@@ -42,7 +43,6 @@ std::string getGamesList();
 std::vector<std::string> *gamesList = nullptr; // A list of games on the server, updated when the client sends a !gamerequest command
 
 int main(int argc, char* argv[]) {
-
     if (argc < 3) {
         printf("Incorrect Arguments");
         return 1;
@@ -298,18 +298,19 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
     };
 
     auto joinLobby = [&done, &client, &menuManager] () {
-        std::string commadType =  "!joinsession ";
-
         std::shared_ptr<MenuPage> joinPage = menuManager.getCurrentPage();
+        form_driver(joinPage->getForm(), REQ_VALIDATION);
+        
         MenuPage::FieldList *connectFields = joinPage->getFieldList();
 
         const int lobbyCodeInputIndex = 1;
         const char *lobbyCode =
             field_buffer( connectFields->at( lobbyCodeInputIndex ), 0 );
         std::string lobbyCodeString(lobbyCode);
-
-        std::string command = commadType + lobbyCodeString;
-        std::string serverMessage = makeServerMessage( command );
+        // Bug: if field is not filled to max length, only spaces will be sent.
+        // What's happening: https://alan-mushi.github.io/2014/11/30/ncurses-forms.html
+        // Fix: https://stackoverflow.com/questions/18493449/how-to-read-an-incomplete-form-field-ncurses-c
+        std::string serverMessage = ParsedMessage::makeMsgText(PMConstants::TYPE_JOIN_SESSION, lobbyCodeString);
         client.send( serverMessage );
     };
 
