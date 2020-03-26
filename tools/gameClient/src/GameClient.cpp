@@ -189,6 +189,58 @@ std::string getGamesList() {
 
 }
 
+void initializePages() {
+    // Build page for creating lobby
+    // Build page for joining lobby
+    // Build page for main menu
+    // Set the current page to main menu
+}
+
+MenuPageInfo::MenuName buildJoinLobbyPage(MenuManager &menuManager, networking::Client& client) {
+    
+    // Join lobby menu
+    const MenuPageInfo::NameList joinLobbyFields = {"Lobby code:"};
+
+    const MenuPageInfo::NameList joinLobbyItems = {"Join", "Back"};
+
+    // Join lobby item functions
+
+    auto moveBackToMainMenuPage = [&menuManager] () {
+        MenuPageInfo::MenuName nextPage = "Main menu";
+        menuManager.switchPage( nextPage );
+    };
+
+    auto joinLobby = [&client, &menuManager] () {
+        std::shared_ptr<MenuPage> joinPage = menuManager.getCurrentPage();
+        form_driver(joinPage->getForm(), REQ_VALIDATION);
+        
+        MenuPage::FieldList *connectFields = joinPage->getFieldList();
+
+        const int lobbyCodeInputIndex = 1;
+        const char *lobbyCode =
+            field_buffer( connectFields->at( lobbyCodeInputIndex ), 0 );
+        std::string lobbyCodeString(lobbyCode);
+        // Bug: if field is not filled to max length, only spaces will be sent.
+        // What's happening: https://alan-mushi.github.io/2014/11/30/ncurses-forms.html
+        // Fix: https://stackoverflow.com/questions/18493449/how-to-read-an-incomplete-form-field-ncurses-c
+        std::string serverMessage = ParsedMessage::makeMsgText(PMConstants::TYPE_JOIN_SESSION, lobbyCodeString);
+        client.send( serverMessage );
+    };
+
+    const MenuPageInfo::FunctionList joinLobbyItemResults
+        = {joinLobby, moveBackToMainMenuPage};
+
+    MenuPageInfo::MenuName joinLobbyName = "Join lobby";
+    std::shared_ptr<MenuPageInfo> joinLobbyPage = std::make_shared<MenuPageInfo>(
+                                              joinLobbyName,
+                                              joinLobbyFields,
+                                              joinLobbyItems,
+                                              joinLobbyItemResults );
+    menuManager.addPage( joinLobbyPage );
+    
+    return "Join lobby";
+}
+
 void initializeMenuPages( MenuManager &menuManager, bool &done,
                             networking::Client &client ) {
 
@@ -197,9 +249,11 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
 
     MenuPageInfo::NameList mainMenuItems = { "Join lobby", "Create lobby", "Exit" };
 
+    MenuPageInfo::MenuName joinLobbyMenuName = buildJoinLobbyPage(menuManager, client);
+
     // Main menu item functions
-    auto moveToJoinLobbyPage = [&menuManager] () {
-        MenuPageInfo::MenuName nextPage = "Join lobby";
+    auto moveToJoinLobbyPage = [&menuManager, joinLobbyMenuName] () {
+        MenuPageInfo::MenuName nextPage = joinLobbyMenuName;
         menuManager.switchPage( nextPage );
     };
     
@@ -284,7 +338,7 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
     menuManager.addPage( mainMenuPage );
 
 
-
+    /*
     // Join lobby menu
     const MenuPageInfo::NameList joinLobbyFields = {"Lobby code:"};
 
@@ -323,7 +377,7 @@ void initializeMenuPages( MenuManager &menuManager, bool &done,
                                               joinLobbyFields,
                                               joinLobbyItems,
                                               joinLobbyItemResults );
-    menuManager.addPage( joinLobbyPage );
+    menuManager.addPage( joinLobbyPage );*/
 
     menuManager.setCurrentPage( mainMenuPage->menuName );
 }
