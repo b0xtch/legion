@@ -18,7 +18,8 @@ namespace PMConstants {
     const std::string TYPE_LEAVE_SESSION = "!leavesession";
     const std::string TYPE_CHAT = "!chat";
     const std::string TYPE_WHISPER = "!whisper";
-    const std::string TYPE_LIST_GAMES = "!requestgames";
+    const std::string TYPE_REQUEST_GAMES = "!requestgames";
+    const std::string TYPE_GAME_INPUT = "!gameinput";
 };
 
 class ParsedMessage {
@@ -33,7 +34,8 @@ public:
         LeaveSession,
         Chat,
         Whisper,
-        ListGames
+        RequestGames,
+        GameInput
     };
     
     Type getType() const;

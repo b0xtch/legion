@@ -46,9 +46,13 @@ TEST(ParsedMessageTests, interpret) {
     EXPECT_EQ(ParsedMessage::Type::Whisper, pm.getType());
     EXPECT_EQ("{\"msg\":\"we are updating our privacy policy\"}", pm.getData());
     
-    pm = ParsedMessage::interpret(makeMessageString(PMConstants::TYPE_LIST_GAMES, ""));
-    EXPECT_EQ(ParsedMessage::Type::ListGames, pm.getType());
+    pm = ParsedMessage::interpret(makeMessageString(PMConstants::TYPE_REQUEST_GAMES, ""));
+    EXPECT_EQ(ParsedMessage::Type::RequestGames, pm.getType());
     EXPECT_EQ("", pm.getData());
+    
+    pm = ParsedMessage::interpret(makeMessageString(PMConstants::TYPE_GAME_INPUT, "{\\\"throw\\\":\\\"paper\\\"}"));
+    EXPECT_EQ(ParsedMessage::Type::GameInput, pm.getType());
+    EXPECT_EQ("{\"throw\":\"paper\"}", pm.getData());
     
     pm = ParsedMessage::interpret(makeMessageString("some other command", "{\\\"throw\\\":\\\"paper\\\"}"));
     EXPECT_EQ(ParsedMessage::Type::Other, pm.getType());
@@ -101,11 +105,15 @@ TEST(ParsedMessageTests, makeMsg_enum) {
     EXPECT_EQ(PMConstants::TYPE_WHISPER, pair.first);
     EXPECT_EQ("pssst!", pair.second);
     
-    text = ParsedMessage::makeMsgText(ParsedMessage::Type::ListGames, "let's see what we've got here...");
+    text = ParsedMessage::makeMsgText(ParsedMessage::Type::RequestGames, "let's see what we've got here...");
     pair = msgTextToPair(text);
-    EXPECT_EQ(PMConstants::TYPE_LIST_GAMES, pair.first);
+    EXPECT_EQ(PMConstants::TYPE_REQUEST_GAMES, pair.first);
     EXPECT_EQ("let's see what we've got here...", pair.second);
     
+    text = ParsedMessage::makeMsgText(ParsedMessage::Type::GameInput, "pick an answer");
+    pair = msgTextToPair(text);
+    EXPECT_EQ(PMConstants::TYPE_GAME_INPUT, pair.first);
+    EXPECT_EQ("pick an answer", pair.second);
 }
 
 TEST(ParsedMessageTests, makeMsg_enumBad) {

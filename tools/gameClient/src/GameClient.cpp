@@ -237,7 +237,7 @@ MenuPageInfo::MenuName buildJoinLobbyPage(MenuManager &menuManager, networking::
 }
 
 std::string requestGames(networking::Client& client) {
-    std::string serverMessage = ParsedMessage::makeMsgText(PMConstants::TYPE_LIST_GAMES, "");
+    std::string serverMessage = ParsedMessage::makeMsgText(PMConstants::TYPE_REQUEST_GAMES, "");
     client.send(serverMessage);
     
     client.update();
@@ -250,7 +250,7 @@ std::string requestGames(networking::Client& client) {
     
     ParsedMessage pm = ParsedMessage::interpret(response);
     
-    if (pm.getType() == ParsedMessage::Type::ListGames) {
+    if (pm.getType() == ParsedMessage::Type::RequestGames) {
         return pm.getData();
     }
     else {

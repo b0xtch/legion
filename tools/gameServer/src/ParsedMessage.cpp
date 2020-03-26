@@ -98,7 +98,8 @@ void ParsedMessage::initializePairs() {
         commandAndTypePairs.push_back({PMConstants::TYPE_LEAVE_SESSION, ParsedMessage::Type::LeaveSession});
         commandAndTypePairs.push_back({PMConstants::TYPE_CHAT, ParsedMessage::Type::Chat});
         commandAndTypePairs.push_back({PMConstants::TYPE_WHISPER, ParsedMessage::Type::Whisper});
-        commandAndTypePairs.push_back({PMConstants::TYPE_LIST_GAMES, ParsedMessage::Type::ListGames});
+        commandAndTypePairs.push_back({PMConstants::TYPE_REQUEST_GAMES, ParsedMessage::Type::RequestGames});
+        commandAndTypePairs.push_back({PMConstants::TYPE_GAME_INPUT, ParsedMessage::Type::GameInput});
         
         initialized = true;
     }

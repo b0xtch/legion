@@ -105,7 +105,7 @@ TEST(GameServerTests, responseToRequestGames) {
     
     networking::Client client{"localhost", "42030"};
     warmup(client, gameServer);
-    sendFromClient(client, makeMessage(PMConstants::TYPE_LIST_GAMES, ""));
+    sendFromClient(client, makeMessage(PMConstants::TYPE_REQUEST_GAMES, ""));
     updateGameServer(gameServer);
     std::string message;
     try {
@@ -114,12 +114,12 @@ TEST(GameServerTests, responseToRequestGames) {
     catch (std::runtime_error& e) {
         FAIL() << e.what();
     }
-    auto expected = makeMessage(PMConstants::TYPE_LIST_GAMES, "Kahoot 2\\nRock Paper Scissors\\nZen Game");
+    auto expected = makeMessage(PMConstants::TYPE_REQUEST_GAMES, "Kahoot 2\\nRock Paper Scissors\\nZen Game");
     EXPECT_EQ(expected, message);
     
     networking::Client client2{"localhost", "42030"};
     warmup(client2, gameServer);
-    sendFromClient(client2, makeMessage(PMConstants::TYPE_LIST_GAMES, ""));
+    sendFromClient(client2, makeMessage(PMConstants::TYPE_REQUEST_GAMES, ""));
     updateGameServer(gameServer);
     try {
         message = receiveToClient(client2);
@@ -127,7 +127,7 @@ TEST(GameServerTests, responseToRequestGames) {
     catch (std::runtime_error& e) {
         FAIL() << e.what();
     }
-    expected = makeMessage(PMConstants::TYPE_LIST_GAMES, "Kahoot 2\\nRock Paper Scissors\\nZen Game");
+    expected = makeMessage(PMConstants::TYPE_REQUEST_GAMES, "Kahoot 2\\nRock Paper Scissors\\nZen Game");
     EXPECT_EQ(expected, message);
 }
 
