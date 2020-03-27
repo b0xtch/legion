@@ -134,21 +134,26 @@ int main()
     p4.incrementPoints(333);
     p5.incrementPoints(5000);
 
-    std::vector<Player> playerList = {p1,p2};
+    // std::vector<Player> playerList = {p1,p2,p3,p4};
 
-    RuleCollection::ScoreMap sb{playerList};
-
-    sb.add(p3);
-    sb.add(p4);
-    sb.add(p5);
+    RuleCollection::playerVector playerList = {p1,p2,p3,p4};
 
     std::cout << "\nascending scoreboard:\n" <<std::endl;
-    RuleCollection::Scores scores1 {sb, true};
+    RuleCollection::Scores scores1 {playerList, true};
     scores1.func();
 
     std::cout << "\ndescending scoreboard:\n" <<std::endl;
-    RuleCollection::Scores scores2 {sb};
+    RuleCollection::Scores scores2 {playerList};
     scores2.func();
+
+    std::cout << "\nchanging scores:\n" <<std::endl;
+    p3.decrementPoints(1000);
+    p4.incrementPoints(555);
+
+    scores1.add(p5);
+    scores1.remove(p1);
+
+    scores1.func();
 
     return 0;
 }

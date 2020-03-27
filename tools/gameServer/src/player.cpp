@@ -20,4 +20,7 @@ pName& Player::getPlayerName(){return playerName;}
 
 int& Player::getPlayerPoints(){return playerPoints;}
 
-// bool operator== (const Player& player1, const Player& player2){ return player1->playerID == player2->playerID; }
+// compiler gives must take exactly 1 arg error if defined here
+// bool Player::operator== (const Player& player1, const Player& player2){
+// 	return player1.playerID == player2.playerID;
+// }
