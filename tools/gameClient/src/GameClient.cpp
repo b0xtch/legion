@@ -5,7 +5,7 @@
 #include <memory>
 #include "json.hpp"
 #include <iostream>
-
+#include <algorithm>
 #include "MenuPage.h"
 #include "MenuManager.h"
 #include "ChatWindow.h"
@@ -37,10 +37,14 @@ std::vector<std::string> splitString(const std::string& text, const std::string&
 std::string makeServerMessage(const std::string& input);
 // Parse json message from server
 std::string processServerMessage(const std::string& response);
-// Get the current client games list (for testing purposes)
-std::string getGamesList();
 
-std::vector<std::string> *gamesList = nullptr; // A list of games on the server, updated when the client sends a !gamerequest command
+MenuPageInfo::MenuName buildJoinLobbyPage(MenuManager &menuManager, networking::Client& client);
+std::string requestGames(networking::Client& client);
+void displayGames(MenuManager& menuManager, const std::string& games);
+MenuPageInfo::MenuName buildCreateLobbyPage(MenuManager &menuManager, networking::Client& client);
+
+
+std::vector<std::string> gamesList; // A list of games on the server, updated when the client sends a !gamerequest command
 
 int main(int argc, char* argv[]) {
     if (argc < 3) {
@@ -118,8 +122,11 @@ std::vector<std::string> splitString(const std::string& text, const std::string&
             start = end + splitOn.length();
             end = text.find(splitOn, start);
         }
-
-        splits.push_back(text.substr(start));
+        
+        std::string toPush = text.substr(start);
+        if (!toPush.empty()) {
+            splits.push_back(toPush);
+        }
     }
 
     return splits;
@@ -167,25 +174,10 @@ std::string processServerMessage(const std::string& response) {
         // To do: function that displays game data
         responseData << data;
     } else if (command == "!requestgames") {
-        std::vector<std::string> newGamesList = splitString(data, "\n", false);
-        gamesList = &newGamesList;
+        gamesList = splitString(data, "\n", false);
     }
 
     return responseData.str();
-
-}
-
-std::string getGamesList() {
-
-    std::stringstream games;
-
-    if (gamesList != nullptr) {
-        for (auto game : *gamesList) {
-            games << game << " ";
-        }
-    }
-
-    return games.str();
 
 }
 
@@ -194,6 +186,10 @@ void initializePages(MenuManager &menuManager, bool &done, networking::Client &c
     // Build page for joining lobby
     // Build page for main menu
     // Set the current page to main menu
+}
+
+MenuPageInfo::MenuName buildInLobbyPage(MenuManager &menuManager, networking::Client& client) {
+    
 }
 
 MenuPageInfo::MenuName buildJoinLobbyPage(MenuManager &menuManager, networking::Client& client) {
@@ -259,7 +255,8 @@ std::string requestGames(networking::Client& client) {
 }
 
 void displayGames(MenuManager& menuManager, const std::string& games) {
-    std::vector<std::string> gamesList = splitString(games, "\n", false);
+    gamesList = splitString(games, "\n", false);
+    
     std::stringstream ss{};
     ss << "--- GAME TITLES\n";
     for (auto& game : gamesList) {
@@ -292,9 +289,6 @@ MenuPageInfo::MenuName buildCreateLobbyPage(MenuManager &menuManager, networking
         const char *gameTitle =
             field_buffer( connectFields->at( gameTitleInputIndex ), 0 );
         std::string gameTitleString(gameTitle);
-        // Bug: if field is not filled to max length, only spaces will be sent.
-        // What's happening: https://alan-mushi.github.io/2014/11/30/ncurses-forms.html
-        // Fix: https://stackoverflow.com/questions/18493449/how-to-read-an-incomplete-form-field-ncurses-c
         std::string serverMessage = ParsedMessage::makeMsgText(PMConstants::TYPE_CREATE_SESSION, gameTitleString);
         client.send( serverMessage );
     };
@@ -309,8 +303,7 @@ MenuPageInfo::MenuName buildCreateLobbyPage(MenuManager &menuManager, networking
     return "Create lobby";
 }
 
-void initializeMenuPages( MenuManager &menuManager, bool &done,
-                            networking::Client &client ) {
+void initializeMenuPages( MenuManager &menuManager, bool &done, networking::Client &client ) {
 
     // Main menu
     MenuPageInfo::NameList mainMenuFields = {};
