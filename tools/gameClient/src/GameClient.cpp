@@ -195,7 +195,7 @@ MenuPageInfo::MenuName buildInLobbyPage(MenuManager &menuManager, networking::Cl
 MenuPageInfo::MenuName buildJoinLobbyPage(MenuManager &menuManager, networking::Client& client) {
     
     // Join lobby menu
-    const MenuPageInfo::NameList joinLobbyFields = {"Lobby code:"};
+    const MenuPageInfo::NameList joinLobbyFields = {"Type in the lobby code:"};
 
     const MenuPageInfo::NameList joinLobbyItems = {"Join", "Back"};
 
@@ -269,7 +269,7 @@ void displayGames(MenuManager& menuManager, const std::string& games) {
 
 MenuPageInfo::MenuName buildCreateLobbyPage(MenuManager &menuManager, networking::Client& client) {
     
-    const MenuPageInfo::NameList createLobbyFields = {"Game title:"};
+    const MenuPageInfo::NameList createLobbyFields = {"Enter the game title:"};
 
     const MenuPageInfo::NameList createLobbyItems = {"Create", "Back"};
 

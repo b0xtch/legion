@@ -30,7 +30,7 @@ void MenuManager::addPage( std::shared_ptr<MenuPageInfo> pageInfo ) {
     // Initialize forms
     if ( !pageInfo->fieldNames.empty() ) {
         const int marginLeftField = 3;
-        const int maxFieldLength = 15;
+        const int maxFieldLength = 30;
         int fieldIndex = 0;
 
         for ( int i = 0; i < pageInfo->fieldNames.size() * 2; i++ ) {
@@ -48,8 +48,8 @@ void MenuManager::addPage( std::shared_ptr<MenuPageInfo> pageInfo ) {
             } 
             else {
                 // Add field entry to form
-                page->addField( new_field( 1, maxFieldLength, marginTop + i - 1, 
-                                          marginLeft + maxFieldLength, 0, 0 ) );
+                page->addField( new_field( 1, maxFieldLength, marginTop + i, 
+                                          marginLeftField, 0, 0 ) );
                 field_opts_on( page->getFieldList()->at( i ), O_ACTIVE );
                 field_opts_on( page->getFieldList()->at( i ), O_EDIT );
                 set_field_back( page->getFieldList()->at( i ), A_UNDERLINE ); 
