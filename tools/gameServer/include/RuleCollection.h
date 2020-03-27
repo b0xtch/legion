@@ -560,8 +560,11 @@ namespace RuleCollection {
 			{};
 
 		void add(Player &p){
-					playerList.push_back(p);
-				}
+			auto result = std::find(playerList.begin(), playerList.end(), p);
+			if(result != playerList.end()){
+				playerList.push_back(p);
+			}
+		}
 
 		void remove(Player &p){
 			auto result = std::find(playerList.begin(), playerList.end(), p);

@@ -153,6 +153,10 @@ int main()
     scores1.add(p5);
     scores1.remove(p1);
 
+    //redundant adds (should have no effect)
+    scores1.add(p5);
+    scores1.add(p5);
+
     scores1.func();
 
     return 0;
