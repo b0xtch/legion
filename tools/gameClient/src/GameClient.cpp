@@ -28,8 +28,7 @@ using json = nlohmann::json;
 //    https://alan-mushi.github.io/2015/05/26/simple-ncurses-popup-in-C.html
 
 
-void initializeMenuPages( MenuManager &menuManager, bool &done,
-                            networking::Client &client );
+
 
 // Split a string into multiple substrings
 std::vector<std::string> splitString(const std::string& text, const std::string& splitOn, bool includeSplit);
@@ -38,10 +37,18 @@ std::string makeServerMessage(const std::string& input);
 // Parse json message from server
 std::string processServerMessage(const std::string& response);
 
+const std::string MENU_NAME_JOIN_LOBBY = "Join lobby";
 MenuPageInfo::MenuName buildJoinLobbyPage(MenuManager &menuManager, networking::Client& client);
+
 std::string requestGames(networking::Client& client);
+
 void displayGames(MenuManager& menuManager, const std::string& games);
+
+const std::string MENU_NAME_CREATE_LOBBY = "Create lobby";
 MenuPageInfo::MenuName buildCreateLobbyPage(MenuManager &menuManager, networking::Client& client);
+
+const std::string MENU_NAME_MAIN_MENU = "Main menu";
+void initializeMenuPages(MenuManager &menuManager, bool &done, networking::Client &client);
 
 
 std::vector<std::string> gamesList; // A list of games on the server, updated when the client sends a !gamerequest command
@@ -147,38 +154,37 @@ Returns a string that is to be displayed to the client user.
 std::string processServerMessage(const std::string& response) {
 
     std::stringstream responseData;
-    json serverJson = json::parse(response);
+    ParsedMessage serverMsg = ParsedMessage::interpret(response);
 
-    std::string command = serverJson.at("command");
-    std::string data = serverJson.at("data");
+    ParsedMessage::Type command = serverMsg.getType();
+    std::string data = serverMsg.getData();
 
-    if (command == "!chat") {
+    if (command == ParsedMessage::Type::Chat) {
         responseData << data;
-    } else if (command == "!createsession") {
+    } else if (command == ParsedMessage::Type::CreateSession) {
         if (data == "fail") {
             responseData << "There was an error creating the session.";
         } else {
             responseData << "The session was successfully created.";
         }
-    } else if (command == "!joinsession") {
+    } else if (command == ParsedMessage::Type::JoinSession) {
         if (data == "fail") {
             responseData << "There was an error joining the session.";
         } else {
             responseData << "You have joined the session: " << data;
         }
-    } else if (command == "!leavesession") {
+    } else if (command == ParsedMessage::Type::LeaveSession) {
         responseData << "You have left the session: " << data;
-    } else if (command == "!gameinput") {
+    } else if (command == ParsedMessage::Type::GameInput) {
         // WIP
         // The game output should be displayed in a separate log than the chat
         // To do: function that displays game data
         responseData << data;
-    } else if (command == "!requestgames") {
+    } else if (command == ParsedMessage::Type::RequestGames) {
         gamesList = splitString(data, "\n", false);
     }
 
     return responseData.str();
-
 }
 
 void initializePages(MenuManager &menuManager, bool &done, networking::Client &client) {
@@ -186,10 +192,11 @@ void initializePages(MenuManager &menuManager, bool &done, networking::Client &c
     // Build page for joining lobby
     // Build page for main menu
     // Set the current page to main menu
+    // WIP
 }
 
 MenuPageInfo::MenuName buildInLobbyPage(MenuManager &menuManager, networking::Client& client) {
-    
+    // WIP
 }
 
 MenuPageInfo::MenuName buildJoinLobbyPage(MenuManager &menuManager, networking::Client& client) {
@@ -201,7 +208,7 @@ MenuPageInfo::MenuName buildJoinLobbyPage(MenuManager &menuManager, networking::
 
     // Join lobby item functions
     auto moveBackToMainMenuPage = [&menuManager] () {
-        MenuPageInfo::MenuName nextPage = "Main menu";
+        MenuPageInfo::MenuName nextPage = MENU_NAME_MAIN_MENU;
         menuManager.switchPage( nextPage );
     };
 
@@ -225,11 +232,11 @@ MenuPageInfo::MenuName buildJoinLobbyPage(MenuManager &menuManager, networking::
     const MenuPageInfo::FunctionList joinLobbyItemResults
         = {joinLobby, moveBackToMainMenuPage};
 
-    MenuPageInfo::MenuName joinLobbyName = "Join lobby";
+    MenuPageInfo::MenuName joinLobbyName = MENU_NAME_JOIN_LOBBY;
     auto joinLobbyPage = std::make_shared<MenuPageInfo>(joinLobbyName, joinLobbyFields, joinLobbyItems, joinLobbyItemResults );
     menuManager.addPage( joinLobbyPage );
     
-    return "Join lobby";
+    return MENU_NAME_JOIN_LOBBY;
 }
 
 std::string requestGames(networking::Client& client) {
@@ -275,7 +282,7 @@ MenuPageInfo::MenuName buildCreateLobbyPage(MenuManager &menuManager, networking
 
     // Join lobby item functions
     auto moveBackToMainMenuPage = [&menuManager] () {
-        MenuPageInfo::MenuName nextPage = "Main menu";
+        MenuPageInfo::MenuName nextPage = MENU_NAME_MAIN_MENU;
         menuManager.switchPage( nextPage );
     };
 
@@ -296,11 +303,11 @@ MenuPageInfo::MenuName buildCreateLobbyPage(MenuManager &menuManager, networking
     const MenuPageInfo::FunctionList createLobbyItemResults
         = {createLobby, moveBackToMainMenuPage};
 
-    MenuPageInfo::MenuName createLobbyName = "Create lobby";
+    MenuPageInfo::MenuName createLobbyName = MENU_NAME_CREATE_LOBBY;
     auto createLobbyPage = std::make_shared<MenuPageInfo>(createLobbyName, createLobbyFields, createLobbyItems, createLobbyItemResults );
     menuManager.addPage( createLobbyPage );
     
-    return "Create lobby";
+    return MENU_NAME_CREATE_LOBBY;
 }
 
 void initializeMenuPages( MenuManager &menuManager, bool &done, networking::Client &client ) {
@@ -335,7 +342,7 @@ void initializeMenuPages( MenuManager &menuManager, bool &done, networking::Clie
                                                    moveToCreateLobbyPage,
                                                    exitProgram };
 
-    MenuPageInfo::MenuName mainMenuName = "Main menu";
+    MenuPageInfo::MenuName mainMenuName = MENU_NAME_MAIN_MENU;
     std::shared_ptr<MenuPageInfo> mainMenuPage = std::make_shared<MenuPageInfo>(
                                              mainMenuName,
                                              mainMenuFields,
