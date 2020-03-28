@@ -10,7 +10,7 @@ using json = nlohmann::json;
 static JsonDSL dsl;
 
 static std::vector<std::string> intFuncs = {"upfrom"};
-static std::vector<std::string> listFuncs = {"collect", "contains", "elements"};
+static std::vector<std::string> listFuncs = {"collect", "contains"};
 
 JsonDSL::VariableDataType getTypeFromJson(const nlohmann::json& j_object){
     if(j_object.is_number_integer()){
@@ -63,13 +63,9 @@ std::optional<JsonDSL::VariableDataType> getLiteralTypeFromString(std::string ex
     }
 }
 
-static void collectLiteralVarsWithPrepend(json& j_object, const std::string& prependStr, varMap& map){
+static void collectTopLevelVarsWithPrepend(json& j_object, const std::string& prependStr, varMap& map){
     for(auto jsonItem : j_object.items()){
         JsonDSL::VariableDataType varType = getTypeFromJson(jsonItem);
-
-        if(!isLiteralVar(varType)){
-            continue;
-        }
 
         std::stringstream varName;
         varName << prependStr << jsonItem.key();
@@ -79,8 +75,50 @@ static void collectLiteralVarsWithPrepend(json& j_object, const std::string& pre
     }
 }
 
-static void collectLiteralVars(json& j_object, varMap& map){
-    collectLiteralVarsWithPrepend(j_object, "", map);
+static void collectTopLevelVars(json& j_object, varMap& map){
+    collectTopLevelVarsWithPrepend(j_object, "", map);
+}
+
+
+//function to extract the user defined variables inside setup
+//and place them in the appropriate vector based on its type
+static void collectSetUpVars(json& setupJson, varMap& map){
+    for(auto jsonItem : setupJson.items()){
+        JsonDSL::VariableDataType varType = getTypeFromJson(jsonItem);
+
+        bool notObject = varType != JsonDSL::VarObject;
+
+        std::string kindField = dsl.getSetupString(JsonDSL::Kind);
+        bool notUserDef = jsonItem.value().contains(kindField);
+        
+        if(notObject || notUserDef){
+            continue;
+        }
+
+        std::string intVar = dsl.getSetupString(JsonDSL::KindInteger);
+        std::string boolVar = dsl.getSetupString(JsonDSL::KindBoolean);
+        std::string strVar = dsl.getSetupString(JsonDSL::KindString);
+        std::string listVar = dsl.getSetupString(JsonDSL::KindMultipleChoice);
+        std::string objVar = dsl.getSetupString(JsonDSL::KindQuestionAnswer);
+
+        if(jsonItem.value()[kindField] == intVar){
+            varType = JsonDSL::VarInteger;
+        } else if (jsonItem.value()[kindField] == boolVar){ 
+            varType = JsonDSL::VarBoolean;
+        } else if (jsonItem.value()[kindField] == strVar){ 
+            varType = JsonDSL::VarString;
+        } else if (jsonItem.value()[kindField] == listVar){ 
+            varType = JsonDSL::VarList;
+        } else if (jsonItem.value()[kindField] == objVar){ 
+            varType = JsonDSL::VarObject;
+        }
+
+        std::stringstream varName;
+        varName << "Configuration." << jsonItem.key();
+
+        map[varType].push_back(varName.str());
+        setupJson.erase(jsonItem.key());
+    }
 }
 
 static varMap getEmptyVarMap(){
@@ -93,11 +131,78 @@ static varMap getEmptyVarMap(){
     return map;
 }
 
-static void collectListAndObjects(json& j_object, varMap& map){
+static void collectObjectVarsWithPrepend(json& j_object,const std::string& prependStr, varMap& map){
+    for(auto jsonItem : j_object.items()){
+        JsonDSL::VariableDataType varType = getTypeFromJson(jsonItem);
+
+        if(varType != JsonDSL::VarObject){
+            continue;
+        }
+
+        std::string objName = prependStr + jsonItem.key();
+        collectTopLevelVarsWithPrepend(jsonItem.value(), objName, map);
+
+    }
+}
+
+static void collectObjectVars(json& j_object, varMap& map){
+    collectObjectVarsWithPrepend(j_object, "", map);
+}
+
+static bool isFunctionCall(std::string expression){
 
 }
 
-bool isBooleanExpression(std::string expression, varMap& map){
+static bool isValidFunctionCall(std::string expression, varMap& map){
+
+}
+
+static bool literalIsDefined(std::string literal, varMap& map){
+    std::vector<varCollection> literalMaps = {map[JsonDSL::VarBoolean], map[JsonDSL::VarInteger], map[JsonDSL::VarString]};
+    auto it = std::find_if(literalMaps.begin(), literalMaps.end(), 
+        [&literal](const varCollection& collection){
+            return std::find(collection.begin(), collection.end(), literal) != collection.end();
+        });
+    return it != literalMaps.end();
+}
+
+static std::pair<size_t, size_t> getVarAccessLocations(const std::string& strVal){
+    std::string accessStart = "{";
+    std::string accessEnd = "}";
+
+    auto startLoc = strVal.find(accessStart);
+    auto endLoc = strVal.find(accessEnd);
+    
+    bool accessNotFound = startLoc == std::string::npos || endLoc == std::string::npos;
+    bool endIsBeforeStart = startLoc < endLoc;
+
+    if (accessNotFound || endIsBeforeStart){
+        startLoc = std::string::npos;
+        endLoc = std::string::npos;
+    }
+
+    return std::make_pair(startLoc, endLoc);
+}
+
+static std::vector<std::string> extractStringVarAccesses(std::string strVal){
+    std::vector<std::string> vars;
+    auto varAccess = getVarAccessLocations(strVal);
+    size_t notFoundValue = std::string::npos;
+
+    while(varAccess.first != notFoundValue){
+        auto start = varAccess.first;
+        auto end = varAccess.second;
+
+        std::string var = strVal.substr(start+1, end-start-1);
+        vars.push_back(var);
+        strVal = strVal.substr(end + 1);
+        varAccess = getVarAccessLocations(strVal);
+    }
+
+    return vars;
+}
+
+static bool isBooleanExpression(std::string expression, varMap& map){
     varCollection& bools = map[JsonDSL::VarBoolean];
     auto boolIt = std::find(bools.begin(), bools.end(), expression);
     if(boolIt != bools.end()){
@@ -132,7 +237,7 @@ bool isBooleanExpression(std::string expression, varMap& map){
 }
 
 
-static varMap collectAllVariables(const json& j_object){
+static varMap collectVarNames(json j_object){
     std::string configStr = dsl.getSpecString(JsonDSL::Configuration);
     std::string setupStr = dsl.getConfigString(JsonDSL::Setup);
     std::string perPlayerStr = dsl.getSpecString(JsonDSL::PerPlayer);
@@ -148,19 +253,24 @@ static varMap collectAllVariables(const json& j_object){
 
     varMap map = getEmptyVarMap();
 
-    collectLiteralVarsWithPrepend(perPlayerVars, "players.", map);
-    collectLiteralVarsWithPrepend(perAudienceVars, "audience.", map);
-    collectLiteralVars(setupVars, map);
-    collectLiteralVars(constVars, map);
-    collectLiteralVars(varVars, map);
-    
+    map[JsonDSL::VarBoolean].push_back("true");
+    map[JsonDSL::VarBoolean].push_back("false");
+
+    map[JsonDSL::VarList].push_back("players");
+    map[JsonDSL::VarList].push_back("audience");
+
+    collectSetUpVars(setupVars, map);
+    collectTopLevelVarsWithPrepend(setupVars, "Configuration.", map);
+    collectTopLevelVars(constVars, map);
+    collectTopLevelVars(varVars, map);
+
     return map;
 }
 
 void VariableValidator::validateVariableUsage(const json& j_object){
     std::string rulesStr = dsl.getSpecString(JsonDSL::Rules);
     json rules = j_object[rulesStr];
-    varMap map = collectAllVariables(j_object);
+    varMap map = collectVarNames(j_object);
 }
 
 VariableValidator::VariableValidator(){}
