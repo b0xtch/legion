@@ -11,134 +11,134 @@
 #include "game.h"
 #include "player.h"
 
-// for convenience
-using PlayerList = GameImpl::Game::getAllPlayers(); //vector of all players, 
-                                                    //this will also have to connect to server 
-                                                    //in order to get realtime results
-using json = nlohmann::json;
-using String = std::string;
-using Integer = int;
-using Boolean = bool;
-using Key     = std::string;
-struct Object;
-struct Array;
-
-template <typename T> 
-struct rapper {
-  rapper(T type) { 
-    entities.emplace_back(std::move(type)); 
-  }
-
-  // user-defined conversion, i think this migth be an implicit conversion
-  // An explicit conversion was tried but i am guessing because i am using templates
-  // Its implicit 
-  operator T() const { 
-    return entities.front(); 
-  }
-
-  std::vector<T> entities;
-};
-
-template<typename... T>
-using Type = std::variant<T...>;
-using Value = Type<
-  Integer,
-  String, 
-  Boolean,
-  rapper<Array>, 
-  rapper<Object>
->;
-
-struct Object {
-  std::map<Key, Value> values;
-};
-
-struct Array {
-  std::vector<Value> values;
-};
-
-// main purpose of this map is to convert each rule object into its appropriate type
-// ex: 
-/**
- *  { "rule": "scores",
-      "score": "wins",
-      "ascending": false
-    }
-
-    to 
-
-    struct Scores{
-      ....
-    }
- * */
-std::unordered_map<std::string, std::function<void(const Object &obj)>> RuleStructure{
-    {"foreach",         [](const Object &obj){  
-
-    }},
-    {"loop",            [](const Object &obj){  
-
-    }},
-    {"inparallel",      [](const Object &obj){  
-
-    }},
-    {"parallelfor",     [](const Object &obj){  
-
-    }},
-    {"switch",          [](const Object &obj){  
-
-    }},
-    {"when",            [](const Object &obj){  
-
-    }},
-    {"extend",          [](const Object &obj){  
-
-    }},
-    {"reverse",         [](const Object &obj){  
-
-    }},
-    {"shuffle",         [](const Object &obj){  
-
-    }},
-    {"sort",            [](const Object &obj){  
-
-    }},
-    {"deal",            [](const Object &obj){  
-
-    }},
-    {"discard",         [](const Object &obj){  
-
-    }},
-    {"timer",           [](const Object &obj){  
-
-    }},
-    {"input-choice",    [](const Object &obj){  
-
-    }},
-    {"input-text",      [](const Object &obj){  
-
-    }},
-    {"input-vote",      [](const Object &obj){  
-
-    }},
-    {"message",         [](const Object &obj){  
-
-    }},
-    {"global-message",  [](const Object &obj){  
-      std::cout << "here" << std::endl; // works
-
-      GlobalMessage({obj});
-    }},
-    {"scores",          [](const Object &obj){  
-      std::cout << "here" << std::endl; // works
-      
-    }},
-};
-
 namespace Engine {
+    //vector of all players, 
+    //this will also have to connect to server 
+    //in order to get realtime results
+    using PlayerList = GameImpl::Game::getAllPlayers(); 
+    using json       = nlohmann::json;
+    using String     = std::string;
+    using Integer    = int;
+    using Boolean    = bool;
+    using Key        = std::string;
+    struct Object;
+    struct Array;
+
+    template <typename T> 
+    struct rapper {
+        rapper(T type) { 
+            entities.emplace_back(std::move(type)); 
+        }
+
+        // user-defined conversion, i think this migth be an implicit conversion
+        // An explicit conversion was tried but i am guessing because i am using templates
+        // Its implicit 
+        operator T() const { 
+            return entities.front(); 
+        }
+
+        std::vector<T> entities;
+    };
+
+    template<typename... T>
+    using Type = std::variant<T...>;
+    using Value = Type<
+        Integer,
+        String, 
+        Boolean,
+        rapper<Array>, 
+        rapper<Object>
+    >;
+
+    struct Object {
+        std::map<Key, Value> values;
+    };
+
+    struct Array {
+        std::vector<Value> values;
+    };
 
     /**
      * Support types 
      */
+
+    // main purpose of this map is to convert each rule object into its appropriate type
+    // ex: 
+    /**
+     *  { "rule": "scores",
+         "score": "wins",
+        "ascending": false
+        }
+
+        to 
+
+        struct Scores{
+        ....
+        }
+    * */
+    std::unordered_map<std::string, std::function<void(const Object &obj)>> RuleStructure{
+        {"foreach",         [](const Object &obj){  
+
+        }},
+        {"loop",            [](const Object &obj){  
+
+        }},
+        {"inparallel",      [](const Object &obj){  
+
+        }},
+        {"parallelfor",     [](const Object &obj){  
+
+        }},
+        {"switch",          [](const Object &obj){  
+
+        }},
+        {"when",            [](const Object &obj){  
+
+        }},
+        {"extend",          [](const Object &obj){  
+
+        }},
+        {"reverse",         [](const Object &obj){  
+
+        }},
+        {"shuffle",         [](const Object &obj){  
+
+        }},
+        {"sort",            [](const Object &obj){  
+
+        }},
+        {"deal",            [](const Object &obj){  
+
+        }},
+        {"discard",         [](const Object &obj){  
+
+        }},
+        {"timer",           [](const Object &obj){  
+
+        }},
+        {"input-choice",    [](const Object &obj){  
+
+        }},
+        {"input-text",      [](const Object &obj){  
+
+        }},
+        {"input-vote",      [](const Object &obj){  
+
+        }},
+        {"message",         [](const Object &obj){  
+
+        }},
+        {"global-message",  [](const Object &obj){  
+        std::cout << "here" << std::endl; // works
+
+        GlobalMessage({obj});
+        }},
+        {"scores",          [](const Object &obj){  
+        std::cout << "here" << std::endl; // works
+        
+        }},
+    };
+
     template <typename K, typename V> 
     struct GenType {
         std::unordered_map<K, V> map;
@@ -146,6 +146,10 @@ namespace Engine {
         V value;
     };
 
+
+    /////////////////////////////////////////////////////////////////////////////
+    // Casting From Json to DSL
+    /////////////////////////////////////////////////////////////////////////////
     Value recursiveValueMap(const json& json) {
         if(json.is_string()){
             return (Value) (String) json;
@@ -401,32 +405,32 @@ namespace Engine {
         PerPlayer perPlayer;
         PerAudience perAudience;
         Rules rules;
-    };
+    } game;
 
-    template <typename T> 
+    template <typename Type> 
     class EngineImpl { 
         public:
             EngineImpl (const T& input);
             GenType<String, Game> getGameConfig() const noexcept;
-            GenType<String, Game> initalizeEngine();
+            Game initalizeEngine(const Type input);
+            
+            // Parser Related methods
+            bool validGameConfig(const Type& input);
+            Game buildGame();
 
         private:
-            T input;
+            Type input;
             GenType<String, Game> gameConfig;
 
             // Domain level set functions, these should never throw if we do our validation correctly
-            Configuration setConfiguration(const T& configuration) const noexcept;
-            Constants setConstants(const T& constants) const noexcept;
-            Variables setVariables(const T& variables) const noexcept;
-            PerPlayer setPerPlayer(const T& perPlayer) const noexcept;
-            PerAudience setPerAudience(const T& perAudience) const noexcept;
-            Rules setRules(const T& rules) const noexcept;
+            Boolean setConfiguration(const Type& configuration) const noexcept;
+            Boolean setConstants(const Type& constants) const noexcept;
+            Boolean setVariables(const Type& variables) const noexcept;
+            Boolean setPerPlayer(const T& perPlayer) const noexcept;
+            Boolean setPerAudience(const Type& perAudience) const noexcept;
+            Boolean setRules(const Type& rules) const noexcept;
 
-            // Parser Related methods
-            bool validGameConfig(const T& input);
-            GenType<String, Game> buildGame();
-            void mapKeyToValue(const T& key, const T& value);
-            T mapValueToFuntion(const T& value);
+            Object mapConfig() const noexcept;
 
             // Game related methods
             void findAndExecute(/* find a specific function and execute dynamically*/);

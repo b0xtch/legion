@@ -68,7 +68,7 @@ GameServer::GameServer(GameServerConfig gameServerConfig, unsigned short port) :
         },
         [this] (networking::Connection c) {
             this->sessionManager.removeConnection(c);
-            //std::cout << "[GameServer] Disconnection: " << c.id << std::endl;
+            std::cout << "[GameServer] Lost connection: " << c.id << std::endl;
         }},
     sessionManager{gameServerConfig.getMaxSessions()}
 {
@@ -104,7 +104,7 @@ void GameServer::receive() {
         ParsedMessage pMsg = ParsedMessage::interpret(msg.text);
         
         switch (pMsg.getType()) {
-            case ParsedMessage::Type::ListGames:
+            case ParsedMessage::Type::RequestGames:
                 // WIP loop through all files from gameServerConfig's gameDir and format it into a message to send back.
                 batchToSend.push_back(generateGameListResponse(msg.connection));
                 break;
@@ -144,7 +144,7 @@ networking::Message GameServer::generateGameListResponse(networking::Connection 
             msgContent << "\n" << name.first;
         }
     }
-    msg.text = ParsedMessage::makeMsgText(ParsedMessage::Type::ListGames, msgContent.str());
+    msg.text = ParsedMessage::makeMsgText(ParsedMessage::Type::RequestGames, msgContent.str());
     return msg;
 }
 

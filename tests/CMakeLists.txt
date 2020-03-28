@@ -13,10 +13,11 @@ add_executable(runAllTests
   ParsedMessageTest.cpp
   SessionTest.cpp
   SessionManagerTest.cpp
+  Engine.cpp
 )
 target_include_directories(runAllTests PUBLIC ${CMAKE_SOURCE_DIR}/lib/json/include)
 target_link_libraries(runAllTests gmock gtest gtest_main nlohmann_json)
 target_link_libraries(runAllTests configValidator specificationValidator ruleValidator)
-target_link_libraries(runAllTests User networking GameServer ParsedMessage Session SessionManager)
+target_link_libraries(runAllTests User networking GameServer ParsedMessage Session SessionManager engine)
 
 add_test(NAME AllTests COMMAND runAllTests)
