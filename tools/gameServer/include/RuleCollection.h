@@ -543,52 +543,52 @@ namespace RuleCollection {
 	*
 	**************************************/
 
-	struct  ScoreMap {
-		ScoreMap() :
-			scoreboard{} {};
-
-		ScoreMap(std::vector<Player> playerList){
-				for(auto p : playerList){
-					// scoreboard.insert({p.getPlayerPoints(), p.getPlayerName()});
-					scoreboard[p.getPlayerName()] = p.getPlayerPoints();
-				}
-			}
-
-		void add(Player &p){
-			scoreboard[p.getPlayerName()] = p.getPlayerPoints();
-		}
-
-		void remove(Player &p){
-			scoreboard.erase(p.getPlayerName());
-		}
-
-		std::map<pName, int> scoreboard;
-	};
-
-
-
+	//vector of references to players (allows for scores to be updated)
+	using playerVector = std::vector<std::reference_wrapper<Player>>;
 	struct Scores : GenRule {
 		//default ascending = false
-		Scores(ScoreMap &s) :
+		Scores(playerVector p) :
 			GenRule{"Scores"},
-			scores{s},
+			playerList{p},
 			ascending{false}
 			{};
 
-		Scores(ScoreMap &s, bool asc) :
+		Scores(playerVector p, bool asc) :
 			GenRule{"Scores"},
-			scores{s},
+			playerList{p},
 			ascending{asc} // false -> desc
 			{};
 
+		void add(Player &p){
+			auto result = std::find(playerList.begin(), playerList.end(), p);
+			if(result != playerList.end()){
+				playerList.push_back(p);
+			}
+		}
+
+		void remove(Player &p){
+			auto result = std::find(playerList.begin(), playerList.end(), p);
+			if(result != playerList.end()){
+				playerList.erase(result);
+			}
+		}
+
 		void func(){
+
+			// clear scoresPairs
+			scoresPairs.clear();
 			
-			//make map key-value elements into pairs
-			for(const auto& [key, value] : scores.scoreboard){
-				scoresPairs.push_back(std::make_pair(value, key));
+			//make playerList vector elements into pairs (points, name)
+			for(auto p : playerList){
+
+				//p.get because p is wrapped with type -> std::reference_wrapper
+				auto tmpPair = std::make_pair(	p.get().getPlayerPoints(), 
+												p.get().getPlayerName());
+
+				scoresPairs.push_back(tmpPair);
 			}
 
-			//sort pairs
+			//sort pairs asc or desc
 			if(ascending){
 				std::sort(scoresPairs.begin(), scoresPairs.end());
 			}
@@ -610,11 +610,10 @@ namespace RuleCollection {
 
 		}
 
-		ScoreMap &scores;
+		playerVector playerList;
 		std::vector< std::pair <int,pName> > scoresPairs;
 		bool ascending;
 	};
-
 
 
 

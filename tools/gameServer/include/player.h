@@ -17,6 +17,12 @@ public:
   pName& getPlayerName();
   int& getPlayerPoints();
   // friend bool operator== (const Player&, const Player&);
+  friend bool operator== (const Player &p1, const Player &p2){
+    return (
+            p1.playerID == p2.playerID &&
+            p1.playerName == p2.playerName
+            );
+  }
 private:
   pID playerID;
   pName playerName;
