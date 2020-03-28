@@ -3,6 +3,7 @@ add_library(ParsedMessage src/ParsedMessage.cpp include/ParsedMessage.h)
 add_library(SessionManager src/SessionManager.cpp include/SessionManager.h)
 add_library(Session src/Session.cpp include/Session.h)
 add_library(User src/User.cpp include/User.h)
+add_library(engine src/engine.cpp include/engine.h)
 
 target_include_directories(GameServer
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -28,6 +29,11 @@ target_include_directories(User
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PUBLIC $<INSTALL_INTERFACE:include>)
 target_link_libraries(User networking)
+
+target_include_directories(User
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PUBLIC $<INSTALL_INTERFACE:include>)
+target_link_libraries(engine nlohmann_json)
 
 add_executable(server src/main.cpp)
 target_link_libraries(server GameServer Utils)
