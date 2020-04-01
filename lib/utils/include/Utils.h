@@ -26,6 +26,8 @@ namespace Utils {
     If there is no valid command, the input is assumed to be a chat message.
     **/
     json makeJsonCommand(const std::string& input);
+    
+    std::string removeTrailingWhitespace(const std::string& text);
 }
 
 #endif

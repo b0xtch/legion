@@ -183,6 +183,7 @@ std::string processServerMessage(const std::string& response) {
     } else if (command == ParsedMessage::Type::RequestGames) {
         gamesList = splitString(data, "\n", false);
     }
+    responseData << "\n";
 
     return responseData.str();
 }
@@ -221,7 +222,7 @@ MenuPageInfo::MenuName buildJoinLobbyPage(MenuManager &menuManager, networking::
         const int lobbyCodeInputIndex = 1;
         const char *lobbyCode =
             field_buffer( connectFields->at( lobbyCodeInputIndex ), 0 );
-        std::string lobbyCodeString(lobbyCode);
+        std::string lobbyCodeString = Utils::removeTrailingWhitespace(lobbyCode);
         // Bug: if field is not filled to max length, only spaces will be sent.
         // What's happening: https://alan-mushi.github.io/2014/11/30/ncurses-forms.html
         // Fix: https://stackoverflow.com/questions/18493449/how-to-read-an-incomplete-form-field-ncurses-c
@@ -295,7 +296,7 @@ MenuPageInfo::MenuName buildCreateLobbyPage(MenuManager &menuManager, networking
         const int gameTitleInputIndex = 1;
         const char *gameTitle =
             field_buffer( connectFields->at( gameTitleInputIndex ), 0 );
-        std::string gameTitleString(gameTitle);
+        std::string gameTitleString = Utils::removeTrailingWhitespace(gameTitle);
         std::string serverMessage = ParsedMessage::makeMsgText(PMConstants::TYPE_CREATE_SESSION, gameTitleString);
         client.send( serverMessage );
     };

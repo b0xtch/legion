@@ -5,6 +5,7 @@
 #include <random>
 #include <stdexcept>
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "json.hpp"
 
@@ -96,6 +97,13 @@ namespace Utils {
         json message = json::parse( commandStream.str() );
 
         return message;
+    }
+    
+    std::string removeTrailingWhitespace(const std::string& text) {
+        // You'd think the C++ standard library would have a way to do this by now!
+        std::string ret = text;
+        boost::trim_right(ret);
+        return ret;
     }
 
 }

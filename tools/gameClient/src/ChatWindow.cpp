@@ -134,7 +134,7 @@ ChatWindowImpl::processInput(int key) {
       // Requesting validation synchs the seen field & the buffer.
       form_driver(entryForm, REQ_VALIDATION);
       onTextEntry(getFieldString());
-      displayText(getFieldString() + "\n");
+      //displayText(getFieldString() + "\n");
       move(1, 1);
       set_field_buffer(entryField, 0, "");
       refresh();
