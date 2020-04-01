@@ -27,11 +27,6 @@ using json = nlohmann::json;
 // Idea on combining menus and forms on one page referenced from:
 //    https://alan-mushi.github.io/2015/05/26/simple-ncurses-popup-in-C.html
 
-
-
-
-// Split a string into multiple substrings
-std::vector<std::string> splitString(const std::string& text, const std::string& splitOn, bool includeSplit);
 // Make json message for server
 std::string makeServerMessage(const std::string& input);
 // Parse json message from server
@@ -91,7 +86,7 @@ int main(int argc, char* argv[]) {
 
         auto response = client.receive();
         if (!response.empty()) {
-            std::vector<std::string> commands = splitString(response, "}", true);
+            std::vector<std::string> commands = Utils::splitString(response, "}", true);
 
             for ( auto cmd : commands ) {
                 menuManager.displayChatText(processServerMessage(cmd));
@@ -105,38 +100,6 @@ int main(int argc, char* argv[]) {
     menuManager.cleanup();
 
     return 0;
-}
-
-/**
-Takes a string and a second string to split the first string on.
-Splits the first string and returns a list of all the new substrings.
-The substrings will include the next split string if includeSplit is true.
-**/
-std::vector<std::string> splitString(const std::string& text, const std::string& splitOn, bool includeSplit) {
-
-    std::vector<std::string> splits;
-
-    if (!text.empty()) {
-        std::size_t start = 0;
-        std::size_t end = text.find(splitOn);
-
-        while (end != std::string::npos) {
-            if (includeSplit) {
-                splits.push_back(text.substr(start, end-start+splitOn.length()));
-            } else {
-                splits.push_back(text.substr(start, end-start));
-            }
-            start = end + splitOn.length();
-            end = text.find(splitOn, start);
-        }
-        
-        std::string toPush = text.substr(start);
-        if (!toPush.empty()) {
-            splits.push_back(toPush);
-        }
-    }
-
-    return splits;
 }
 
 std::string makeServerMessage(const std::string& input) {
@@ -181,7 +144,7 @@ std::string processServerMessage(const std::string& response) {
         // To do: function that displays game data
         responseData << data;
     } else if (command == ParsedMessage::Type::RequestGames) {
-        gamesList = splitString(data, "\n", false);
+        gamesList = Utils::splitString(data, "\n", false);
     }
     responseData << "\n";
 
@@ -263,7 +226,7 @@ std::string requestGames(networking::Client& client) {
 }
 
 void displayGames(MenuManager& menuManager, const std::string& games) {
-    gamesList = splitString(games, "\n", false);
+    gamesList = Utils::splitString(games, "\n", false);
     
     std::stringstream ss{};
     ss << "--- GAME TITLES\n";

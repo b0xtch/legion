@@ -28,6 +28,13 @@ namespace Utils {
     json makeJsonCommand(const std::string& input);
     
     std::string removeTrailingWhitespace(const std::string& text);
+    
+    /**
+    Takes a string and a second string to split the first string on.
+    Splits the first string and returns a list of all the new substrings.
+    The substrings will include the next split string if includeSplit is true.
+    **/
+    std::vector<std::string> splitString(const std::string& text, const std::string& splitOn, bool includeSplit);
 }
 
 #endif
