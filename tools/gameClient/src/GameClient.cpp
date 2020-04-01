@@ -129,7 +129,7 @@ std::vector<std::string> splitString(const std::string& text, const std::string&
             start = end + splitOn.length();
             end = text.find(splitOn, start);
         }
-        
+
         std::string toPush = text.substr(start);
         if (!toPush.empty()) {
             splits.push_back(toPush);
@@ -145,6 +145,19 @@ std::string makeServerMessage(const std::string& input) {
     return message.dump();
 
 }
+
+// Used for testing
+namespace ProcessConstants {
+
+    const std::string MESSAGE_FAIL = "fail/wip";
+
+    const std::string RESPONSE_CREATESUCCESS = "The session was successfully created.";
+    const std::string RESPONSE_CREATEFAIL = "There was an error creating the session.";
+    const std::string RESPONSE_JOINSUCCESS = "You have joined the session: ";
+    const std::string RESPONSE_JOINFAIL = "There was an error joining the session.";
+    const std::string RESPONSE_LEAVE = "You have left the session: ";
+
+};
 
 /**
 Takes the string response from the server and converts it into json.
@@ -162,26 +175,24 @@ std::string processServerMessage(const std::string& response) {
     if (command == ParsedMessage::Type::Chat) {
         responseData << data;
     } else if (command == ParsedMessage::Type::CreateSession) {
-        if (data == "fail") {
-            responseData << "There was an error creating the session.";
+        if (data == ProcessConstants::FAIL_RESPONSE) {
+            responseData << ProcessConstants::RESPONSE_CREATEFAIL;
         } else {
-            responseData << "The session was successfully created.";
+            responseData << ProcessConstants::RESPONSE_CREATESUCCESS;
         }
     } else if (command == ParsedMessage::Type::JoinSession) {
-        if (data == "fail") {
-            responseData << "There was an error joining the session.";
+        if (data == ProcessConstants::FAIL_RESPONSE) {
+            responseData << ProcessConstants::RESPONSE_JOINFAIL;
         } else {
-            responseData << "You have joined the session: " << data;
+            responseData << ProcessConstants::RESPONSE_JOINSUCCESS << data;
         }
     } else if (command == ParsedMessage::Type::LeaveSession) {
-        responseData << "You have left the session: " << data;
+        responseData << ProcessConstants::RESPONSE_LEAVE << data;
     } else if (command == ParsedMessage::Type::GameInput) {
         // WIP
         // The game output should be displayed in a separate log than the chat
         // To do: function that displays game data
         responseData << data;
-    } else if (command == ParsedMessage::Type::RequestGames) {
-        gamesList = splitString(data, "\n", false);
     }
 
     return responseData.str();
@@ -200,7 +211,7 @@ MenuPageInfo::MenuName buildInLobbyPage(MenuManager &menuManager, networking::Cl
 }
 
 MenuPageInfo::MenuName buildJoinLobbyPage(MenuManager &menuManager, networking::Client& client) {
-    
+
     // Join lobby menu
     const MenuPageInfo::NameList joinLobbyFields = {"Type in the lobby code:"};
 
@@ -215,7 +226,7 @@ MenuPageInfo::MenuName buildJoinLobbyPage(MenuManager &menuManager, networking::
     auto joinLobby = [&client, &menuManager] () {
         std::shared_ptr<MenuPage> joinPage = menuManager.getCurrentPage();
         form_driver(joinPage->getForm(), REQ_VALIDATION);
-        
+
         MenuPage::FieldList *connectFields = joinPage->getFieldList();
 
         const int lobbyCodeInputIndex = 1;
@@ -235,14 +246,14 @@ MenuPageInfo::MenuName buildJoinLobbyPage(MenuManager &menuManager, networking::
     MenuPageInfo::MenuName joinLobbyName = MENU_NAME_JOIN_LOBBY;
     auto joinLobbyPage = std::make_shared<MenuPageInfo>(joinLobbyName, joinLobbyFields, joinLobbyItems, joinLobbyItemResults );
     menuManager.addPage( joinLobbyPage );
-    
+
     return MENU_NAME_JOIN_LOBBY;
 }
 
 std::string requestGames(networking::Client& client) {
     std::string serverMessage = ParsedMessage::makeMsgText(PMConstants::TYPE_REQUEST_GAMES, "");
     client.send(serverMessage);
-    
+
     client.update();
     auto response = client.receive();
     while ( response.empty() ) {
@@ -250,9 +261,9 @@ std::string requestGames(networking::Client& client) {
         client.update();
         response = client.receive();
     }
-    
+
     ParsedMessage pm = ParsedMessage::interpret(response);
-    
+
     if (pm.getType() == ParsedMessage::Type::RequestGames) {
         return pm.getData();
     }
@@ -263,19 +274,19 @@ std::string requestGames(networking::Client& client) {
 
 void displayGames(MenuManager& menuManager, const std::string& games) {
     gamesList = splitString(games, "\n", false);
-    
+
     std::stringstream ss{};
     ss << "--- GAME TITLES\n";
     for (auto& game : gamesList) {
         ss << game << "\n";
     }
     ss << "---\n";
-    
+
     menuManager.displayChatText(ss.str());
 }
 
 MenuPageInfo::MenuName buildCreateLobbyPage(MenuManager &menuManager, networking::Client& client) {
-    
+
     const MenuPageInfo::NameList createLobbyFields = {"Enter the game title:"};
 
     const MenuPageInfo::NameList createLobbyItems = {"Create", "Back"};
@@ -289,7 +300,7 @@ MenuPageInfo::MenuName buildCreateLobbyPage(MenuManager &menuManager, networking
     auto createLobby = [&client, &menuManager] () {
         std::shared_ptr<MenuPage> createPage = menuManager.getCurrentPage();
         form_driver(createPage->getForm(), REQ_VALIDATION);
-        
+
         MenuPage::FieldList *connectFields = createPage->getFieldList();
 
         const int gameTitleInputIndex = 1;
@@ -306,7 +317,7 @@ MenuPageInfo::MenuName buildCreateLobbyPage(MenuManager &menuManager, networking
     MenuPageInfo::MenuName createLobbyName = MENU_NAME_CREATE_LOBBY;
     auto createLobbyPage = std::make_shared<MenuPageInfo>(createLobbyName, createLobbyFields, createLobbyItems, createLobbyItemResults );
     menuManager.addPage( createLobbyPage );
-    
+
     return MENU_NAME_CREATE_LOBBY;
 }
 
@@ -325,11 +336,11 @@ void initializeMenuPages( MenuManager &menuManager, bool &done, networking::Clie
         MenuPageInfo::MenuName nextPage = joinLobbyMenuName;
         menuManager.switchPage( nextPage );
     };
-    
+
     auto moveToCreateLobbyPage = [&menuManager, &client, createLobbyMenuName] () {
         std::string response = requestGames(client);
         displayGames(menuManager, response);
-        
+
         MenuPageInfo::MenuName nextPage = createLobbyMenuName;
         menuManager.switchPage( nextPage );
     };

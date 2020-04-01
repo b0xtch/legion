@@ -79,19 +79,24 @@ namespace Utils {
 
         const std::string TYPE_CREATE_SESSION = "!createsession";
         const std::string TYPE_JOIN_SESSION = "!joinsession";
-        const std::string TYPE_LEAVE_SERVER = "!leavesession";
+        const std::string TYPE_LEAVE_SERVER = "!leaveserver";
+        const std::string TYPE_LEAVE_SESSION = "!leavesession";
         const std::string TYPE_CHAT = "!chat";
         const std::string TYPE_WHISPER = "!whisper";
-        const std::string TYPE_LIST_GAMES = "!requestGames";
+        const std::string TYPE_REQUEST_GAMES = "!requestgames";
+        const std::string TYPE_GAME_INPUT = "!gameinput";
+
     };
 
     const std::vector<const std::string> possibleCommands;
     possibleCommands.push_back(TYPE_CREATE_SESSION);
     possibleCommands.push_back(TYPE_JOIN_SESSION);
     possibleCommands.push_back(TYPE_LEAVE_SERVER);
+    possibleCommands.push_back(TYPE_LEAVE_SESSION);
     possibleCommands.push_back(TYPE_CHAT);
     possibleCommands.push_back(TYPE_WHISPER);
-    possibleCommands.push_back(TYPE_LIST_GAMES);
+    possibleCommands.push_back(TYPE_REQUEST_GAMES);
+    possibleCommands.push_back(TYPE_GAME_INPUT);
 
     json makeJsonCommand(const std::string& input) {
         std::stringstream commandStream;
@@ -106,13 +111,8 @@ namespace Utils {
             endOfCommand = 0;
         }
 
-<<<<<<< HEAD
         commandStream << "\", \"" << KEY_DATA << "\": \""; // Declare the data field
         commandStream << input.substr(endOfCommand, string::npos); // Get the data value
-=======
-        commandStream << "\", \"data\": \""; // Declare the data field
-        commandStream << input.substr(endOfCommand, std::string::npos); // Get the data value
->>>>>>> a8615f57a30ebd63e066c7a667e540b250968e73
         commandStream << "\" }"; // End of the json object
 
         json message = json::parse( commandStream.str() );
