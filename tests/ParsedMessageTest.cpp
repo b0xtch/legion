@@ -34,6 +34,10 @@ TEST(ParsedMessageTests, interpret) {
     EXPECT_EQ(ParsedMessage::Type::LeaveServer, pm.getType());
     EXPECT_EQ("", pm.getData());
     
+    pm = ParsedMessage::interpret(makeMessageString(PMConstants::TYPE_LEAVE_SESSION, ""));
+    EXPECT_EQ(ParsedMessage::Type::LeaveSession, pm.getType());
+    EXPECT_EQ("", pm.getData());
+    
     pm = ParsedMessage::interpret(makeMessageString(PMConstants::TYPE_CHAT, "{\\\"msg\\\":\\\"can u start already?? i have to study soon\\\"}"));
     EXPECT_EQ(ParsedMessage::Type::Chat, pm.getType());
     EXPECT_EQ("{\"msg\":\"can u start already?? i have to study soon\"}", pm.getData());
@@ -42,9 +46,13 @@ TEST(ParsedMessageTests, interpret) {
     EXPECT_EQ(ParsedMessage::Type::Whisper, pm.getType());
     EXPECT_EQ("{\"msg\":\"we are updating our privacy policy\"}", pm.getData());
     
-    pm = ParsedMessage::interpret(makeMessageString(PMConstants::TYPE_LIST_GAMES, ""));
-    EXPECT_EQ(ParsedMessage::Type::ListGames, pm.getType());
+    pm = ParsedMessage::interpret(makeMessageString(PMConstants::TYPE_REQUEST_GAMES, ""));
+    EXPECT_EQ(ParsedMessage::Type::RequestGames, pm.getType());
     EXPECT_EQ("", pm.getData());
+    
+    pm = ParsedMessage::interpret(makeMessageString(PMConstants::TYPE_GAME_INPUT, "{\\\"throw\\\":\\\"paper\\\"}"));
+    EXPECT_EQ(ParsedMessage::Type::GameInput, pm.getType());
+    EXPECT_EQ("{\"throw\":\"paper\"}", pm.getData());
     
     pm = ParsedMessage::interpret(makeMessageString("some other command", "{\\\"throw\\\":\\\"paper\\\"}"));
     EXPECT_EQ(ParsedMessage::Type::Other, pm.getType());
@@ -62,12 +70,50 @@ TEST(ParsedMessageTests, interpretBadKeys) {
 }
 
 TEST(ParsedMessageTests, makeMsg_enum) {
-    std::string text = ParsedMessage::makeMsgText(ParsedMessage::Type::ServerStop, "stop! hammer time!");
-    auto [command, data] = msgTextToPair(text);
-    EXPECT_EQ(PMConstants::TYPE_SERVER_STOP, command);
-    EXPECT_EQ("stop! hammer time!", data);
+    std::string text = ParsedMessage::makeMsgText(ParsedMessage::Type::ServerStop, "");
+    std::pair<std::string, std::string> pair = msgTextToPair(text);
+    EXPECT_EQ(PMConstants::TYPE_SERVER_STOP, pair.first);
+    EXPECT_EQ("", pair.second);
     
-    // WIP
+    text = ParsedMessage::makeMsgText(ParsedMessage::Type::CreateSession, "{\"gamename\":\"kahoot 2\"}");
+    pair = msgTextToPair(text);
+    EXPECT_EQ(PMConstants::TYPE_CREATE_SESSION, pair.first);
+    EXPECT_EQ("{\"gamename\":\"kahoot 2\"}", pair.second);
+    
+    text = ParsedMessage::makeMsgText(ParsedMessage::Type::JoinSession, "{\"sessionId\":\"abc123\"}");
+    pair = msgTextToPair(text);
+    EXPECT_EQ(PMConstants::TYPE_JOIN_SESSION, pair.first);
+    EXPECT_EQ("{\"sessionId\":\"abc123\"}", pair.second);
+    
+    text = ParsedMessage::makeMsgText(ParsedMessage::Type::LeaveSession, "see ya");
+    pair = msgTextToPair(text);
+    EXPECT_EQ(PMConstants::TYPE_LEAVE_SESSION, pair.first);
+    EXPECT_EQ("see ya", pair.second);
+    
+    text = ParsedMessage::makeMsgText(ParsedMessage::Type::LeaveServer, "bye now");
+    pair = msgTextToPair(text);
+    EXPECT_EQ(PMConstants::TYPE_LEAVE_SERVER, pair.first);
+    EXPECT_EQ("bye now", pair.second);
+    
+    text = ParsedMessage::makeMsgText(ParsedMessage::Type::Chat, "blah blah");
+    pair = msgTextToPair(text);
+    EXPECT_EQ(PMConstants::TYPE_CHAT, pair.first);
+    EXPECT_EQ("blah blah", pair.second);
+    
+    text = ParsedMessage::makeMsgText(ParsedMessage::Type::Whisper, "pssst!");
+    pair = msgTextToPair(text);
+    EXPECT_EQ(PMConstants::TYPE_WHISPER, pair.first);
+    EXPECT_EQ("pssst!", pair.second);
+    
+    text = ParsedMessage::makeMsgText(ParsedMessage::Type::RequestGames, "let's see what we've got here...");
+    pair = msgTextToPair(text);
+    EXPECT_EQ(PMConstants::TYPE_REQUEST_GAMES, pair.first);
+    EXPECT_EQ("let's see what we've got here...", pair.second);
+    
+    text = ParsedMessage::makeMsgText(ParsedMessage::Type::GameInput, "pick an answer");
+    pair = msgTextToPair(text);
+    EXPECT_EQ(PMConstants::TYPE_GAME_INPUT, pair.first);
+    EXPECT_EQ("pick an answer", pair.second);
 }
 
 TEST(ParsedMessageTests, makeMsg_enumBad) {
@@ -78,7 +124,12 @@ TEST(ParsedMessageTests, makeMsg_enumBad) {
 
 TEST(ParsedMessageTests, makeMsg_string) {
     std::string text = ParsedMessage::makeMsgText("this is a custom command!", "stop! hammer time!");
-    auto [command, data] = msgTextToPair(text);
-    EXPECT_EQ("this is a custom command!", command);
-    EXPECT_EQ("stop! hammer time!", data);
+    std::pair<std::string, std::string> pair = msgTextToPair(text);
+    EXPECT_EQ("this is a custom command!", pair.first);
+    EXPECT_EQ("stop! hammer time!", pair.second);
+    
+    text = ParsedMessage::makeMsgText("", "");
+    pair = msgTextToPair(text);
+    EXPECT_EQ("", pair.first);
+    EXPECT_EQ("", pair.second);
 }

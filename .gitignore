@@ -1,4 +1,5 @@
 build/
+core
 
 # Prerequisites
 *.d
@@ -58,3 +59,5 @@ cmake-build-*/
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/
+
+tags

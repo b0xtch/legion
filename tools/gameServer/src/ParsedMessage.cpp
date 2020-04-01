@@ -22,8 +22,8 @@ ParsedMessage ParsedMessage::interpret(const std::string& text) {
     std::string msgDataString;
     try {
         jsonObj = json::parse(text);
-        msgTypeString = jsonObj[PMConstants::KEY_COMMAND].get<std::string>();
-        msgDataString = jsonObj[PMConstants::KEY_DATA].get<std::string>();
+        msgTypeString = jsonObj[PMConstants::JKEY_COMMAND].get<std::string>();
+        msgDataString = jsonObj[PMConstants::JKEY_DATA].get<std::string>();
     }
     catch (json::parse_error& e) {
         return {Type::Invalid, "JSON Parse error"};
@@ -64,10 +64,13 @@ std::string ParsedMessage::makeMsgText(const std::string& msgCommand, const std:
     
     using json = nlohmann::json;
     
-    json jsonObj = {
-        {PMConstants::KEY_COMMAND, msgCommand},
-        {PMConstants::KEY_DATA, msgData}
-    };
+    json jsonObj{};
+    
+    // For some reason, putting this inside the brace initialization adds an extra backslash when escaping certain characters.
+    // e.g.: if msgData contains a linefeed character (\n), the jsonObj.dump() string would have a \\n (3 chars) rather than just a \n (2 chars).
+    // Doing this instead does what is wanted.
+    jsonObj[PMConstants::JKEY_COMMAND] = msgCommand;
+    jsonObj[PMConstants::JKEY_DATA] = msgData;
     
     return jsonObj.dump();
 }
@@ -92,9 +95,11 @@ void ParsedMessage::initializePairs() {
         commandAndTypePairs.push_back({PMConstants::TYPE_CREATE_SESSION, ParsedMessage::Type::CreateSession});
         commandAndTypePairs.push_back({PMConstants::TYPE_JOIN_SESSION, ParsedMessage::Type::JoinSession});
         commandAndTypePairs.push_back({PMConstants::TYPE_LEAVE_SERVER, ParsedMessage::Type::LeaveServer});
+        commandAndTypePairs.push_back({PMConstants::TYPE_LEAVE_SESSION, ParsedMessage::Type::LeaveSession});
         commandAndTypePairs.push_back({PMConstants::TYPE_CHAT, ParsedMessage::Type::Chat});
         commandAndTypePairs.push_back({PMConstants::TYPE_WHISPER, ParsedMessage::Type::Whisper});
-        commandAndTypePairs.push_back({PMConstants::TYPE_LIST_GAMES, ParsedMessage::Type::ListGames});
+        commandAndTypePairs.push_back({PMConstants::TYPE_REQUEST_GAMES, ParsedMessage::Type::RequestGames});
+        commandAndTypePairs.push_back({PMConstants::TYPE_GAME_INPUT, ParsedMessage::Type::GameInput});
         
         initialized = true;
     }

@@ -1,3 +1,4 @@
+add_subdirectory(abseil-cpp)
 add_subdirectory(nlohmann_json)
 add_subdirectory(networking)
 add_subdirectory(utils)

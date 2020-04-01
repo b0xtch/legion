@@ -106,8 +106,13 @@ namespace Utils {
             endOfCommand = 0;
         }
 
+<<<<<<< HEAD
         commandStream << "\", \"" << KEY_DATA << "\": \""; // Declare the data field
         commandStream << input.substr(endOfCommand, string::npos); // Get the data value
+=======
+        commandStream << "\", \"data\": \""; // Declare the data field
+        commandStream << input.substr(endOfCommand, std::string::npos); // Get the data value
+>>>>>>> a8615f57a30ebd63e066c7a667e540b250968e73
         commandStream << "\" }"; // End of the json object
 
         json message = json::parse( commandStream.str() );

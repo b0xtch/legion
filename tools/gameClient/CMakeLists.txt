@@ -2,6 +2,7 @@
 add_executable(GameClient
   src/GameClient.cpp
   src/MenuPage.cpp
+  src/MenuManager.cpp
   src/ChatWindow.cpp
 )
 
@@ -31,6 +32,8 @@ target_link_libraries(GameClient
   -lmenu
   -lform
   nlohmann_json
+  Utils
+  ParsedMessage
 )
 
 install(TARGETS GameClient

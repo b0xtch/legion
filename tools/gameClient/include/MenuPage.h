@@ -1,85 +1,81 @@
-#ifndef SETUPMENU_H
-#define SETUPMENU_H
+#ifndef MENU_PAGE_H
+#define MENU_PAGE_H
 
 #include <vector>
 #include <functional>
-#include <string>
+#include <string_view>
 #include <map>
 #include <menu.h>
 #include <form.h>
+#include <memory>
+
+struct MenuPageInfo {
+    using MenuName = std::string_view;
+    using ItemName = const char *;
+    using NameList = std::vector<ItemName>;
+    using ItemFunction = std::function<void()>;
+    using FunctionList = std::vector<ItemFunction>;
+
+    MenuPageInfo( 
+                    const MenuName &menuName,
+                    const NameList &fieldNames,
+                    const NameList &itemNames,
+                    const FunctionList &itemResults )
+    : menuName( menuName ), 
+      fieldNames( fieldNames ), 
+      itemNames( itemNames ), 
+      itemResults( itemResults ) { }
+
+    MenuName menuName;
+    NameList fieldNames;
+    NameList itemNames;
+    FunctionList itemResults;
+};
 
 class MenuPage {
 
 public:
 
-    using PageMap = std::map<std::string, MenuPage *>;
-    using FunctionList = std::vector<std::function<void()>>;
-    using NameList = std::vector<const char *>;
+    using PageMap = std::map<MenuPageInfo::MenuName, MenuPage *>;
+    using ItemList = std::vector<ITEM *>;
+    using FieldList = std::vector<FIELD *>;
     
-    MenuPage( const std::string &menu_name,
-              const NameList &field_names, 
-              const NameList &item_names, 
-              const FunctionList &item_results );
+    MenuPage( const std::shared_ptr<MenuPageInfo> &menuPageInfo )
+        : menuName( menuPageInfo->menuName ),
+        itemResults( menuPageInfo->itemResults ) { }
 
     void cleanup();
-    
-    static WINDOW *main_window;
-    static WINDOW *form_window;
-    static WINDOW *menu_window;
 
-    int get_selected_option();
-    int change_selected_option_on_input();
+    int changeSelectedOptionOnInput();
 
-    std::vector<const char *> get_field_names();
-    std::vector<FIELD *> get_field_list();
-    FORM* get_form();
-    bool has_form();
+    FieldList* getFieldList();
+    void addField( FIELD *field );
+    FORM* getForm();
+    void setForm( FORM *form );
+    bool hasForm();
 
-    std::vector<const char *> get_item_names();
-    const FunctionList get_item_results();
-    MENU* get_menu();
+    std::vector<MenuPageInfo::ItemName> getItemNames();
+    const MenuPageInfo::FunctionList getItemResults();
+    void addItem( ITEM *item );
+    MENU* getMenu();
+    void setMenu( MENU *menu );
+    ItemList* getItemList();
+
+    MenuPageInfo::MenuName getMenuName();
 
 private:
+
     MenuPage();
 
-    std::string menu_name;
-    int selected_option;
+    MenuPageInfo::MenuName menuName;
 
     // Menu components
     FORM *form;
-    std::vector<const char *> field_names;
-    std::vector<FIELD *> field_list;
+    FieldList fieldList;
 
     MENU *menu;
-    std::vector<const char *> item_names;
-    std::vector<ITEM *> item_list;
-    const FunctionList item_results;
-};
-
-
-
-class MenuManager {
-
-public:
-
-    static void initialize_menu_manager();
-    static void initialize_windows();
-    static void initialize_starting_page();
-    static void add_menu_page( std::string &page_name, MenuPage *page );
-    static std::map<std::string, MenuPage *> get_menu_pages();
-    static void set_current_page( MenuPage *page );
-    static MenuPage *get_current_page();
-    static int get_selected_index();
-    static void switch_page( std::string &next_page_name );
-    static void main_menu_driver();
-    static void cleanup();
-
-private:
-    static std::map<std::string, MenuPage *> menu_pages;
-    static MenuPage *current_page;
-    static int selected_index;
-    static bool is_on_menu;
-
+    ItemList itemList;
+    const MenuPageInfo::FunctionList itemResults;
 };
 
 #endif

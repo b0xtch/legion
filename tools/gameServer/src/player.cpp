@@ -3,15 +3,24 @@
 #include "player.h"
 
 
-Player::Player(const variable& pid, const stringVar& name): playerID(pid), playerName(name){}
-Player::Player() : playerID(0), playerName("not_initialized") {};
+Player::Player(pID id, pName name): 
+	playerID(id), 
+	playerName(name),
+	playerPoints(0)
+	{};
 
-// void Player::incrementPoints(const variable& x){playerPoints += x;}
+// Player::Player() : playerID(0), playerName("not_initialized") {};
 
-// void Player::decrementPoints(const variable& x) {playerPoints -= x;}
+void Player::incrementPoints(int x){playerPoints += x;}
 
-variable Player::getPlayerID(){return playerID;}
+void Player::decrementPoints(int x){playerPoints -= x;}
 
-// variable Player::getPlayerPoints(){return playerPoints;}
+pID& Player::getPlayerID(){return playerID;}
+pName& Player::getPlayerName(){return playerName;}
 
-bool operator== (const Player& player1, const Player& player2){ return player1->playerID == player2->playerID; }
+int& Player::getPlayerPoints(){return playerPoints;}
+
+// compiler gives must take exactly 1 arg error if defined here
+// bool Player::operator== (const Player& player1, const Player& player2){
+// 	return player1.playerID == player2.playerID;
+// }

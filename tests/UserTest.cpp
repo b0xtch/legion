@@ -12,8 +12,8 @@ networking::Connection makeTestConn(uintptr_t id) {
 TEST(UserTests, constructor) {
     auto conn = makeTestConn(373);
     User u{conn};
-    ASSERT_EQ(373, u.getConn().id);
-    ASSERT_EQ(conn, u.getConn());
+    ASSERT_EQ(373, u.getConnection().id);
+    ASSERT_EQ(conn, u.getConnection());
 }
 
 TEST(UserTests, name) {

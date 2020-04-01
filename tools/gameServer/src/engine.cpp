@@ -7,49 +7,31 @@
 #include "engine.h"
 #include <json.hpp>
 #include <any>
+#include <tuple>
 // #include "jsonvalidator.h"
 
 using json = nlohmann::json;
 using Engine::GenType;
+using Engine::Value;
+using Engine::Boolean;
+Using Engine::game;
 
 namespace Engine {
     
     template <typename T>
-    EngineImpl<T>::EngineImpl (const T& input): 
+    EngineImpl<Type>::EngineImpl (const Type& input): 
     input(input) {}
 
-    template <typename T> 
-    GenType<std::string, Game> EngineImpl<T>::initalizeEngine() { 
+    template <typename Type>
+    Game EngineImpl<Type>::initalizeEngine(const Type& input) { 
         std::cout << "Engine Initalizing!" << endl;
-        const json j1 = {
-            {"configuration", {
-                {"name", "Botch"},
-                {"player count", {{"min", 1}, {"max", 4}}},
-                {"audience", false},
-                {"setup", {{"Rounds", 10}}}
-            }},
-            {"constants", {}},
-            {"variables", {
-            {"winners", {1, 0, 2}}
-            }},
-            {"per-player", {
-            {"wins", 0}
-            }}, 
-            {"per-audience", {}},
-            {"rules", {}}
-        };
-
         if(this->validGameConfig(input)){
-            for (auto& [key, value] : this->input.items()){
-                this->mapKeyToValue(key, value); 
-            }
-
-            // return buildGame();
+            return buildGame();
         }; 
     }
 
-    template <typename T> 
-    bool EngineImpl<T>::validGameConfig(const T& input) { 
+    template <typename Type>
+    bool EngineImpl<Type>::validGameConfig(const Type& input) { 
         // if(JsonValidator.validJson(input)) {
         //     this->input = input; 
         //     return true;
@@ -59,96 +41,148 @@ namespace Engine {
         return true;
     } 
     
-    template <typename T> 
-    GenType<std::string, Game> EngineImpl<T>::buildGame() { 
+    template <typename Type>
+    Game EngineImpl<Type>::buildGame() { 
         std::cout << "Building new game from the following configs..." << endl;
         std::cout << this->input << endl;
 
-        // merge all the config variables together
-        // This one of the last methods that will be called to construct
-        // a game with all the game specification
+        // For testing TODO: Remove
+        json data = readJsonFromFile("../../src/data.json");
 
-        return this->gameConfig;
-    }
+        std::map<std::string, std::function<Value(const json& in)> > Game{
+            {"configuration", [](const Type& in){ return setConfiguration(in); }},
+            {"constants", [](const Type& in){ return setConstants(in); }},
+            {"variables", [](const Type& in){ return setVariables(in); }},
+            {"per-player", [](const Type& in){ return setPerPlayer(in); }},
+            {"per-audience", [](const Type& in){ return setPerAudience(in); }},
+            {"rules", [](const Type& in){ return setRules(in); }}
+        };
 
-    template <typename T> 
-    void EngineImpl<T>::mapKeyToValue(const T& key, const T& value){
-        std::cout << key << " " << this->mapValueToFuntion(value) << std::endl;
-    }
-
-    template <typename T> 
-    T EngineImpl<T>::mapValueToFuntion(const T& value){
-        return value.flatten();
-    }
-
-    template <typename T> 
-    GenType<std::string, Game> EngineImpl<T>::getGameConfig() const {
-        return this->gameConfig;
-    }
-
-    /////////////////////////////////////////////////////////////////////////////
-    // Main Parser from Type T to DSL
-    /////////////////////////////////////////////////////////////////////////////
-    std::unordered_map<std::string, std::any> getKeyToValueMapping(const json& j_object){
-        std::unordered_map<std::string, std::any> mapKeyVal;
-        for(auto jsonItem : j_object.items()){
-            mapKeyVal[jsonItem.key()] = jsonItem.value()
+        // Passed on the key in the shallow level of the config call the appropriate fucntion and pass only that object
+        for (const auto &[key, value] : data.items()) {
+            Game[key](value);
         }
-        return mapKeyVal;
+
+        return this->gameConfig;
+    }
+
+    // Just for testing now TODO: Remove
+    json readJsonFromFile(const std::string& file_path) {
+        std::ifstream input(file_path);
+
+        if(input.fail()) {
+            throw std::runtime_error("Unable to open file " + file_path);
+        }
+
+        return json::parse(input);
+    }
+
+    template <typename Type>
+    GenType<std::string, Game> EngineImpl<Type>::getGameConfig() const {
+        return this->gameConfig;
     }
     
-    template <typename T> 
-    Configuration& EngineImpl<T>::setConfiguration(const T& in) {
-        Configuration configuration = Configuration();
+    template <typename Type>
+    Boolean EngineImpl<Type>::setConfiguration(const Type& in) const noexcept {
+        Object setup;
+        setup.values.emplace("setup", recursiveValueMap(in["setup"]));
 
-        // this->gameConfig["configuration"] = configuration;
-        return configuration;
+        Configuration configuration{
+            in["name"],
+            {
+            in["player count"]["min"], 
+            in["player count"]["max"]
+            },
+            in["audience"],
+            setup
+        };
+
+        // this needs to be moved to a place where it is called when necessary\
+        // but it shows that now you can recurse and get the values.
+        // might not even use it as these are actionless unlike the rules
+        std::visit(Interpreter{}, (Value) configuration.setup); 
+        game.configuration { configuration };
+
+        return true;
     }
 
-    template <typename T> 
-    CVPA& EngineImpl<T>::setConstants(const T& in){
-        CVPA constants;
-        json constantsJson = this->gameConfig["constants"];
-        constants.constants.map = getKeyToValueMapping(constantsJson);
-        return constants;
+    template <typename Type>
+    Boolean EngineImpl<Type>::setConstants(const Type& in) const noexcept {
+        Object vars;
+        consts.values.emplace("constants", recursiveValueMap(in));
+
+        Constants constants{ vars };
+        game.constants { constants };
+
+        return true;
     }
 
-    template <typename T> 
-    CVPA& EngineImpl<T>::setVariables(const T& in){
-        CVPA variables;
-        json variablesJson = this->gameConfig["variables"];
-        variables.variables.map = getKeyToValueMapping(variablesJson);
-        return variables;
+    template <typename Type>
+    Boolean EngineImpl<Type>::setVariables(const Type& in) const noexcept {
+        Object vars;
+        vars.values.emplace("variables", recursiveValueMap(in));
+
+        Variables variables{ vars };
+        game.variables { variables };
+
+        return true;
     }
 
-    template <typename T> 
-    CVPA& EngineImpl<T>::setPerPlayer(const T& in){
-        CVPA perPlayer;
+    template <typename Type>
+    Boolean EngineImpl<Type>::setPerPlayer(const Type& in) const noexcept {
+        Object vars;
+        vars.values.emplace("per-player", recursiveValueMap(in));
 
-        // this->gameConfig["perPlayer"] = perPlayer;
-        return perPlayer;
+        PerPlayer perPlayer{ vars };
+        // not sure yet how this and per audience ties into the overall players
+        game.perPlayer { perPlayer };
+
+        return true;
     }
 
-    template <typename T> 
-    CVPA& EngineImpl<T>::setPerAudience(const T& in){
-        CVPA perAudience;
+    template <typename Type>
+    Boolean EngineImpl<Type>::setPerAudience(const Type& in) const noexcept {
+        Object vars;
+        vars.values.emplace("per-audience", recursiveValueMap(in));
 
-        // this->gameConfig["perAudience"] = perAudience;
-        return perAudience;
+        PerAudience perAudience{ vars };
+        game.perAudience { perAudience };
+
+        return true;
     }
 
-    template <typename T> 
-    Rules& EngineImpl<T>::setRules(const T& in){
-        Rules rules;
+    template <typename Type>
+    Boolean EngineImpl<Type>::setRules(const Type& in) const noexcept {
+        Array vars;
 
-        this->gameConfig["rules"] = rules;
-        return rules;
+        vars.values.emplace_back(recursiveValueMap(in));
+        Rules rules { vars };
+
+        std::visit(Interpreter{}, rules.rules);
+        game.rules { rules };
+
+        return true;
     }
 
     /////////////////////////////////////////////////////////////////////////////
     // Control Structures
     /////////////////////////////////////////////////////////////////////////////
 
-    template <typename T> 
-    void EngineImpl<T>::findAndExecute() { }
+    template <typename Type>
+    void EngineImpl<Type>::findAndExecute() { }
+
+    /*************************************
+    *
+    *     RuleCollection Implemention  
+    *
+    **************************************/
+
+    template <typename T>
+    void forEachImpl(RuleCollection::ForEach &data){
+        for(T &el : data.list){
+            for(RuleCollection::GenRule rule : data.rules_to_run){
+                std::apply(rule, el);
+            }
+        }
+    }
 }

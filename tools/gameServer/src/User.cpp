@@ -1,13 +1,10 @@
 #include "User.h"
 
-User::User(networking::Connection cnxn) :
-    cnxn{cnxn}, name{""}
-{
-    
-}
+User::User(const networking::Connection& connection) :
+    connection{connection}, name{""} {}
 
-networking::Connection User::getConn() const {
-    return cnxn;
+networking::Connection User::getConnection() const {
+    return connection;
 }
 
 std::string User::getName() const {
@@ -16,4 +13,8 @@ std::string User::getName() const {
 
 void User::setName(std::string& name) {
     this->name = name;
+}
+
+bool User::operator< (const User &user) const{
+    return getConnection().id < user.getConnection().id;
 }
