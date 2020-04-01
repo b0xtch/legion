@@ -71,14 +71,31 @@ namespace Utils {
         return gameName;
     }
 
-    const char* commandList[] = {"!chat","!createsession","!joinsession","!leavesession","!gameinput","!whisper","!requestgames"};
+    namespace PMConstants {
+        const std::string KEY_COMMAND = "command";
+        const std::string KEY_DATA = "data";
+
+        const std::string TYPE_SERVER_STOP = "serverstop";
+
+        const std::string TYPE_CREATE_SESSION = "!createsession";
+        const std::string TYPE_JOIN_SESSION = "!joinsession";
+        const std::string TYPE_LEAVE_SERVER = "!leavesession";
+        const std::string TYPE_CHAT = "!chat";
+        const std::string TYPE_WHISPER = "!whisper";
+        const std::string TYPE_LIST_GAMES = "!requestGames";
+    };
+
+    const std::vector<const std::string> possibleCommands;
+    possibleCommands.push_back(TYPE_CREATE_SESSION);
+    possibleCommands.push_back(TYPE_JOIN_SESSION);
+    possibleCommands.push_back(TYPE_LEAVE_SERVER);
+    possibleCommands.push_back(TYPE_CHAT);
+    possibleCommands.push_back(TYPE_WHISPER);
+    possibleCommands.push_back(TYPE_LIST_GAMES);
 
     json makeJsonCommand(const std::string& input) {
-        int commandNum = sizeof(commandList) / sizeof(commandList[0]);
-        std::vector<std::string> possibleCommands(commandList, commandList+commandNum);
-
         std::stringstream commandStream;
-        commandStream << "{ \"command\": \""; // Start the json object and declare the command field
+        commandStream << "{ \"" << KEY_COMMAND << "\": \""; // Start the json object and declare the command field
 
         size_t endOfCommand = input.find(" ");
         std::string firstWord = input.substr(0,endOfCommand);
@@ -89,7 +106,7 @@ namespace Utils {
             endOfCommand = 0;
         }
 
-        commandStream << "\", \"data\": \""; // Declare the data field
+        commandStream << "\", \"" << KEY_DATA << "\": \""; // Declare the data field
         commandStream << input.substr(endOfCommand, string::npos); // Get the data value
         commandStream << "\" }"; // End of the json object
 
