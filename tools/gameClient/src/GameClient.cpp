@@ -32,6 +32,9 @@ std::string makeServerMessage(const std::string& input);
 // Parse json message from server
 std::string processServerMessage(const std::string& response);
 
+const std::string MENU_NAME_IN_LOBBY = "In lobby";
+MenuPageInfo::MenuName buildInLobbyPage(MenuManager& menuManager, networking::Client& client);
+
 const std::string MENU_NAME_JOIN_LOBBY = "Join lobby";
 MenuPageInfo::MenuName buildJoinLobbyPage(MenuManager &menuManager, networking::Client& client);
 
@@ -159,8 +162,21 @@ void initializePages(MenuManager &menuManager, bool &done, networking::Client &c
     // WIP
 }
 
-MenuPageInfo::MenuName buildInLobbyPage(MenuManager &menuManager, networking::Client& client) {
-    // WIP
+MenuPageInfo::MenuName buildInLobbyPage(MenuManager& menuManager, networking::Client& client, bool& done) {
+    const MenuPageInfo::NameList inLobbyFields{"COMMMANDS: !quit, !gameinput"};
+    const MenuPageInfo::NameList inLobbyItems{"Quit"};
+    
+    auto quit = [&done] () {
+        done = true;
+    };
+    
+    const MenuPageInfo::FunctionList inLobbyItemResults{quit};
+    
+    MenuPageInfo::MenuName inLobbyName = MENU_NAME_IN_LOBBY;
+    auto inLobbyPage = std::make_shared<MenuPageInfo>(inLobbyName, inLobbyFields, inLobbyItems, inLobbyItemResults);
+    menuManager.addPage( inLobbyPage );
+    
+    return MENU_NAME_IN_LOBBY;
 }
 
 MenuPageInfo::MenuName buildJoinLobbyPage(MenuManager &menuManager, networking::Client& client) {
@@ -191,6 +207,9 @@ MenuPageInfo::MenuName buildJoinLobbyPage(MenuManager &menuManager, networking::
         // Fix: https://stackoverflow.com/questions/18493449/how-to-read-an-incomplete-form-field-ncurses-c
         std::string serverMessage = ParsedMessage::makeMsgText(PMConstants::TYPE_JOIN_SESSION, lobbyCodeString);
         client.send( serverMessage );
+        
+        MenuPageInfo::MenuName nextPage = MENU_NAME_IN_LOBBY;
+        menuManager.switchPage(nextPage);
     };
 
     const MenuPageInfo::FunctionList joinLobbyItemResults
@@ -262,6 +281,9 @@ MenuPageInfo::MenuName buildCreateLobbyPage(MenuManager &menuManager, networking
         std::string gameTitleString = Utils::removeTrailingWhitespace(gameTitle);
         std::string serverMessage = ParsedMessage::makeMsgText(PMConstants::TYPE_CREATE_SESSION, gameTitleString);
         client.send( serverMessage );
+        
+        MenuPageInfo::MenuName nextPage = MENU_NAME_IN_LOBBY;
+        menuManager.switchPage(nextPage);
     };
 
     const MenuPageInfo::FunctionList createLobbyItemResults
@@ -281,6 +303,7 @@ void initializeMenuPages( MenuManager &menuManager, bool &done, networking::Clie
 
     MenuPageInfo::NameList mainMenuItems = { "Join lobby", "Create lobby", "Exit" };
 
+    buildInLobbyPage(menuManager, client, done);
     MenuPageInfo::MenuName joinLobbyMenuName = buildJoinLobbyPage(menuManager, client);
     MenuPageInfo::MenuName createLobbyMenuName = buildCreateLobbyPage(menuManager, client);
 

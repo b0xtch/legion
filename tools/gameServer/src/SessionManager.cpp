@@ -122,7 +122,7 @@ std::vector<Message> SessionManager::processMessage(const Message& message){
         std::set<User> users = session.getAllUsers();
         return constructMessage(message.text, users);
 
-    } else if(type == ParsedMessage::Type::LeaveSession){
+    } else if(type == ParsedMessage::Type::LeaveSession || type == ParsedMessage::Type::LeaveServer){
         Session& session = getSessionForConnection(message.connection);
         session.removeUser(message.connection);
         std::set<User> users = session.getAllUsers();
@@ -139,6 +139,9 @@ std::vector<Message> SessionManager::processMessage(const Message& message){
             std::set<User> users = session.getAllUsers();
             return constructMessage(ParsedMessage::makeMsgText(PMConstants::TYPE_CHAT, "New player joined."), users);
         }
+    } else if (type == ParsedMessage::Type::GameInput) {
+        Session& session = getSessionForConnection(message.connection);
+        // WIP Do something about the game input.
     }
 }  
 

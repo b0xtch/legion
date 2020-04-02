@@ -16,7 +16,7 @@ void MenuPage::addField( FIELD *field ) {
     fieldList.push_back( field );
 }
 
-bool MenuPage::hasForm() {
+bool MenuPage::hasForm() const {
     return !fieldList.empty();
 }
 
@@ -32,15 +32,19 @@ void MenuPage::addItem( ITEM *item ) {
     itemList.push_back( item );
 }
 
+bool MenuPage::hasMenu() const {
+    return !itemList.empty();
+}
+
 MenuPage::ItemList *MenuPage::getItemList() {
     return &itemList;
 }
 
-const MenuPageInfo::FunctionList MenuPage::getItemResults() {
+const MenuPageInfo::FunctionList MenuPage::getItemResults() const {
     return itemResults;
 }
 
-MenuPageInfo::MenuName MenuPage::getMenuName() {
+MenuPageInfo::MenuName MenuPage::getMenuName() const {
     return menuName;
 }
 

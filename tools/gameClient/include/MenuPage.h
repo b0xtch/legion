@@ -46,22 +46,21 @@ public:
 
     void cleanup();
 
-    int changeSelectedOptionOnInput();
-
     FieldList* getFieldList();
     void addField( FIELD *field );
     FORM* getForm();
     void setForm( FORM *form );
-    bool hasForm();
+    bool hasForm() const;
 
-    std::vector<MenuPageInfo::ItemName> getItemNames();
-    const MenuPageInfo::FunctionList getItemResults();
+    const MenuPageInfo::FunctionList getItemResults() const;
     void addItem( ITEM *item );
     MENU* getMenu();
     void setMenu( MENU *menu );
+    bool hasMenu() const;
+    
     ItemList* getItemList();
 
-    MenuPageInfo::MenuName getMenuName();
+    MenuPageInfo::MenuName getMenuName() const;
 
 private:
 
