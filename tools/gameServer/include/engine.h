@@ -78,66 +78,136 @@ namespace Engine {
     * */
     std::unordered_map<std::string, std::function<void(const Object &obj)>> RuleStructure{
         {"foreach",         [](const Object &obj){  
+        std::cout << "Creating Rule: foreach" << std::endl;
+
+            // { "rule": "foreach",
+            //   "list": <<list, list expression, or name of a list object>>,
+            //   "element": << name for list element object within the rules below >>
+            //   "rules": [
+            //     << Rules to execute on every element of the given list >>
+            //   ]
+            // }
+
 
         }},
         {"loop",            [](const Object &obj){  
+        std::cout << "Creating Rule: loop" << std::endl;
 
         }},
         {"inparallel",      [](const Object &obj){  
+        std::cout << "Creating Rule: inparallel" << std::endl;
 
         }},
         {"parallelfor",     [](const Object &obj){  
+        std::cout << "Creating Rule: parallelfor" << std::endl;
 
         }},
         {"switch",          [](const Object &obj){  
+        std::cout << "Creating Rule: switch" << std::endl;
 
         }},
         {"when",            [](const Object &obj){  
+        // { "rule": "when",
+        //   "cases": [
+        //     { "condition": << Boolean guard for rules >>,
+        //       "rules": [ << Rules to execute when the value and case match >> ]
+        //     },
+        //     ...
+        //   ]
+        // }
+        std::cout << "Creating Rule: when" << std::endl;
+        
+        for (const auto&[key, value] : obj.values) {
+            std::cout << key << std::endl;
 
+            std::visit([](auto&& arg){std::cout << typeid(arg).name() << " ";}, value); // 3
+
+        }
+
+        auto lambda = [](auto&& variant) {
+        return std::visit(
+            [](auto&& arg) -> Value {
+                using T = std::decay_t<decltype(arg)>;
+                std::cout << std::get<0>(arg) << std::endl;
+                return arg;
+            }, variant);
+        };
+
+        // auto it = lambda(Value(2)); // example code
         }},
         {"extend",          [](const Object &obj){  
+        std::cout << "Creating Rule: extend" << std::endl;
+
+        // for (const auto&[key, value] : obj.values) {
+        //   std::cout << key << std::endl;
+        // }
 
         }},
         {"reverse",         [](const Object &obj){  
+        std::cout << "Creating Rule: reverse" << std::endl;
+        // for (const auto&[key, value] : obj.values) {
+        //   std::cout << key << std::endl;
+        // }
 
         }},
         {"shuffle",         [](const Object &obj){  
+        std::cout << "Creating Rule: shuffle" << std::endl;
+        for (const auto&[key, value] : obj.values) {
+            std::cout << key << std::endl;
+        }
 
         }},
         {"sort",            [](const Object &obj){  
+        std::cout << "Creating Rule: sort" << std::endl;
+        for (const auto&[key, value] : obj.values) {
+            std::cout << key << std::endl;
+        }
 
         }},
         {"deal",            [](const Object &obj){  
+        std::cout << "Creating Rule: deal" << std::endl;
+        for (const auto&[key, value] : obj.values) {
+            std::cout << key << std::endl;
+        }
 
         }},
         {"discard",         [](const Object &obj){  
+        std::cout << "Creating Rule: discard" << std::endl;
+        // for (const auto&[key, value] : obj.values) {
+        //   std::cout << key << std::endl;
+        // }
 
         }},
         {"timer",           [](const Object &obj){  
+        std::cout << "Creating Rule: timer" << std::endl;
 
         }},
         {"input-choice",    [](const Object &obj){  
+        std::cout << "Creating Rule: input-choice" << std::endl;
 
         }},
         {"input-text",      [](const Object &obj){  
+        std::cout << "Creating Rule: input-text" << std::endl;
 
         }},
         {"input-vote",      [](const Object &obj){  
+        std::cout << "Creating Rule: input-vote" << std::endl;
 
         }},
         {"message",         [](const Object &obj){  
+        std::cout << "Creating Rule: message" << std::endl;
 
         }},
         {"global-message",  [](const Object &obj){  
-        std::cout << "here" << std::endl; // works
+        std::cout << "Creating Rule: global-message" << std::endl;
 
-        GlobalMessage({obj});
         }},
         {"scores",          [](const Object &obj){  
-        std::cout << "here" << std::endl; // works
-        
+        std::cout << "Creating Rule: scores" << std::endl;
+
         }},
     };
+
 
     template <typename K, typename V> 
     struct GenType {
@@ -180,8 +250,7 @@ namespace Engine {
                 [](auto&& arg) -> Value {
                     using T = std::decay_t<decltype(arg)>;
                     return arg;
-                },
-            variant);
+                }, variant);
             };
 
             auto it = lambda(Value(2)); // example code
