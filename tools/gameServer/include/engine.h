@@ -307,6 +307,11 @@ namespace Engine {
 
     struct Components {
         using Rules = Type<
+        Integer,
+        String,
+        Boolean,
+        rapper<Array>, 
+        rapper<Object>,
         RuleCollection::Arithmetic,
         RuleCollection::When<Integer>,
         RuleCollection::Loop<Integer>,
@@ -320,6 +325,13 @@ namespace Engine {
         void visit(){
             for (auto& entity : entities){
                 std::visit(overloaded {
+                std::visit(overloaded {
+                    [](std::monostate){},
+                    [](const Integer& rule){},
+                    [](const String &str){},
+                    [](const Boolean& rule){},
+                    [](const Object& rule){},
+                    [](const Array& rule){},
                     [](RuleCollection::Arithmetic rule){},
                     [](RuleCollection::When<Integer> rule){},
                     [](RuleCollection::Loop<Integer> rule){},
@@ -327,7 +339,7 @@ namespace Engine {
                     [](RuleCollection::Reverse rule){},
                     [](RuleCollection::Shuffle<Integer> rule){},
                     [](RuleCollection::Sort<Integer> rule){}
-                    // [](RuleCollection::Scores rule){},
+                    // [](RuleCollection::Scores rule){}
                 }, entity);
             }
         }
