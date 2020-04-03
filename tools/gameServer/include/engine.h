@@ -77,6 +77,25 @@ namespace Engine {
         }
     * */
     std::unordered_map<std::string, std::function<void(const Object &obj)>> RuleStructure{
+        {"add",          [](const Object &obj){  
+        std::cout << "Creating Rule: add" << std::endl;
+        auto rule = obj.values.find("rule")->second;
+        auto to = obj.values.find("to")->second;
+        auto value = obj.values.find("value")->second;
+
+        std::visit(BuildRule{}, rule);
+        std::cout << std::endl;
+        // std::visit(BuildRule{}, to);
+        // std::cout << std::endl;
+        // std::visit(BuildRule{}, value);
+        // std::cout << std::endl;
+
+        // RuleCollection::Arithmetic addition(b, 10, RuleCollection::MathOperation::ADD);
+
+        // Arithmetic addition {{43, 5}, Arith::ADD};
+        // Components component {{addition}};
+        // component.visit();
+        }},
         {"foreach",         [](const Object &obj){  
         std::cout << "Creating Rule: foreach" << std::endl;
 
@@ -119,21 +138,9 @@ namespace Engine {
         
         for (const auto&[key, value] : obj.values) {
             std::cout << key << std::endl;
-
-            std::visit([](auto&& arg){std::cout << typeid(arg).name() << " ";}, value); // 3
-
         }
 
-        auto lambda = [](auto&& variant) {
-        return std::visit(
-            [](auto&& arg) -> Value {
-                using T = std::decay_t<decltype(arg)>;
-                std::cout << std::get<0>(arg) << std::endl;
-                return arg;
-            }, variant);
-        };
 
-        // auto it = lambda(Value(2)); // example code
         }},
         {"extend",          [](const Object &obj){  
         std::cout << "Creating Rule: extend" << std::endl;
@@ -173,9 +180,9 @@ namespace Engine {
         }},
         {"discard",         [](const Object &obj){  
         std::cout << "Creating Rule: discard" << std::endl;
-        // for (const auto&[key, value] : obj.values) {
-        //   std::cout << key << std::endl;
-        // }
+        for (const auto&[key, value] : obj.values) {
+            std::cout << key << std::endl;
+        }
 
         }},
         {"timer",           [](const Object &obj){  
@@ -242,21 +249,6 @@ namespace Engine {
         }
     }
 
-    // STILL IN DEVELOPMENT
-    struct BuildRule {
-        void build() {
-            auto lambda = [](auto&& variant) {
-            return std::visit(
-                [](auto&& arg) -> Value {
-                    using T = std::decay_t<decltype(arg)>;
-                    return arg;
-                }, variant);
-            };
-
-            auto it = lambda(Value(2)); // example code
-        }
-    };
-
     /**
      * Rules
      */
@@ -266,18 +258,9 @@ namespace Engine {
         void operator()(std::monostate) const {  }
         void operator()(const String &str) const { 
             std::cout << str << std::endl; 
-            // All values like:
-            // Winners: {winners.elements.name}
-            // Will be proccessed here
-
-
         }
         void operator()(const Integer num) const { 
             std::cout << num << std::endl; 
-            // All values like: 0 
-
-
-
         }
         void operator()(const Array &array) const {
             // Loop over the an array and extract the values to do processing by recursive visiting
@@ -322,48 +305,29 @@ namespace Engine {
     template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>; 
 
-    template<typename... T>
-    struct Components{
-        using component = std::variant<T...>;
+    struct Components {
+        using Rules = Type<
+        RuleCollection::Arithmetic,
+        RuleCollection::When<Integer>,
+        RuleCollection::Loop<Integer>,
+        RuleCollection::Extend<Integer>,
+        RuleCollection::Reverse, 
+        RuleCollection::Shuffle<Integer>,
+        RuleCollection::Sort<Integer>
+        // RuleCollection::Scores
+        >;
 
         void visit(){
             for (auto& entity : entities){
                 std::visit(overloaded {
-                    [](Integer& value){value += value;},
-                    // [](ControlStructures rule){
-                    //     switch(rule){
-                    //         case ControlStructures::ForEach:
-                    //         case ControlStructures::Loop:
-                    //         case ControlStructures::Inparallel:
-                    //         case ControlStructures::Parallelfor:
-                    //         case ControlStructures::Switch:
-                    //         case ControlStructures::When:
-                    //         default: break;
-                    //     }
-                    // },
-                    // [](ListOperations rule){},
-                    [](Arithmetic rule){
-                        switch (rule.operation) {
-                            case JsonDSL::Arithmetic::ADD:      rule.result = rule.values.first + rule.values.second; break;
-                            case JsonDSL::Arithmetic::SUBTRACT: rule.result = rule.values.first - rule.values.second; break;
-                            case JsonDSL::Arithmetic::MULTIPLY: rule.result = rule.values.first * rule.values.second; break;
-                            case JsonDSL::Arithmetic::DIVIDE:   rule.result = rule.values.first / rule.values.second; break;
-                            default: break;
-                        }
-                    },
-                    // [](Timing rule){
-                    //     rule->func();
-                    // },
-                    [](InputChoice rule){
-                        
-                    },
-                    // [](HumanInput rule){
-                    //     switch(rule){
-                    //         case HumanInput::InputChoice:
-                                
-                    //     }
-                    // },
-                    // [](Output rule){}
+                    [](RuleCollection::Arithmetic rule){},
+                    [](RuleCollection::When<Integer> rule){},
+                    [](RuleCollection::Loop<Integer> rule){},
+                    [](RuleCollection::Extend<Integer> rule){},
+                    [](RuleCollection::Reverse rule){},
+                    [](RuleCollection::Shuffle<Integer> rule){},
+                    [](RuleCollection::Sort<Integer> rule){}
+                    // [](RuleCollection::Scores rule){},
                 }, entity);
             }
         }
@@ -375,8 +339,47 @@ namespace Engine {
             }
         }
 
-        std::vector<component> entities;
-    };     
+        std::vector<Rules> entities;
+    };   
+
+        struct BuildRule {
+        void operator()(std::monostate) const { }
+        void operator()(const String& str) const { 
+            std::cout << str; 
+        }
+        void operator()(const Integer& num) const { 
+            std::cout << num; 
+        }
+        void operator()(const Boolean& boo) const { 
+            std::cout << boo; 
+        }
+        void operator()(const Array &arr) const {
+            std::cout << "here" << std::endl;
+            if (!arr.values.empty()) {
+            std::for_each(arr.values.begin(), arr.values.end(), [this](const auto &arr) {
+                std::visit(*this, arr);
+            });
+            }
+        }
+        void operator()(const Object &obj) const {
+            std::cout << "here" << std::endl;
+            if (!obj.values.empty()) {
+            std::for_each(obj.values.begin(), obj.values.end(), [this](const auto &obj) {
+                std::visit(*this, obj.second);
+            });
+            }
+        }
+        // auto operator()(Value&& value){
+        //   std::cout << "here build rule" << std::endl;
+        // }
+
+        // Components build() {
+            
+        //   return rule;
+        // }
+
+        // Components rule; 
+    };
 
     struct ControlStructures {
         ForEach forEach;
