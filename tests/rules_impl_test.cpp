@@ -26,7 +26,7 @@ int main()
     r.push_back(&mathobj4);
 
     int max1 = 100;
-    RuleCollection::Condition<int> end_condition1 {b, max1, RuleCollection::ConditionType::GREATER};
+    RuleCollection::Condition<int> end_condition1{b, max1, RuleCollection::ConditionType::GREATER};
 
     RuleCollection::Loop<int> loopobj(end_condition1, RuleCollection::LoopType::UNTIL, r);
 
