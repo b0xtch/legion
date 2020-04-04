@@ -169,7 +169,7 @@ std::pair<size_t, size_t> VH::getVarAccessLocations(const std::string& strVal){
     auto endLoc = strVal.find(accessEnd);
     
     bool accessNotFound = startLoc == std::string::npos || endLoc == std::string::npos;
-    bool endIsBeforeStart = startLoc < endLoc;
+    bool endIsBeforeStart = startLoc > endLoc;
 
     if (accessNotFound || endIsBeforeStart){
         startLoc = std::string::npos;
@@ -199,7 +199,11 @@ std::vector<std::string> VH::extractStringVarAccesses(std::string strVal){
 
 bool VH::isBooleanExpression(std::string expression, varMap& map){
     varCollection& bools = map[JsonDSL::VarBoolean];
-    auto boolIt = std::find(bools.begin(), bools.end(), expression);
+
+    std::string trimmedExpr = expression;
+    boost::trim(trimmedExpr);
+
+    auto boolIt = std::find(bools.begin(), bools.end(), trimmedExpr);
     if(boolIt != bools.end()){
         return true;
     }
