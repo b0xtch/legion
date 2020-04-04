@@ -27,15 +27,13 @@ using json = nlohmann::json;
 // Idea on combining menus and forms on one page referenced from:
 //    https://alan-mushi.github.io/2015/05/26/simple-ncurses-popup-in-C.html
 
-
-
-
-// Split a string into multiple substrings
-std::vector<std::string> splitString(const std::string& text, const std::string& splitOn, bool includeSplit);
 // Make json message for server
 std::string makeServerMessage(const std::string& input);
 // Parse json message from server
 std::string processServerMessage(const std::string& response);
+
+const std::string MENU_NAME_IN_LOBBY = "In lobby";
+MenuPageInfo::MenuName buildInLobbyPage(MenuManager& menuManager, networking::Client& client);
 
 const std::string MENU_NAME_JOIN_LOBBY = "Join lobby";
 MenuPageInfo::MenuName buildJoinLobbyPage(MenuManager &menuManager, networking::Client& client);
@@ -91,7 +89,7 @@ int main(int argc, char* argv[]) {
 
         auto response = client.receive();
         if (!response.empty()) {
-            std::vector<std::string> commands = splitString(response, "}", true);
+            std::vector<std::string> commands = Utils::splitString(response, "}", true);
 
             for ( auto cmd : commands ) {
                 menuManager.displayChatText(processServerMessage(cmd));
@@ -105,38 +103,6 @@ int main(int argc, char* argv[]) {
     menuManager.cleanup();
 
     return 0;
-}
-
-/**
-Takes a string and a second string to split the first string on.
-Splits the first string and returns a list of all the new substrings.
-The substrings will include the next split string if includeSplit is true.
-**/
-std::vector<std::string> splitString(const std::string& text, const std::string& splitOn, bool includeSplit) {
-
-    std::vector<std::string> splits;
-
-    if (!text.empty()) {
-        std::size_t start = 0;
-        std::size_t end = text.find(splitOn);
-
-        while (end != std::string::npos) {
-            if (includeSplit) {
-                splits.push_back(text.substr(start, end-start+splitOn.length()));
-            } else {
-                splits.push_back(text.substr(start, end-start));
-            }
-            start = end + splitOn.length();
-            end = text.find(splitOn, start);
-        }
-        
-        std::string toPush = text.substr(start);
-        if (!toPush.empty()) {
-            splits.push_back(toPush);
-        }
-    }
-
-    return splits;
 }
 
 std::string makeServerMessage(const std::string& input) {
@@ -181,8 +147,9 @@ std::string processServerMessage(const std::string& response) {
         // To do: function that displays game data
         responseData << data;
     } else if (command == ParsedMessage::Type::RequestGames) {
-        gamesList = splitString(data, "\n", false);
+        gamesList = Utils::splitString(data, "\n", false);
     }
+    responseData << "\n";
 
     return responseData.str();
 }
@@ -195,8 +162,21 @@ void initializePages(MenuManager &menuManager, bool &done, networking::Client &c
     // WIP
 }
 
-MenuPageInfo::MenuName buildInLobbyPage(MenuManager &menuManager, networking::Client& client) {
-    // WIP
+MenuPageInfo::MenuName buildInLobbyPage(MenuManager& menuManager, networking::Client& client, bool& done) {
+    const MenuPageInfo::NameList inLobbyFields{"COMMMANDS: !quit, !gameinput"};
+    const MenuPageInfo::NameList inLobbyItems{"Quit"};
+    
+    auto quit = [&done] () {
+        done = true;
+    };
+    
+    const MenuPageInfo::FunctionList inLobbyItemResults{quit};
+    
+    MenuPageInfo::MenuName inLobbyName = MENU_NAME_IN_LOBBY;
+    auto inLobbyPage = std::make_shared<MenuPageInfo>(inLobbyName, inLobbyFields, inLobbyItems, inLobbyItemResults);
+    menuManager.addPage( inLobbyPage );
+    
+    return MENU_NAME_IN_LOBBY;
 }
 
 MenuPageInfo::MenuName buildJoinLobbyPage(MenuManager &menuManager, networking::Client& client) {
@@ -221,12 +201,15 @@ MenuPageInfo::MenuName buildJoinLobbyPage(MenuManager &menuManager, networking::
         const int lobbyCodeInputIndex = 1;
         const char *lobbyCode =
             field_buffer( connectFields->at( lobbyCodeInputIndex ), 0 );
-        std::string lobbyCodeString(lobbyCode);
+        std::string lobbyCodeString = Utils::removeTrailingWhitespace(lobbyCode);
         // Bug: if field is not filled to max length, only spaces will be sent.
         // What's happening: https://alan-mushi.github.io/2014/11/30/ncurses-forms.html
         // Fix: https://stackoverflow.com/questions/18493449/how-to-read-an-incomplete-form-field-ncurses-c
         std::string serverMessage = ParsedMessage::makeMsgText(PMConstants::TYPE_JOIN_SESSION, lobbyCodeString);
         client.send( serverMessage );
+        
+        MenuPageInfo::MenuName nextPage = MENU_NAME_IN_LOBBY;
+        menuManager.switchPage(nextPage);
     };
 
     const MenuPageInfo::FunctionList joinLobbyItemResults
@@ -262,7 +245,7 @@ std::string requestGames(networking::Client& client) {
 }
 
 void displayGames(MenuManager& menuManager, const std::string& games) {
-    gamesList = splitString(games, "\n", false);
+    gamesList = Utils::splitString(games, "\n", false);
     
     std::stringstream ss{};
     ss << "--- GAME TITLES\n";
@@ -295,9 +278,12 @@ MenuPageInfo::MenuName buildCreateLobbyPage(MenuManager &menuManager, networking
         const int gameTitleInputIndex = 1;
         const char *gameTitle =
             field_buffer( connectFields->at( gameTitleInputIndex ), 0 );
-        std::string gameTitleString(gameTitle);
+        std::string gameTitleString = Utils::removeTrailingWhitespace(gameTitle);
         std::string serverMessage = ParsedMessage::makeMsgText(PMConstants::TYPE_CREATE_SESSION, gameTitleString);
         client.send( serverMessage );
+        
+        MenuPageInfo::MenuName nextPage = MENU_NAME_IN_LOBBY;
+        menuManager.switchPage(nextPage);
     };
 
     const MenuPageInfo::FunctionList createLobbyItemResults
@@ -317,6 +303,7 @@ void initializeMenuPages( MenuManager &menuManager, bool &done, networking::Clie
 
     MenuPageInfo::NameList mainMenuItems = { "Join lobby", "Create lobby", "Exit" };
 
+    buildInLobbyPage(menuManager, client, done);
     MenuPageInfo::MenuName joinLobbyMenuName = buildJoinLobbyPage(menuManager, client);
     MenuPageInfo::MenuName createLobbyMenuName = buildCreateLobbyPage(menuManager, client);
 

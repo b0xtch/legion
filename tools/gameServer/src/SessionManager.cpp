@@ -14,13 +14,13 @@ SessionManager::SessionManager(int maxSessions): MAX_SESSIONS_PER_SERVER{maxSess
 /**
  * function for creating a new session
  * **/
-Session SessionManager::createNewSession(){
-    if(sessions.size() <= MAX_SESSIONS_PER_SERVER){
-        Session session = Session{};
+Session& SessionManager::createNewSession(){
+    if (sessions.size() <= MAX_SESSIONS_PER_SERVER) {
+        Session session{};
         sessions[session.getSessionId()] = session;
-        return session;
+        return sessions[session.getSessionId()];
     };
-    throw; // ServerLimitReached();
+    throw std::runtime_error("Attempting to create new session when limit already reached."); // ServerLimitReached();
 };
 
 
@@ -60,12 +60,15 @@ void SessionManager::addToSession(const Connection& connectionToAdd, std::string
 /**
  * Find session for particular connection
  * **/  
-Session SessionManager::getSessionForConnection(const Connection& connection){
+Session& SessionManager::getSessionForConnection(const Connection& connection){
     auto it = find_if(sessions.begin(), sessions.end(), [&](const std::pair<std::string, Session> &map){
         return map.second.isUser(connection);
     });
     if(it != sessions.end()){
         return it->second;
+    }
+    else {
+        throw std::runtime_error("Unable to find session for connection."); // ServerLimitReached();
     }
 }
 
@@ -109,24 +112,37 @@ std::vector<Message> SessionManager::processMessage(const Message& message){
     std::string msg = parsedMessage.getData();
 
     if(type == ParsedMessage::Type::CreateSession){
-        Session session = createNewSession();
+        Session& session = createNewSession();
         session.addUser(message.connection);
         std::set<User> users = session.getAllUsers();
-        return constructMessage("New Player Joined", users);
+        return constructMessage(ParsedMessage::makeMsgText(PMConstants::TYPE_CHAT, "Session created. Join ID: " + session.getSessionId()), users);
    
     } else if(type == ParsedMessage::Type::Chat){
-        Session session = getSessionForConnection(message.connection);
+        Session& session = getSessionForConnection(message.connection);
         std::set<User> users = session.getAllUsers();
         return constructMessage(message.text, users);
-        /* std::set<Connection> connections = getUnassignedConnections(); */
-        /* return constructMessage(message.text, connections); */
 
-    } else if(type == ParsedMessage::Type::LeaveSession){
-        Session session = getSessionForConnection(message.connection);
+    } else if(type == ParsedMessage::Type::LeaveSession || type == ParsedMessage::Type::LeaveServer){
+        Session& session = getSessionForConnection(message.connection);
         session.removeUser(message.connection);
         std::set<User> users = session.getAllUsers();
-        return constructMessage("Player Left", users);
-    } 
+        return constructMessage(ParsedMessage::makeMsgText(PMConstants::TYPE_CHAT, "A player left."), users);
+        
+    } else if (type == ParsedMessage::Type::JoinSession) {
+        if (sessions.count(msg) == 0) {
+            std::set<Connection> recipient{message.connection};
+            return constructMessage(ParsedMessage::makeMsgText(PMConstants::TYPE_CHAT, "That session does not exist."), recipient);
+        }
+        else {
+            Session& session = sessions[msg];
+            session.addUser(message.connection);
+            std::set<User> users = session.getAllUsers();
+            return constructMessage(ParsedMessage::makeMsgText(PMConstants::TYPE_CHAT, "New player joined."), users);
+        }
+    } else if (type == ParsedMessage::Type::GameInput) {
+        Session& session = getSessionForConnection(message.connection);
+        // WIP Do something about the game input.
+    }
 }  
 
 

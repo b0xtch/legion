@@ -5,6 +5,7 @@
 #include <random>
 #include <stdexcept>
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "json.hpp"
 
@@ -97,5 +98,36 @@ namespace Utils {
 
         return message;
     }
+    
+    std::string removeTrailingWhitespace(const std::string& text) {
+        // You'd think the C++ standard library would have a way to do this by now!
+        std::string ret = text;
+        boost::trim_right(ret);
+        return ret;
+    }
+    
+    std::vector<std::string> splitString(const std::string& text, const std::string& splitOn, bool includeSplit) {
+        std::vector<std::string> splits;
+        
+        if (!text.empty()) {
+            std::size_t start = 0;
+            std::size_t end = text.find(splitOn);
+            while (end != std::string::npos) {
+                if (includeSplit) {
+                    splits.push_back(text.substr(start, end-start+splitOn.length()));
+                } else {
+                    splits.push_back(text.substr(start, end-start));
+                }
+                start = end + splitOn.length();
+                end = text.find(splitOn, start);
+            }
+            
+            std::string toPush = text.substr(start);
+            if (!toPush.empty()) {
+                splits.push_back(toPush);
+            }
+        }
 
+        return splits;
+    }
 }
