@@ -166,8 +166,9 @@ void MenuManager::switchPage( MenuPageInfo::MenuName &nextPageName ) {
     if ( currentPage->hasForm() ) {
         assert( post_form( currentPage->getForm() ) == E_OK );
     }
-    assert( post_menu( currentPage->getMenu() ) == E_OK );
-    
+    if (currentPage->hasMenu()) {
+        assert( post_menu( currentPage->getMenu() ) == E_OK );
+    }
 }
 
 void MenuManager::initializeStartingPage() {

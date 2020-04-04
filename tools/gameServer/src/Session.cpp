@@ -6,7 +6,8 @@
 /**
  * Construct with session id
  * **/
-Session::Session(): sessionId{Utils::generateSessionId(6)}{};
+Session::Session(): sessionId{Utils::generateSessionId(6)}, MAX_SESSION_SIZE{100}
+{};
 
 
 /**
@@ -25,7 +26,7 @@ int Session::getNumberOfUsers(){
  * **/
 void Session::addUser(const Connection& connection){
     if(users.size() >= MAX_SESSION_SIZE){
-        throw;// SessSessionLimitExceeded();
+        throw std::runtime_error("Number of users in session exceeded maximum.");
     };
     users.insert(User{connection});
 };
