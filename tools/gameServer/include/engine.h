@@ -78,67 +78,67 @@ namespace Engine {
     * */
     std::unordered_map<std::string, std::function<void(const Object &obj)>> RuleStructure{
         {"add",          [](const Object &obj){  
-        std::cout << "Creating Rule: add" << std::endl;
-        auto rule = obj.values.find("rule")->second;
-        auto to = obj.values.find("to")->second;
-        auto value = obj.values.find("value")->second;
+            std::cout << "Creating Rule: add" << std::endl;
+            auto rule = obj.values.find("rule")->second;
+            auto to = obj.values.find("to")->second;
+            auto value = obj.values.find("value")->second;
 
-        // std::visit(BuildRule{}, rule);
-        // std::cout << std::endl;
-        // std::visit(BuildRule{}, to);
-        // std::cout << std::endl;
-        // std::visit(BuildRule{}, value);
-        // std::cout << std::endl;
+            // std::visit(BuildRule{}, rule);
+            // std::cout << std::endl;
+            // std::visit(BuildRule{}, to);
+            // std::cout << std::endl;
+            // std::visit(BuildRule{}, value);
+            // std::cout << std::endl;
 
-        int b = 1;
-        RuleCollection::Arithmetic addition(b, 10, RuleCollection::MathOperation::ADD);
-        Components component {{addition}};
-        component.visit();
+            int b = 1;
+            RuleCollection::Arithmetic addition(b, 10, RuleCollection::MathOperation::ADD);
+            Components component {{addition}};
+            component.visit();
         }},
         {"foreach",         [](const Object &obj){  
-        std::cout << "Creating Rule: foreach" << std::endl;
-        // { "rule": "foreach",
-        //   "list": <<list, list expression, or name of a list object>>,
-        //   "element": << name for list element object within the rules below >>
-        //   "rules": [
-        //     << Rules to execute on every element of the given list >>
-        //   ]
-        // }
-        auto rule = obj.values.find("rule")->second;
-        auto list = obj.values.find("list")->second;
-        auto element = obj.values.find("element")->second;
-        Value rules = obj.values.find("rules")->second;
+            std::cout << "Creating Rule: foreach" << std::endl;
+            // { "rule": "foreach",
+            //   "list": <<list, list expression, or name of a list object>>,
+            //   "element": << name for list element object within the rules below >>
+            //   "rules": [
+            //     << Rules to execute on every element of the given list >>
+            //   ]
+            // }
+            auto rule = obj.values.find("rule")->second;
+            auto list = obj.values.find("list")->second;
+            auto element = obj.values.find("element")->second;
+            Value rules = obj.values.find("rules")->second;
         }},
-        {"loop",            [](const Object &obj){  
-        // { "rule": "loop",
-        //   "until": << Condition that may fail >>,
-        //   OR
-        //   "while": << Condition that may fail >>,
+            {"loop",            [](const Object &obj){  
+            // { "rule": "loop",
+            //   "until": << Condition that may fail >>,
+            //   OR
+            //   "while": << Condition that may fail >>,
 
-        //   "rules": [
-        //     << Rules to execute on every element of the given list >>
-        //   ]
-        // }
-        std::cout << "Creating Rule: loop" << std::endl;
-        auto rule = obj.values.find("rule")->second;
-        String untilOrWhile;
-        auto type = Value(0);
+            //   "rules": [
+            //     << Rules to execute on every element of the given list >>
+            //   ]
+            // }
+            std::cout << "Creating Rule: loop" << std::endl;
+            auto rule = obj.values.find("rule")->second;
+            String untilOrWhile;
+            auto type = Value(0);
 
-        if ( auto rule{ obj.values.find( "until") }; rule != std::end( obj.values )) {
-            untilOrWhile = "until";
-            type = obj.values.find(untilOrWhile)->second;
-        }else{
-            untilOrWhile = "while";
-            type = obj.values.find(untilOrWhile)->second;
-        }
-        Value rules = obj.values.find("rules")->second;
+            if ( auto rule{ obj.values.find( "until") }; rule != std::end( obj.values )) {
+                untilOrWhile = "until";
+                type = obj.values.find(untilOrWhile)->second;
+            }else{
+                untilOrWhile = "while";
+                type = obj.values.find(untilOrWhile)->second;
+            }
+            Value rules = obj.values.find("rules")->second;
 
-        std::vector<RuleCollection::GenRule*> r;
+            std::vector<RuleCollection::GenRule*> r;
 
-        int b = 1;
-        int max1 = 100;
-        RuleCollection::Condition<int> end_condition1 {b, max1, RuleCollection::ConditionType::GREATER};
-        RuleCollection::Loop<int> loopobj(end_condition1, RuleCollection::LoopType::UNTIL, r);
+            int b = 1;
+            int max1 = 100;
+            RuleCollection::Condition<int> end_condition1 {b, max1, RuleCollection::ConditionType::GREATER};
+            RuleCollection::Loop<int> loopobj(end_condition1, RuleCollection::LoopType::UNTIL, r);
 
         }},
         {"inparallel",      [](const Object &obj){  
