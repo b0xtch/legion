@@ -86,7 +86,6 @@ namespace Engine {
     Boolean EngineImpl<Type>::setConfiguration(const Type& in) const noexcept {
         Object setup;
         setup.values.emplace("setup", recursiveValueMap(in["setup"]));
-
         Configuration configuration{
             in["name"],
             {
@@ -97,23 +96,16 @@ namespace Engine {
             setup
         };
 
-        // this needs to be moved to a place where it is called when necessary\
-        // but it shows that now you can recurse and get the values.
-        // might not even use it as these are actionless unlike the rules
-        std::visit(Interpreter{}, (Value) configuration.setup); 
-        game.configuration { configuration };
-
+        game.configuration = { std::move(configuration) };
         return true;
     }
 
     template <typename Type>
     Boolean EngineImpl<Type>::setConstants(const Type& in) const noexcept {
         Object vars;
-        consts.values.emplace("constants", recursiveValueMap(in));
+        vars.values.emplace("constants", recursiveValueMap(in));
 
-        Constants constants{ vars };
-        game.constants { constants };
-
+        game.constants = { vars };
         return true;
     }
 
@@ -122,9 +114,7 @@ namespace Engine {
         Object vars;
         vars.values.emplace("variables", recursiveValueMap(in));
 
-        Variables variables{ vars };
-        game.variables { variables };
-
+        game.variables = { vars };
         return true;
     }
 
@@ -133,10 +123,7 @@ namespace Engine {
         Object vars;
         vars.values.emplace("per-player", recursiveValueMap(in));
 
-        PerPlayer perPlayer{ vars };
-        // not sure yet how this and per audience ties into the overall players
-        game.perPlayer { perPlayer };
-
+        game.perPlayer = { vars };
         return true;
     }
 
@@ -145,22 +132,17 @@ namespace Engine {
         Object vars;
         vars.values.emplace("per-audience", recursiveValueMap(in));
 
-        PerAudience perAudience{ vars };
-        game.perAudience { perAudience };
-
+        game.perAudience = { vars };
         return true;
     }
 
     template <typename Type>
     Boolean EngineImpl<Type>::setRules(const Type& in) const noexcept {
         Array vars;
-
         vars.values.emplace_back(recursiveValueMap(in));
-        Rules rules { vars };
 
-        std::visit(Interpreter{}, rules.rules);
-        game.rules { rules };
-
+        game.rules = { vars };
+        std::visit(Interpreter{}, (Value) game.rules.rules);
         return true;
     }
 
