@@ -30,10 +30,10 @@ target_include_directories(User
     PUBLIC $<INSTALL_INTERFACE:include>)
 target_link_libraries(User networking)
 
-target_include_directories(User
+target_include_directories(engine
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PUBLIC $<INSTALL_INTERFACE:include>)
-target_link_libraries(engine nlohmann_json)
+target_link_libraries(engine nlohmann_json jsonDSL)
 
 add_executable(server src/main.cpp)
 target_link_libraries(server GameServer Utils)
