@@ -21,7 +21,7 @@ public:
   
   int getMaxSessions();
 
-  Session createNewSession();
+  Session& createNewSession();
   
   void addToSession(const Connection& connectionToAdd, std::string& sessionId);
 
@@ -39,7 +39,7 @@ public:
   
   std::set<Connection> getUnassignedConnections();
   
-  Session getSessionForConnection(const Connection& connection);
+  Session& getSessionForConnection(const Connection& connection);
 
 private:
   std::map<std::string, Session> sessions;
