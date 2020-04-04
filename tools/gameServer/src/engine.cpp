@@ -142,7 +142,7 @@ namespace Engine {
         vars.values.emplace_back(recursiveValueMap(in));
 
         game.rules = { vars };
-        std::visit(Interpreter{}, game.rules.rules);
+        std::visit(Interpreter{}, (Value) game.rules.rules);
         return true;
     }
 

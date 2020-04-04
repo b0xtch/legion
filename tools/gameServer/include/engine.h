@@ -266,23 +266,23 @@ namespace Engine {
     /////////////////////////////////////////////////////////////////////////////
     Value recursiveValueMap(const json& json) {
         if(json.is_string()){
-            return (Value) (String) json;
+            return (String) json;
         }else if(json.is_number()){
-            return (Value) (Integer) json;
+            return  (Integer) json;
         }else if(json.is_boolean()){
-            return (Value) (Boolean) json;
+            return (Boolean) json;
         }else if (json.is_object()) {
             Object map;
             for(const auto&[key, value]: json.items()) {
                 map.values.emplace(key, recursiveValueMap(value));
             }
-            return (Value) map;
+            return map;
         }else if(json.is_array()){
             Array arr;
             for(const auto&[key, value]: json.items()) {
                 arr.values.emplace_back(recursiveValueMap(value));
             }
-            return (Value) arr;
+            return arr;
         }
     }
 
@@ -482,26 +482,26 @@ namespace Engine {
     };
 
     struct Constants {
-        Value constants;
+        Object constants;
     };
 
     struct Variables {
-        Value variables;
+        Object variables;
     };
 
     struct PerPlayer {
-        Value perPlayer;
+        Object perPlayer;
     };
 
     struct PerAudience {
-        Value perAudience;
+        Object perAudience;
     };
 
     struct Configuration {
         String name;
         PlayerCount playerCount; // an object type can be used here i guess
         bool audience;
-        Value setup;
+        Object setup;
     };
 
     /**
