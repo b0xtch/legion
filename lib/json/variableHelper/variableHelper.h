@@ -19,7 +19,9 @@ using functionList = std::vector<MethodProperties>;
 
 namespace VariableHelper {
 
-    JsonDSL::VariableDataType getTypeFromJson(const nlohmann::json& j_object);
+    JsonDSL::VariableDataType getTypeFromJson(const json& j_object);
+
+    std::optional<json> getJsonFieldVarIsFrom(const json& j_object, std::string varName);
 
     bool isLiteralVar(JsonDSL::VariableDataType varType);
 
@@ -39,13 +41,13 @@ namespace VariableHelper {
 
     std::optional<std::vector<size_t>> isMethodCall(std::string expression);
 
-    bool isValidMethodCall(std::string expression, varMap& map, functionList& funcList);
+    bool isValidMethodCall(std::string expression, varMap& map, functionList& funcList, const json& j_object);
+
+    bool isIntLiteral(std::string expression);
 
     bool literalIsDefined(std::string literal, varMap& map);
 
-    bool varIsExpectedType(std::string varExpr, JsonDSL::VariableDataType expectedType, varMap& map);
-
-    std::optional<JsonDSL::VariableDataType> checkVarExistenceAndType(std::string varExpr, varMap& map);
+    std::optional<JsonDSL::VariableDataType> checkVarExistenceAndType(std::string varExpr, varMap& map, const json& j_object);
 
     std::pair<size_t, size_t> getVarAccessLocations(const std::string& strVal);
 
