@@ -45,7 +45,7 @@ namespace VariableHelper {
 
     bool varIsExpectedType(std::string varExpr, JsonDSL::VariableDataType expectedType, varMap& map);
 
-    bool isValidVariable(std::string varExpr, varMap& map);
+    std::optional<JsonDSL::VariableDataType> checkVarExistenceAndType(std::string varExpr, varMap& map);
 
     std::pair<size_t, size_t> getVarAccessLocations(const std::string& strVal);
 

@@ -214,6 +214,9 @@ bool VH::literalIsDefined(std::string literal, varMap& map){
     return it != literalMaps.end();
 }
 
+std::optional<JsonDSL::VariableDataType> VH::checkVarExistenceAndType(std::string varExpr, varMap& map){}
+
+
 std::pair<size_t, size_t> VH::getVarAccessLocations(const std::string& strVal){
     std::string accessStart = "{";
     std::string accessEnd = "}";
