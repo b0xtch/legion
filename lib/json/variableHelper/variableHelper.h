@@ -9,6 +9,13 @@ using json = nlohmann::json;
 using varCollection = std::vector<std::string>;
 using varMap = std::map<JsonDSL::VariableDataType, varCollection>;
 
+struct MethodProperties{
+    JsonDSL::VariableDataType methodType;
+    JsonDSL::VariableDataType argumentType;
+    std::string methodName;
+};
+
+using functionList = std::vector<MethodProperties>;
 
 namespace VariableHelper {
 
@@ -16,7 +23,7 @@ namespace VariableHelper {
 
     bool isLiteralVar(JsonDSL::VariableDataType varType);
 
-    std::optional<JsonDSL::VariableDataType> getLiteralTypeFromString(std::string expression, varMap& map);
+    std::optional<JsonDSL::VariableDataType> getTypeFromLiteral(std::string expression, varMap& map);
 
     void collectTopLevelVarsWithPrepend(json& j_object, const std::string& prependStr, varMap& map);
 
@@ -30,11 +37,15 @@ namespace VariableHelper {
 
     void collectObjectVars(json& j_object, varMap& map);
 
-    bool isFunctionCall(std::string expression);
+    std::optional<std::vector<size_t>> isMethodCall(std::string expression);
 
-    bool isValidFunctionCall(std::string expression, varMap& map);
+    bool isValidMethodCall(std::string expression, varMap& map, functionList& funcList);
 
     bool literalIsDefined(std::string literal, varMap& map);
+
+    bool varIsExpectedType(std::string varExpr, JsonDSL::VariableDataType expectedType, varMap& map);
+
+    bool isValidVariable(std::string varExpr, varMap& map);
 
     std::pair<size_t, size_t> getVarAccessLocations(const std::string& strVal);
 

@@ -6,7 +6,7 @@ static JsonDSL dsl;
 
 using varCollection = std::vector<std::string>;
 using varMap = std::map<JsonDSL::VariableDataType, varCollection>;
-
+using functionList = std::vector<MethodProperties>;
 
 namespace VH = VariableHelper;
 
@@ -34,7 +34,7 @@ bool VH::isLiteralVar(JsonDSL::VariableDataType varType){
     return isInt || isBool || isString;
 }
 
-std::optional<JsonDSL::VariableDataType> VH::getLiteralTypeFromString(std::string expression, varMap& map){
+std::optional<JsonDSL::VariableDataType> VH::getTypeFromLiteral(std::string expression, varMap& map){
     auto boolVars = map[JsonDSL::VarBoolean];
     auto strVars = map[JsonDSL::VarString];
     auto intVars = map[JsonDSL::VarInteger];
@@ -144,12 +144,65 @@ void VH::collectObjectVars(json& j_object, varMap& map){
     VH::collectObjectVarsWithPrepend(j_object, "", map);
 }
 
-bool VH::isFunctionCall(std::string expression){
+std::optional<std::vector<size_t>> VH::isMethodCall(std::string expression){
+    std::string funcAccessor = ".";
+    std::string argStart = "(";
+    std::string argEnd = ")";
 
+    auto accessorLoc = expression.find_last_of(funcAccessor);
+    auto startLoc = expression.find(argStart);
+    auto endLoc = expression.find(argEnd);
+    
+    bool charsNotFound = startLoc == std::string::npos || 
+                            endLoc == std::string::npos ||
+                            accessorLoc == std::string::npos;
+
+    bool improperOrder = endLoc < startLoc ||
+                        startLoc < accessorLoc || 
+                        endLoc < accessorLoc;
+
+    if(charsNotFound || improperOrder){
+        return {};
+    }
+
+    std::vector<size_t> charLocVec = {accessorLoc, startLoc, endLoc};
+    
+    return {charLocVec};
 }
 
-bool VH::isValidFunctionCall(std::string expression, varMap& map){
 
+bool VH::isValidMethodCall(std::string expression, varMap& map, functionList& funcList){
+    
+    auto isMethodOpt = isMethodCall(expression);
+
+    if(!isMethodOpt.has_value()){
+        return false;
+    }
+
+    auto charLocs = isMethodOpt.value();
+
+    size_t accessorLoc = charLocs[0];
+    size_t argStartLoc = charLocs[1];
+    size_t argEndLoc = charLocs[2];
+    
+    std::string methodName = expression.substr(accessorLoc+1, argStartLoc-accessorLoc-1);
+    std::string argument = expression.substr(argStartLoc+1, argEndLoc-argStartLoc-1);
+    std::string varName = expression.substr(0, accessorLoc-1);
+    
+    auto methodNameIt = find_if(funcList.begin(), funcList.end(), 
+        [&methodName](MethodProperties funcProperties){
+            return methodName == funcProperties.methodName;
+        }
+    );
+
+    if(methodNameIt == funcList.end()){
+        return false;
+    }
+
+    bool validArg = varIsExpectedType(argument, (*methodNameIt).argumentType, map);
+    bool validCallingVar = varIsExpectedType(varName, (*methodNameIt).argumentType, map);
+
+    return validArg && validCallingVar;
 }
 
 bool VH::literalIsDefined(std::string literal, varMap& map){
@@ -225,8 +278,8 @@ bool VH::isBooleanExpression(std::string expression, varMap& map){
     boost::trim(args.at(0));
     boost::trim(args.at(1));
 
-    auto firstVarType = VH::getLiteralTypeFromString(args.at(0), map);
-    auto secondVarType = VH::getLiteralTypeFromString(args.at(1), map);
+    auto firstVarType = VH::getTypeFromLiteral(args.at(0), map);
+    auto secondVarType = VH::getTypeFromLiteral(args.at(1), map);
 
     if(!firstVarType.has_value() || !secondVarType.has_value()){
         return false;
