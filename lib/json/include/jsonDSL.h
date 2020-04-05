@@ -14,7 +14,7 @@ public:
         PerPlayer, PerAudience, Rules};
 
     enum ConfigFields{
-        GameName, PlayerCount, AllowAudience, Setup
+        COUNT=4, GameName, PlayerCount, AllowAudience, Setup
     };
 
     enum PlayerRestriction{

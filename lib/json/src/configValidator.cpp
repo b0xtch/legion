@@ -12,8 +12,14 @@ static void validateAllNecessaryFieldsPresent(const json& j_object){
     std::pair<configIterator, configIterator> mapIterator = dsl.getConfigBeginEndIterators();
     std::string configuration = dsl.getSpecString(JsonDSL::Configuration);
     json configurations = j_object[configuration];
-    
-    auto it = std::find_if(mapIterator.first, mapIterator.second, 
+
+    if (configurations.size() > JsonDSL::ConfigFields(0)) {
+        throw std::invalid_argument("Config has extra fields that are not required.");
+    } else if (configurations.size() < JsonDSL::ConfigFields(0)) {
+        throw std::invalid_argument("Config does not have all required fields.");
+    }
+
+    auto it = std::find_if(mapIterator.first, mapIterator.second,
         [&configurations](auto& pair) {
             std::string fieldToBeChecked = pair.first;
             return !configurations.contains(fieldToBeChecked);
@@ -27,7 +33,7 @@ static void validateAllNecessaryFieldsPresent(const json& j_object){
     std::string playerCount = dsl.getConfigString(JsonDSL::PlayerCount);
     std::string minPlayerStr = dsl.getPlayerRestrictionString(JsonDSL::MinPlayers);
     std::string maxPlayerStr = dsl.getPlayerRestrictionString(JsonDSL::MaxPlayers);
-    
+
     json playerCountConfig = j_object[configuration][playerCount];
     if(!playerCountConfig.contains("min")){
         throw std::invalid_argument("Min player count not found");
@@ -53,7 +59,7 @@ static void validateNumPlayersRestrictionValid(const json& j_object){
     std::string playerCount = dsl.getConfigString(JsonDSL::PlayerCount);
     std::string minPlayerStr = dsl.getPlayerRestrictionString(JsonDSL::MinPlayers);
     std::string maxPlayerStr = dsl.getPlayerRestrictionString(JsonDSL::MaxPlayers);
-    
+
     json minPlayersJson = j_object[configuration][playerCount][minPlayerStr];
     json maxPlayersJson = j_object[configuration][playerCount][maxPlayerStr];
 
@@ -67,14 +73,14 @@ static void validateNumPlayersRestrictionValid(const json& j_object){
     if(minPlayersInt < 0 || maxPlayersInt < 0){
         throw std::invalid_argument("Player count values are not both greater than or equal to 0");
     }
-    
+
     if(maxPlayersInt < minPlayersInt){
         throw std::invalid_argument("The minimum number of players must be less than or equal to the number of max players");
     }
 }
 
 RulesValidator ConfigValidator::validateConfig(const json& j_object){
-    validateAllFieldsAreValid(j_object);
+    //validateAllFieldsAreValid(j_object);
     validateAllNecessaryFieldsPresent(j_object);
     validateNumPlayersRestrictionValid(j_object);
     return RulesValidator();
