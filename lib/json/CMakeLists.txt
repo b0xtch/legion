@@ -5,6 +5,7 @@ target_include_directories(jsonDSL
 target_link_libraries(jsonDSL nlohmann_json)
 
 add_subdirectory(ruleStructure)
+add_subdirectory(variableHelper)
 
 add_library (specificationValidator ./src/specificationValidator.cpp ./include/fieldValidators.h)
 target_include_directories(specificationValidator
@@ -16,7 +17,7 @@ add_library (variableValidator ./src/variableValidator.cpp ./include/fieldValida
 target_include_directories(variableValidator
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PUBLIC $<INSTALL_INTERFACE:include>)
-target_link_libraries(variableValidator nlohmann_json jsonDSL absl::strings)
+target_link_libraries(variableValidator nlohmann_json jsonDSL variableHelper)
 
 add_library (ruleValidator ./src/ruleValidator.cpp ./include/fieldValidators.h)
 target_include_directories(ruleValidator
