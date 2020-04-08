@@ -175,7 +175,17 @@ Boolean EngineImpl<Type>::setRules(const Type &in) const noexcept
 /////////////////////////////////////////////////////////////////////////////
 
 template <typename Type>
-void EngineImpl<Type>::findAndExecute() {}
+void EngineImpl<Type>::findAndExecute() {
+    // This where things get interesting, when we get a command, we need to find the 
+    // rule in the list of components and just visit it
+    auto ruleExample = components.entities.begin();
+    // auto rule = components.entities.find(); 
+
+    std::for_each(ruleExample, components.entities.end(), [](const auto &rule) {
+        std::cout << typeid(rule).name() << std::endl;
+        // std::visit(Interpreter{}, rule);
+    });
+}
 
 /*************************************
     *
