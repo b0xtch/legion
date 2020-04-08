@@ -79,179 +79,189 @@ namespace Engine {
     * */
     std::unordered_map<std::string, std::function<void(const Object &obj)>> RuleStructure{
         {"add",          [](const Object &obj){  
-            std::cout << "Creating Rule: add" << std::endl;
-            auto rule = obj.values.find("rule")->second;
-            auto to = obj.values.find("to")->second;
-            auto value = obj.values.find("value")->second;
+        std::cout << "Creating Rule: add" << std::endl;
+        auto rule = obj.values.find("rule")->second;
+        auto to = obj.values.find("to")->second;
+        auto value = obj.values.find("value")->second;
 
-            // std::visit(BuildRule{}, rule);
-            // std::cout << std::endl;
-            // std::visit(BuildRule{}, to);
-            // std::cout << std::endl;
-            // std::visit(BuildRule{}, value);
-            // std::cout << std::endl;
+        // std::visit(BuildRule{}, rule);
+        // std::cout << std::endl;
+        // std::visit(BuildRule{}, to);
+        // std::cout << std::endl;
+        // std::visit(BuildRule{}, value);
+        // std::cout << std::endl;
 
-            int b = 1;
-            RuleCollection::Arithmetic addition(b, 10, RuleCollection::MathOperation::ADD);
-            Components component {{addition}};
-            component.visit();
+        int b = 1;
+        RuleCollection::Arithmetic addition(b, 10, RuleCollection::MathOperation::ADD);
+        components.entities.emplace_back(addition);
         }},
         {"foreach",         [](const Object &obj){  
-            std::cout << "Creating Rule: foreach" << std::endl;
-            // { "rule": "foreach",
-            //   "list": <<list, list expression, or name of a list object>>,
-            //   "element": << name for list element object within the rules below >>
-            //   "rules": [
-            //     << Rules to execute on every element of the given list >>
-            //   ]
-            // }
-            auto rule = obj.values.find("rule")->second;
-            auto list = obj.values.find("list")->second;
-            auto element = obj.values.find("element")->second;
-            Value rules = obj.values.find("rules")->second;
+        std::cout << "Creating Rule: foreach" << std::endl;
+        // { "rule": "foreach",
+        //   "list": <<list, list expression, or name of a list object>>,
+        //   "element": << name for list element object within the rules below >>
+        //   "rules": [
+        //     << Rules to execute on every element of the given list >>
+        //   ]
+        // }
+        auto rule = obj.values.find("rule")->second;
+        auto list = obj.values.find("list")->second;
+        auto element = obj.values.find("element")->second;
+        Value rules = obj.values.find("rules")->second;
+        // components.entities.emplace_back();
         }},
-            {"loop",            [](const Object &obj){  
-            // { "rule": "loop",
-            //   "until": << Condition that may fail >>,
-            //   OR
-            //   "while": << Condition that may fail >>,
+        {"loop",            [](const Object &obj){  
+        // { "rule": "loop",
+        //   "until": << Condition that may fail >>,
+        //   OR
+        //   "while": << Condition that may fail >>,
 
-            //   "rules": [
-            //     << Rules to execute on every element of the given list >>
-            //   ]
-            // }
-            std::cout << "Creating Rule: loop" << std::endl;
-            auto rule = obj.values.find("rule")->second;
-            String untilOrWhile;
-            auto type = Value(0);
+        //   "rules": [
+        //     << Rules to execute on every element of the given list >>
+        //   ]
+        // }
+        std::cout << "Creating Rule: loop" << std::endl;
+        auto rule = obj.values.find("rule")->second;
+        String untilOrWhile;
+        auto type = Value(0);
 
-            if ( auto rule{ obj.values.find( "until") }; rule != std::end( obj.values )) {
-                untilOrWhile = "until";
-                type = obj.values.find(untilOrWhile)->second;
-            }else{
-                untilOrWhile = "while";
-                type = obj.values.find(untilOrWhile)->second;
-            }
-            Value rules = obj.values.find("rules")->second;
+        if ( auto rule{ obj.values.find( "until") }; rule != std::end( obj.values )) {
+            untilOrWhile = "until";
+            type = obj.values.find(untilOrWhile)->second;
+        }else{
+            untilOrWhile = "while";
+            type = obj.values.find(untilOrWhile)->second;
+        }
+        Value rules = obj.values.find("rules")->second;
 
-            std::vector<RuleCollection::GenRule*> r;
+        std::vector<RuleCollection::GenRule*> r;
 
-            int b = 1;
-            int max1 = 100;
-            RuleCollection::Condition<int> end_condition1 {b, max1, RuleCollection::ConditionType::GREATER};
-            RuleCollection::Loop<int> loopobj(end_condition1, RuleCollection::LoopType::UNTIL, r);
-
+        int b = 1;
+        int max1 = 100;
+        RuleCollection::Condition<int> end_condition1 {b, max1, RuleCollection::ConditionType::GREATER};
+        RuleCollection::Loop<int> loopobj(end_condition1, RuleCollection::LoopType::UNTIL, r);
+        // components.entities.emplace_back();
         }},
         {"inparallel",      [](const Object &obj){  
-            std::cout << "Creating Rule: inparallel" << std::endl;
-            auto rule = obj.values.find("rule")->second;
+        std::cout << "Creating Rule: inparallel" << std::endl;
+        auto rule = obj.values.find("rule")->second;
         }},
         {"parallelfor",     [](const Object &obj){  
-            std::cout << "Creating Rule: parallelfor" << std::endl;
-            auto rule = obj.values.find("rule")->second;
-
+        std::cout << "Creating Rule: parallelfor" << std::endl;
+        auto rule = obj.values.find("rule")->second;
+        // components.entities.emplace_back();
         }},
         {"switch",          [](const Object &obj){  
-            std::cout << "Creating Rule: switch" << std::endl;
-            auto rule = obj.values.find("rule")->second;
-
+        std::cout << "Creating Rule: switch" << std::endl;
+        auto rule = obj.values.find("rule")->second;
+        // components.entities.emplace_back();
         }},
         {"when",            [](const Object &obj){  
-            // { "rule": "when",
-            //   "cases": [
-            //     { "condition": << Boolean guard for rules >>,
-            //       "rules": [ << Rules to execute when the value and case match >> ]
-            //     },
-            //     ...
-            //   ]
-            // }
-            std::cout << "Creating Rule: when" << std::endl;
-            auto rule = obj.values.find("rule")->second;
+        // { "rule": "when",
+        //   "cases": [
+        //     { "condition": << Boolean guard for rules >>,
+        //       "rules": [ << Rules to execute when the value and case match >> ]
+        //     },
+        //     ...
+        //   ]
+        // }
+        std::cout << "Creating Rule: when" << std::endl;
+        auto rule = obj.values.find("rule")->second;
+        // components.entities.emplace_back();
+        }},
+        {"extend",          [](const Object &obj){  
+        std::cout << "Creating Rule: extend" << std::endl;
+        auto rule = obj.values.find("rule")->second;
+        Array list {{5,60,-800,26,32,-46}};
 
-            }},
-            {"extend",          [](const Object &obj){  
-            std::cout << "Creating Rule: extend" << std::endl;
-            auto rule = obj.values.find("rule")->second;
-            Array list {{5,60,-800,26,32,-46}};
+        auto it = game.constants.constants.values.begin();
+        const auto &[key, value] = *it;
 
-            RuleCollection::Extend<Value> listOpExtend {100, list.values};
-            Components component {{listOpExtend}};
-            component.visit();
+        RuleCollection::Extend<Value> listOpExtend {100, list.values};
+        components.entities.emplace_back(listOpExtend);
         }},
         {"reverse",         [](const Object &obj){  
-            std::cout << "Creating Rule: reverse" << std::endl;
-            auto rule = obj.values.find("rule")->second;
-            Array list {{5,60,-800,26,32,-46}};
+        std::cout << "Creating Rule: reverse" << std::endl;
+        auto rule = obj.values.find("rule")->second;
+        Array list {{5,60,-800,26,32,-46}};
 
-            RuleCollection::Reverse listOpReverse {list.values};
-            Components component {{listOpReverse}};
-            component.visit();
-            }},
-            {"shuffle",         [](const Object &obj){  
-            std::cout << "Creating Rule: shuffle" << std::endl;
-            auto rule = obj.values.find("rule")->second;
-            Array list {{5,60,-800,26,32,-46}};
+        RuleCollection::Reverse listOpReverse {list.values};
+        components.entities.emplace_back(listOpReverse);
+        }},
+        {"shuffle",         [](const Object &obj){  
+        std::cout << "Creating Rule: shuffle" << std::endl;
+        auto rule = obj.values.find("rule")->second;
+        Array list {{5,60,-800,26,32,-46}};
 
-            RuleCollection::Shuffle listOpShuffle {list.values};
-            Components component {{listOpShuffle}};
-            component.visit();
+        RuleCollection::Shuffle listOpShuffle {list.values};
+        components.entities.emplace_back(listOpShuffle);
         }},
         {"sort",            [](const Object &obj){  
-            std::cout << "Creating Rule: sort" << std::endl;
-            auto rule = obj.values.find("rule")->second;
-            Array list {{5,60,-800,26,32,-46}};
+        std::cout << "Creating Rule: sort" << std::endl;
+        auto rule = obj.values.find("rule")->second;
+        Array list {{5,60,-800,26,32,-46}};
 
-            RuleCollection::Shuffle listOpSort {list.values};
-            Components component {{listOpSort}};
-            component.visit();
+        RuleCollection::Shuffle listOpSort {list.values};
+        components.entities.emplace_back(listOpSort);
         }},
         {"deal",            [](const Object &obj){  
-            std::cout << "Creating Rule: deal" << std::endl;
-            auto rule = obj.values.find("rule")->second;
-
-
+        std::cout << "Creating Rule: deal" << std::endl;
+        auto rule = obj.values.find("rule")->second;
+        // components.entities.emplace_back();
         }},
         {"discard",         [](const Object &obj){  
-            std::cout << "Creating Rule: discard" << std::endl;
-            auto rule = obj.values.find("rule")->second;
-
-
+        std::cout << "Creating Rule: discard" << std::endl;
+        auto rule = obj.values.find("rule")->second;
+        // components.entities.emplace_back();
         }},
         {"timer",           [](const Object &obj){  
-            std::cout << "Creating Rule: timer" << std::endl;
-            auto rule = obj.values.find("rule")->second;
-
-
+        std::cout << "Creating Rule: timer" << std::endl;
+        auto rule = obj.values.find("rule")->second;
+        // components.entities.emplace_back();
         }},
         {"input-choice",    [](const Object &obj){  
-            std::cout << "Creating Rule: input-choice" << std::endl;
-            auto rule = obj.values.find("rule")->second;
-
+        std::cout << "Creating Rule: input-choice" << std::endl;
+        auto rule = obj.values.find("rule")->second;
+        // components.entities.emplace_back();
         }},
         {"input-text",      [](const Object &obj){  
-            std::cout << "Creating Rule: input-text" << std::endl;
-            auto rule = obj.values.find("rule")->second;
-
+        std::cout << "Creating Rule: input-text" << std::endl;
+        auto rule = obj.values.find("rule")->second;
+        // components.entities.emplace_back();
         }},
         {"input-vote",      [](const Object &obj){  
-            std::cout << "Creating Rule: input-vote" << std::endl;
-            auto rule = obj.values.find("rule")->second;
-
+        std::cout << "Creating Rule: input-vote" << std::endl;
+        auto rule = obj.values.find("rule")->second;
+        // components.entities.emplace_back();
         }},
         {"message",         [](const Object &obj){  
-            std::cout << "Creating Rule: message" << std::endl;
-            auto rule = obj.values.find("rule")->second;
-
+        std::cout << "Creating Rule: message" << std::endl;
+        auto rule = obj.values.find("rule")->second;
+        // components.entities.emplace_back();
         }},
         {"global-message",  [](const Object &obj){  
-            std::cout << "Creating Rule: global-message" << std::endl;
-            auto rule = obj.values.find("rule")->second;
+        std::cout << "Creating Rule: global-message" << std::endl;
+        auto rule = obj.values.find("rule")->second;
 
+
+        // components.entities.emplace_back();
         }},
         {"scores",          [](const Object &obj){  
-            std::cout << "Creating Rule: scores" << std::endl;
-            auto rule = obj.values.find("rule")->second;
+        std::cout << "Creating Rule: scores" << std::endl;
+        auto rule = obj.values.find("rule")->second;
+        auto score = obj.values.find("score")->second;
+        auto ascending = obj.values.find("ascending")->second;
 
+        // Temp Player list until we can programmatically get them @benny
+        // Player p1{1, "Alex"};
+        // Player p2{2, "Bob"};
+        // Player p3{3, "Chuck"};
+        // Player p4{4, "Dennis"};
+        // Player p5{5, "Earl"};
+        // RuleCollection::playerVector playerList = {p1,p2,p3,p4};
+
+        // RuleCollection::Scores scores {playerList};
+        // components.entities.emplace_back(scores);
         }},
     };
 
@@ -342,7 +352,7 @@ namespace Engine {
 
     template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>; 
-    struct Components{
+    struct Components {
         using Rules = Type<
         Integer,
         String,
@@ -369,13 +379,13 @@ namespace Engine {
                     [](const Object& rule){},
                     [](const Array& rule){},
                     [](RuleCollection::Arithmetic rule){ rule.func(); },
-                    [](RuleCollection::When<Integer> rule){},
-                    [](RuleCollection::Loop<Integer> rule){},
+                    [](RuleCollection::When<Integer> rule){ rule.func(); },
+                    [](RuleCollection::Loop<Integer> rule){ rule.func(); },
                     [](RuleCollection::Extend<Value> rule){ rule.func(); },
-                    [](RuleCollection::Reverse<Value> rule){},
-                    [](RuleCollection::Shuffle<Value> rule){},
-                    [](RuleCollection::Sort<Integer> rule){}
-                    // [](RuleCollection::Scores rule){}
+                    [](RuleCollection::Reverse<Value> rule){ rule.func(); },
+                    [](RuleCollection::Shuffle<Value> rule){ rule.func(); },
+                    [](RuleCollection::Sort<Integer> rule){ rule.func(); },
+                    // [this](RuleCollection::Scores rule){ rule.func(); },
                 }, entity);
             }
         }
@@ -388,7 +398,7 @@ namespace Engine {
         }
 
         std::vector<Rules> entities;
-    };  
+    } components;  
 
     struct BuildRule {
         void operator()(std::monostate) const { }
