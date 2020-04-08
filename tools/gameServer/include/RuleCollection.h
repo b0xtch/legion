@@ -410,12 +410,12 @@ namespace RuleCollection {
 
 	struct Timer : GenRule {
 		Timer() {};
-		Timer(seconds &s, mode mode, RulesList &r, condition *flag) :
+		Timer(seconds &s, mode mode, RulesList &r) :
 			GenRule{"Timer"},
 			seconds{s},
 			mode{mode},
 			rules_to_run{r},
-			flag{flag}
+			// flag{flag}
 			{
 				// if(mode != "track"){
 				// 	assert flag == nullptr;
@@ -425,22 +425,27 @@ namespace RuleCollection {
 		void func(){
 			std::vector<GenRule>::iterator iterator = std::begin(rules_to_run);
 			auto startTime = std::chrono::high_resolution_clock::now();
+			std::cout << "Set start time\n";
 			auto endTime = startTime + seconds;
+			std::cout << "Set end time\n";
 			auto newEndTime;
 			bool conditionToRun = startTime - endTime >= std::chrono::milliseconds(0);
 			switch(mode){
 				case TimerMode::AT_MOST: 
+					std::cout << "TimerMode::AT_MOST\n";
 					while(conditionToRun){
 						Engine::Interpreter:operator()(*iterator);
 						if((iterator++) == std::end(rules_to_run)) break; std::cout << "The operation ended early\n";
 					}
 				case TimerMode::EXACT:
+					std::cout << "TimerMode::EXACT\n";
 					while(conditionToRun){
 						Engine::Interpreter::operator()(*iterator);
 						if((iterator++) == std::end(rules_to_run) && conditionToRun)
 							sleep(std::chrono::high_resolution_clock::now() - endTime); //in case the operation ended early
 					}
 				case TimerMode::TRACK:
+					std::cout << "TimerMode::TRACK\n";
 					std::for_each(std::begin(rules_to_run), std::end(rules_to_run), [&](GenRule rule){
 						Engine::Interpreter::operator()(rule);
 					});
