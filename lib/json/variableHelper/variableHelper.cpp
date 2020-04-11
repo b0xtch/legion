@@ -1,0 +1,428 @@
+#include "variableHelper.h"
+
+using json = nlohmann::json;
+
+static JsonDSL dsl;
+
+static std::string configStr = dsl.getSpecString(JsonDSL::Configuration);
+static std::string setupStr = dsl.getConfigString(JsonDSL::Setup);
+static std::string perPlayerStr = dsl.getSpecString(JsonDSL::PerPlayer);
+static std::string perAudienceStr = dsl.getSpecString(JsonDSL::PerAudience);
+static std::string constStr = dsl.getSpecString(JsonDSL::Constants);
+static std::string varStr = dsl.getSpecString(JsonDSL::Variables);
+
+
+using varCollection = std::vector<std::string>;
+using varMap = std::map<JsonDSL::VariableDataType, varCollection>;
+using functionList = std::vector<MethodProperties>;
+
+namespace VH = VariableHelper;
+
+JsonDSL::VariableDataType VH::getTypeFromJson(const nlohmann::json& j_object){
+    if(j_object.is_number_integer()){
+        return JsonDSL::VarInteger;
+    }else if (j_object.is_boolean()){
+        return JsonDSL::VarBoolean;
+    }else if (j_object.is_string()){
+        return JsonDSL::VarString;
+    }else if (j_object.is_array()){
+        return JsonDSL::VarList;
+    }else if (j_object.is_object()){
+        return JsonDSL::VarObject;
+    }else{
+        throw std::invalid_argument("Invalid data type being used in json");
+    }
+}
+
+std::optional<json> VH::getJsonFieldVarIsFrom(const json& j_object, std::string varName){
+    json perPlayerVars = j_object[perPlayerStr];
+    json perAudienceVars = j_object[perAudienceStr];
+    json setupVars = j_object[configStr][setupStr];
+    json constVars = j_object[constStr];
+    json varVars = j_object[varStr];
+    
+    if(varName == "players"){
+        return {perPlayerVars};
+    } else if( varName == "audience"){
+        return {perAudienceVars};
+    } else if ( varName == "Configuration"){
+        return {setupVars};
+    }
+
+    if(varVars.contains(varName)){
+        return {varVars[varName]};
+    }else if(constVars.contains(varName)){
+        return {constVars[varName]};
+    }
+
+    return {};
+}
+
+bool VH::isLiteralVar(JsonDSL::VariableDataType varType){
+    bool isInt = varType == JsonDSL::VarInteger;
+    bool isBool = varType == JsonDSL::VarBoolean;
+    bool isString = varType == JsonDSL::VarString;
+
+    return isInt || isBool || isString;
+}
+
+std::optional<JsonDSL::VariableDataType> VH::getTypeFromLiteral(std::string expression, varMap& map){
+    auto boolVars = map[JsonDSL::VarBoolean];
+    auto strVars = map[JsonDSL::VarString];
+    auto intVars = map[JsonDSL::VarInteger];
+
+    auto boolIt = std::find(boolVars.begin(), boolVars.end(), expression);
+    auto strIt = std::find(strVars.begin(), strVars.end(), expression);
+    auto intIt = std::find(intVars.begin(), intVars.end(), expression);
+
+    bool boolFound = boolIt != boolVars.end();
+    bool strFound = strIt != strVars.end();
+    bool intFound = intIt != intVars.end();
+
+    if(boolFound){
+        return JsonDSL::VarBoolean;
+    }else if(strFound){
+        return JsonDSL::VarString;
+    }else if(intFound){
+        return JsonDSL::VarInteger;
+    }else {
+        return {};
+    }
+}
+
+void VH::collectTopLevelVarsWithPrepend(json& j_object, const std::string& prependStr, varMap& map){
+    for(auto jsonItem : j_object.items()){
+        JsonDSL::VariableDataType varType = VH::getTypeFromJson(jsonItem);
+
+        std::stringstream varName;
+        varName << prependStr << jsonItem.key();
+
+        map[varType].push_back(varName.str());
+        j_object.erase(jsonItem.key());
+    }
+}
+
+void VH::collectTopLevelVars(json& j_object, varMap& map){
+    VH::collectTopLevelVarsWithPrepend(j_object, "", map);
+}
+
+
+//function to extract the user defined variables inside setup
+//and place them in the appropriate vector based on its type
+void VH::collectSetUpVars(json& setupJson, varMap& map){
+    for(auto jsonItem : setupJson.items()){
+        JsonDSL::VariableDataType varType = VH::getTypeFromJson(jsonItem);
+
+        bool notObject = varType != JsonDSL::VarObject;
+
+        std::string kindField = dsl.getSetupString(JsonDSL::Kind);
+        bool notUserDef = jsonItem.value().contains(kindField);
+        
+        if(notObject || notUserDef){
+            continue;
+        }
+
+        std::string intVar = dsl.getSetupString(JsonDSL::KindInteger);
+        std::string boolVar = dsl.getSetupString(JsonDSL::KindBoolean);
+        std::string strVar = dsl.getSetupString(JsonDSL::KindString);
+        std::string listVar = dsl.getSetupString(JsonDSL::KindMultipleChoice);
+        std::string objVar = dsl.getSetupString(JsonDSL::KindQuestionAnswer);
+
+        if(jsonItem.value()[kindField] == intVar){
+            varType = JsonDSL::VarInteger;
+        } else if (jsonItem.value()[kindField] == boolVar){ 
+            varType = JsonDSL::VarBoolean;
+        } else if (jsonItem.value()[kindField] == strVar){ 
+            varType = JsonDSL::VarString;
+        } else if (jsonItem.value()[kindField] == listVar){ 
+            varType = JsonDSL::VarList;
+        } else if (jsonItem.value()[kindField] == objVar){ 
+            varType = JsonDSL::VarObject;
+        }
+
+        std::stringstream varName;
+        varName << "Configuration." << jsonItem.key();
+
+        map[varType].push_back(varName.str());
+        setupJson.erase(jsonItem.key());
+    }
+}
+
+varMap VH::getEmptyVarMap(){
+    varMap map;
+    map.insert(std::make_pair(JsonDSL::VarInteger, varCollection{}));
+    map.insert(std::make_pair(JsonDSL::VarBoolean, varCollection{}));
+    map.insert(std::make_pair(JsonDSL::VarString, varCollection{}));
+    map.insert(std::make_pair(JsonDSL::VarList, varCollection{}));
+    map.insert(std::make_pair(JsonDSL::VarObject, varCollection{}));
+    return map;
+}
+
+void VH::collectObjectVarsWithPrepend(json& j_object,const std::string& prependStr, varMap& map){
+    for(auto jsonItem : j_object.items()){
+        JsonDSL::VariableDataType varType = VH::getTypeFromJson(jsonItem);
+
+        if(varType != JsonDSL::VarObject){
+            continue;
+        }
+
+        std::string objName = prependStr + jsonItem.key();
+        VH::collectTopLevelVarsWithPrepend(jsonItem.value(), objName, map);
+
+    }
+}
+
+void VH::collectObjectVars(json& j_object, varMap& map){
+    VH::collectObjectVarsWithPrepend(j_object, "", map);
+}
+
+std::optional<std::vector<size_t>> VH::isMethodCall(std::string expression){
+    std::string funcAccessor = ".";
+    std::string argStart = "(";
+    std::string argEnd = ")";
+
+    auto accessorLoc = expression.find_last_of(funcAccessor);
+    auto startLoc = expression.find(argStart);
+    auto endLoc = expression.find(argEnd);
+    
+    bool charsNotFound = startLoc == std::string::npos || 
+                            endLoc == std::string::npos ||
+                            accessorLoc == std::string::npos;
+
+    bool improperOrder = endLoc < startLoc ||
+                        startLoc < accessorLoc || 
+                        endLoc < accessorLoc;
+
+    if(charsNotFound || improperOrder){
+        return {};
+    }
+
+    std::vector<size_t> charLocVec = {accessorLoc, startLoc, endLoc};
+    
+    return {charLocVec};
+}
+
+
+bool VH::isValidMethodCall(std::string expression, varMap& map, functionList& funcList, const json& j_object){
+    
+    auto isMethodOpt = isMethodCall(expression);
+
+    if(!isMethodOpt.has_value()){
+        return false;
+    }
+
+    auto charLocs = isMethodOpt.value();
+
+    size_t accessorLoc = charLocs[0];
+    size_t argStartLoc = charLocs[1];
+    size_t argEndLoc = charLocs[2];
+    
+    std::string methodName = expression.substr(accessorLoc+1, argStartLoc-accessorLoc-1);
+    std::string argument = expression.substr(argStartLoc+1, argEndLoc-argStartLoc-1);
+    std::string varName = expression.substr(0, accessorLoc-1);
+    
+    auto methodNameIt = find_if(funcList.begin(), funcList.end(), 
+        [&methodName](MethodProperties funcProperties){
+            return methodName == funcProperties.methodName;
+        }
+    );
+
+    if(methodNameIt == funcList.end()){
+        return false;
+    }
+
+    auto argVar = checkVarExistenceAndType(argument, map, j_object);
+    auto callingVar = checkVarExistenceAndType(varName, map, j_object);
+
+    auto argType = (*methodNameIt).argumentType;
+    auto callType = (*methodNameIt).methodType;
+
+    if(!argVar.has_value() || !callingVar.has_value()){
+        return false;
+    }
+
+    return argVar.value() == argType && callingVar.value() == callType;
+}
+
+bool VH::isIntLiteral(std::string expression){
+    bool isIntLiteral;
+
+    try{
+        std::stoi(expression);
+        isIntLiteral = true;
+    }catch(std::invalid_argument e){
+        isIntLiteral = false;
+    }
+
+    return isIntLiteral;
+}
+
+bool VH::literalIsDefined(std::string literal, varMap& map){
+    std::vector<varCollection> literalMaps = {map[JsonDSL::VarBoolean], map[JsonDSL::VarInteger], map[JsonDSL::VarString]};
+    auto it = std::find_if(literalMaps.begin(), literalMaps.end(), 
+        [&literal](const varCollection& collection){
+            return std::find(collection.begin(), collection.end(), literal) != collection.end();
+        });
+    return it != literalMaps.end();
+}
+
+std::optional<JsonDSL::VariableDataType> VH::checkVarExistenceAndType(std::string varExpr, varMap& map, const json& j_object){
+    
+    if(isIntLiteral(varExpr)){
+        return {JsonDSL::VarInteger};
+    }
+    
+    std::string propertyAccessor = ".";
+    bool exprHasAccessor = varExpr.find(propertyAccessor) != std::string::npos;
+
+    //variable is a literal
+    if(!exprHasAccessor){
+        return getTypeFromLiteral(varExpr, map);
+    }
+
+    std::vector<std::string> propertyAccesses = absl::StrSplit(varExpr, propertyAccessor);
+    auto varEntry = getJsonFieldVarIsFrom(j_object, propertyAccesses[0]);
+    
+    if(!varEntry.has_value()){
+        return {};
+    }
+
+    json structuredVar = varEntry.value();
+
+    for(int i = 1; i < propertyAccesses.size(); i++){
+
+        std::string currentEl = propertyAccesses[i];
+
+        bool listAccess = currentEl == "elements";
+
+        bool invalidPropertyAccess = false;
+
+        if(listAccess){
+            
+            std::string prevEl = propertyAccesses[i-1];
+
+            bool isUserList = prevEl == "players" || prevEl == "audience";
+            
+            i += 1;
+
+            if(isUserList){
+                invalidPropertyAccess = !structuredVar.contains(propertyAccesses[i]);
+            } else {
+                invalidPropertyAccess = !structuredVar.is_array();
+            }
+
+        }else{
+            invalidPropertyAccess = !structuredVar.contains(currentEl) ||
+                        !structuredVar.is_object();
+        }
+
+        if(invalidPropertyAccess){
+            return {};
+        }
+
+        structuredVar = structuredVar[currentEl];
+    }
+
+    return {getTypeFromJson(structuredVar)};
+
+}
+
+
+std::pair<size_t, size_t> VH::getVarAccessLocations(const std::string& strVal){
+    std::string accessStart = "{";
+    std::string accessEnd = "}";
+
+    auto startLoc = strVal.find(accessStart);
+    auto endLoc = strVal.find(accessEnd);
+    
+    bool accessNotFound = startLoc == std::string::npos || endLoc == std::string::npos;
+    bool endIsBeforeStart = startLoc > endLoc;
+
+    if (accessNotFound || endIsBeforeStart){
+        startLoc = std::string::npos;
+        endLoc = std::string::npos;
+    }
+
+    return std::make_pair(startLoc, endLoc);
+}
+
+std::vector<std::string> VH::extractStringVarAccesses(std::string strVal){
+    std::vector<std::string> vars;
+    auto varAccess = VH::getVarAccessLocations(strVal);
+    size_t notFoundValue = std::string::npos;
+
+    while(varAccess.first != notFoundValue){
+        auto start = varAccess.first;
+        auto end = varAccess.second;
+
+        std::string var = strVal.substr(start+1, end-start-1);
+        vars.push_back(var);
+        strVal = strVal.substr(end + 1);
+        varAccess = VH::getVarAccessLocations(strVal);
+    }
+
+    return vars;
+}
+
+bool VH::isBooleanExpression(std::string expression, varMap& map){
+    varCollection& bools = map[JsonDSL::VarBoolean];
+
+    std::string trimmedExpr = expression;
+    boost::trim(trimmedExpr);
+
+    auto boolIt = std::find(bools.begin(), bools.end(), trimmedExpr);
+    if(boolIt != bools.end()){
+        return true;
+    }
+
+    std::string compareOp = "==";
+    auto compareLoc = expression.find(compareOp);
+    
+    if(compareLoc == std::string::npos){
+        return false;
+    }
+
+    std::vector<std::string> args = absl::StrSplit(expression, compareOp);
+
+    //assuming that boolean expressions do not include && or || as it's not listed in spec
+    if(args.size() != 2){
+        return false;
+    }
+
+    boost::trim(args.at(0));
+    boost::trim(args.at(1));
+
+    auto firstVarType = VH::getTypeFromLiteral(args.at(0), map);
+    auto secondVarType = VH::getTypeFromLiteral(args.at(1), map);
+
+    if(!firstVarType.has_value() || !secondVarType.has_value()){
+        return false;
+    }
+    
+    return firstVarType.value() == secondVarType.value();
+}
+
+
+varMap VH::collectVarNames(json j_object){
+
+    json perPlayerVars = j_object[perPlayerStr];
+    json perAudienceVars = j_object[perAudienceStr];
+    json setupVars = j_object[configStr][setupStr];
+    json constVars = j_object[constStr];
+    json varVars = j_object[varStr];
+
+    varMap map = VH::getEmptyVarMap();
+
+    map[JsonDSL::VarBoolean].push_back("true");
+    map[JsonDSL::VarBoolean].push_back("false");
+
+    map[JsonDSL::VarList].push_back("players");
+    map[JsonDSL::VarList].push_back("audience");
+
+    VH::collectSetUpVars(setupVars, map);
+    VH::collectTopLevelVarsWithPrepend(setupVars, "Configuration.", map);
+    VH::collectTopLevelVars(constVars, map);
+    VH::collectTopLevelVars(varVars, map);
+
+    return map;
+}
