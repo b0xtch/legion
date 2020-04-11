@@ -1,0 +1,27 @@
+{
+    "configuration": {
+        "name": "Testy",
+        "player count": {"min": 1, "max": 10},
+        "audience": true,
+        "setup": {
+            "setUpA": 10,
+            "setUpB": false,
+            "setUpC": "string",
+            "setUpD" : {
+                "kind" : "integer",
+                "prompt" : "abcd"
+            },
+            "setUpE" : {
+                "kind" : "boolean",
+                "prompt" : "asdfasdassdfasd"
+            }
+        }
+    },
+    "constants": {
+    },
+    "variables": {
+    },
+    "per-player": {},
+    "per-audience": {},
+    "rules": {}
+}

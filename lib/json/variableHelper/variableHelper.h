@@ -10,7 +10,7 @@ using varCollection = std::vector<std::string>;
 using varMap = std::map<JsonDSL::VariableDataType, varCollection>;
 
 struct MethodProperties{
-    JsonDSL::VariableDataType methodType;
+    JsonDSL::VariableDataType methodCallerType;
     JsonDSL::VariableDataType argumentType;
     std::string methodName;
 };
