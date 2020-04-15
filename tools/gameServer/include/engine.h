@@ -93,8 +93,7 @@ namespace Engine {
 
             int b = 1;
             RuleCollection::Arithmetic addition(b, 10, RuleCollection::MathOperation::ADD);
-            Components component {{addition}};
-            component.visit();
+            components.entities.emplace_back(addition);
         }},
         {"foreach",         [](const Object &obj){  
             std::cout << "Creating Rule: foreach" << std::endl;
@@ -109,8 +108,9 @@ namespace Engine {
             auto list = obj.values.find("list")->second;
             auto element = obj.values.find("element")->second;
             Value rules = obj.values.find("rules")->second;
+            // components.entities.emplace_back();
         }},
-            {"loop",            [](const Object &obj){  
+        {"loop",            [](const Object &obj){  
             // { "rule": "loop",
             //   "until": << Condition that may fail >>,
             //   OR
@@ -140,7 +140,7 @@ namespace Engine {
             int max1 = 100;
             RuleCollection::Condition<int> end_condition1 {b, max1, RuleCollection::ConditionType::GREATER};
             RuleCollection::Loop<int> loopobj(end_condition1, RuleCollection::LoopType::UNTIL, r);
-
+            // components.entities.emplace_back();
         }},
         {"inparallel",      [](const Object &obj){  
             std::cout << "Creating Rule: inparallel" << std::endl;
@@ -149,12 +149,12 @@ namespace Engine {
         {"parallelfor",     [](const Object &obj){  
             std::cout << "Creating Rule: parallelfor" << std::endl;
             auto rule = obj.values.find("rule")->second;
-
+            // components.entities.emplace_back();
         }},
         {"switch",          [](const Object &obj){  
             std::cout << "Creating Rule: switch" << std::endl;
             auto rule = obj.values.find("rule")->second;
-
+            // components.entities.emplace_back();
         }},
         {"when",            [](const Object &obj){  
             // { "rule": "when",
@@ -167,16 +167,18 @@ namespace Engine {
             // }
             std::cout << "Creating Rule: when" << std::endl;
             auto rule = obj.values.find("rule")->second;
-
-            }},
-            {"extend",          [](const Object &obj){  
+            // components.entities.emplace_back();
+        }},
+        {"extend",          [](const Object &obj){  
             std::cout << "Creating Rule: extend" << std::endl;
             auto rule = obj.values.find("rule")->second;
             Array list {{5,60,-800,26,32,-46}};
 
+            auto it = game.constants.constants.values.begin();
+            const auto &[key, value] = *it;
+
             RuleCollection::Extend<Value> listOpExtend {100, list.values};
-            Components component {{listOpExtend}};
-            component.visit();
+            components.entities.emplace_back(listOpExtend);
         }},
         {"reverse",         [](const Object &obj){  
             std::cout << "Creating Rule: reverse" << std::endl;
@@ -184,17 +186,15 @@ namespace Engine {
             Array list {{5,60,-800,26,32,-46}};
 
             RuleCollection::Reverse listOpReverse {list.values};
-            Components component {{listOpReverse}};
-            component.visit();
-            }},
-            {"shuffle",         [](const Object &obj){  
+            components.entities.emplace_back(listOpReverse);
+        }},
+        {"shuffle",         [](const Object &obj){  
             std::cout << "Creating Rule: shuffle" << std::endl;
             auto rule = obj.values.find("rule")->second;
             Array list {{5,60,-800,26,32,-46}};
 
             RuleCollection::Shuffle listOpShuffle {list.values};
-            Components component {{listOpShuffle}};
-            component.visit();
+            components.entities.emplace_back(listOpShuffle);
         }},
         {"sort",            [](const Object &obj){  
             std::cout << "Creating Rule: sort" << std::endl;
@@ -202,56 +202,66 @@ namespace Engine {
             Array list {{5,60,-800,26,32,-46}};
 
             RuleCollection::Shuffle listOpSort {list.values};
-            Components component {{listOpSort}};
-            component.visit();
+            components.entities.emplace_back(listOpSort);
         }},
         {"deal",            [](const Object &obj){  
             std::cout << "Creating Rule: deal" << std::endl;
             auto rule = obj.values.find("rule")->second;
-
-
+            // components.entities.emplace_back();
         }},
         {"discard",         [](const Object &obj){  
             std::cout << "Creating Rule: discard" << std::endl;
             auto rule = obj.values.find("rule")->second;
-
-
+            // components.entities.emplace_back();
         }},
         {"timer",           [](const Object &obj){  
             std::cout << "Creating Rule: timer" << std::endl;
             auto rule = obj.values.find("rule")->second;
-
-
+            // components.entities.emplace_back();
         }},
         {"input-choice",    [](const Object &obj){  
             std::cout << "Creating Rule: input-choice" << std::endl;
             auto rule = obj.values.find("rule")->second;
-
+            // components.entities.emplace_back();
         }},
         {"input-text",      [](const Object &obj){  
             std::cout << "Creating Rule: input-text" << std::endl;
             auto rule = obj.values.find("rule")->second;
-
+            // components.entities.emplace_back();
         }},
         {"input-vote",      [](const Object &obj){  
             std::cout << "Creating Rule: input-vote" << std::endl;
             auto rule = obj.values.find("rule")->second;
-
+            // components.entities.emplace_back();
         }},
         {"message",         [](const Object &obj){  
             std::cout << "Creating Rule: message" << std::endl;
             auto rule = obj.values.find("rule")->second;
-
+            // components.entities.emplace_back();
         }},
         {"global-message",  [](const Object &obj){  
             std::cout << "Creating Rule: global-message" << std::endl;
             auto rule = obj.values.find("rule")->second;
 
+
+            // components.entities.emplace_back();
         }},
         {"scores",          [](const Object &obj){  
             std::cout << "Creating Rule: scores" << std::endl;
             auto rule = obj.values.find("rule")->second;
+            auto score = obj.values.find("score")->second;
+            auto ascending = obj.values.find("ascending")->second;
 
+            // Temp Player list until we can programmatically get them @benny
+            Player p1{1, "Alex"};
+            Player p2{2, "Bob"};
+            Player p3{3, "Chuck"};
+            Player p4{4, "Dennis"};
+            Player p5{5, "Earl"};
+            RuleCollection::playerVector playerList = {p1,p2,p3,p4};
+
+            RuleCollection::Scores scores {playerList};
+            components.entities.emplace_back(scores);
         }},
     };
 
@@ -342,7 +352,7 @@ namespace Engine {
 
     template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>; 
-    struct Components{
+    struct Components {
         using Rules = Type<
         Integer,
         String,
@@ -369,13 +379,13 @@ namespace Engine {
                     [](const Object& rule){},
                     [](const Array& rule){},
                     [](RuleCollection::Arithmetic rule){ rule.func(); },
-                    [](RuleCollection::When<Integer> rule){},
-                    [](RuleCollection::Loop<Integer> rule){},
+                    [](RuleCollection::When<Integer> rule){ rule.func(); },
+                    [](RuleCollection::Loop<Integer> rule){ rule.func(); },
                     [](RuleCollection::Extend<Value> rule){ rule.func(); },
-                    [](RuleCollection::Reverse<Value> rule){},
-                    [](RuleCollection::Shuffle<Value> rule){},
-                    [](RuleCollection::Sort<Integer> rule){}
-                    // [](RuleCollection::Scores rule){}
+                    [](RuleCollection::Reverse<Value> rule){ rule.func(); },
+                    [](RuleCollection::Shuffle<Value> rule){ rule.func(); },
+                    [](RuleCollection::Sort<Integer> rule){ rule.func(); },
+                    // [this](RuleCollection::Scores rule){ rule.func(); },
                 }, entity);
             }
         }
@@ -388,7 +398,7 @@ namespace Engine {
         }
 
         std::vector<Rules> entities;
-    };  
+    } components;  
 
     struct BuildRule {
         void operator()(std::monostate) const { }
