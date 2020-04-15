@@ -92,7 +92,7 @@ std::optional<JsonDSL::VariableDataType> VH::getTypeFromLiteral(std::string expr
 
 void VH::collectTopLevelVarsWithPrepend(json& j_object, const std::string& prependStr, varMap& map){
     for(auto jsonItem : j_object.items()){
-        JsonDSL::VariableDataType varType = VH::getTypeFromJson(jsonItem);
+        JsonDSL::VariableDataType varType = VH::getTypeFromJson(j_object[jsonItem.key()]);
 
         std::stringstream varName;
         varName << prependStr << jsonItem.key();
@@ -111,12 +111,12 @@ void VH::collectTopLevelVars(json& j_object, varMap& map){
 //and place them in the appropriate vector based on its type
 void VH::collectSetUpVars(json& setupJson, varMap& map){
     for(auto jsonItem : setupJson.items()){
-        JsonDSL::VariableDataType varType = VH::getTypeFromJson(jsonItem);
+        JsonDSL::VariableDataType varType = VH::getTypeFromJson(setupJson[jsonItem.key()]);
 
         bool notObject = varType != JsonDSL::VarObject;
 
         std::string kindField = dsl.getSetupString(JsonDSL::Kind);
-        bool notUserDef = jsonItem.value().contains(kindField);
+        bool notUserDef = !jsonItem.value().contains(kindField);
         
         if(notObject || notUserDef){
             continue;
@@ -160,7 +160,7 @@ varMap VH::getEmptyVarMap(){
 
 void VH::collectObjectVarsWithPrepend(json& j_object,const std::string& prependStr, varMap& map){
     for(auto jsonItem : j_object.items()){
-        JsonDSL::VariableDataType varType = VH::getTypeFromJson(jsonItem);
+        JsonDSL::VariableDataType varType = VH::getTypeFromJson(j_object[jsonItem.key()]);
 
         if(varType != JsonDSL::VarObject){
             continue;
@@ -219,7 +219,7 @@ bool VH::isValidMethodCall(std::string expression, varMap& map, functionList& fu
     
     std::string methodName = expression.substr(accessorLoc+1, argStartLoc-accessorLoc-1);
     std::string argument = expression.substr(argStartLoc+1, argEndLoc-argStartLoc-1);
-    std::string varName = expression.substr(0, accessorLoc-1);
+    std::string varName = expression.substr(0, accessorLoc);
     
     auto methodNameIt = find_if(funcList.begin(), funcList.end(), 
         [&methodName](MethodProperties funcProperties){
@@ -235,7 +235,7 @@ bool VH::isValidMethodCall(std::string expression, varMap& map, functionList& fu
     auto callingVar = checkVarExistenceAndType(varName, map, j_object);
 
     auto argType = (*methodNameIt).argumentType;
-    auto callType = (*methodNameIt).methodType;
+    auto callType = (*methodNameIt).methodCallerType;
 
     if(!argVar.has_value() || !callingVar.has_value()){
         return false;

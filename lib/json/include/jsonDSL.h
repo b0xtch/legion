@@ -10,11 +10,11 @@ class JsonDSL{
 public:
     JsonDSL();
     enum SpecificationFields{
-        Configuration, Constants, Variables, 
+        COUNT=6, Configuration, Constants, Variables, 
         PerPlayer, PerAudience, Rules};
 
     enum ConfigFields{
-        GameName, PlayerCount, AllowAudience, Setup
+        COUNT=4, GameName, PlayerCount, AllowAudience, Setup
     };
 
     enum PlayerRestriction{
