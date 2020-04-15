@@ -253,15 +253,15 @@ namespace Engine {
             auto ascending = obj.values.find("ascending")->second;
 
             // Temp Player list until we can programmatically get them @benny
-            // Player p1{1, "Alex"};
-            // Player p2{2, "Bob"};
-            // Player p3{3, "Chuck"};
-            // Player p4{4, "Dennis"};
-            // Player p5{5, "Earl"};
-            // RuleCollection::playerVector playerList = {p1,p2,p3,p4};
+            Player p1{1, "Alex"};
+            Player p2{2, "Bob"};
+            Player p3{3, "Chuck"};
+            Player p4{4, "Dennis"};
+            Player p5{5, "Earl"};
+            RuleCollection::playerVector playerList = {p1,p2,p3,p4};
 
-            // RuleCollection::Scores scores {playerList};
-            // components.entities.emplace_back(scores);
+            RuleCollection::Scores scores {playerList};
+            components.entities.emplace_back(scores);
         }},
     };
 
